@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -87,7 +87,7 @@ export function Sidebar() {
             className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-sidebar-foreground/70 hover:bg-sidebar-muted transition-colors"
           >
             <LogOut className="w-5 h-5" />
-            {!collapsed && <span>Cerrar sesión</span>}
+            {!collapsed && <span>Cerrar sesi├│n</span>}
           </button>
         )}
 
@@ -146,7 +146,7 @@ export function MobileNav() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between px-4 h-14 border-b border-border">
-                <span className="font-heading font-semibold">Menú</span>
+                <span className="font-heading font-semibold">Men├║</span>
                 <Button variant="ghost" size="icon" onClick={() => setOpen(false)}>
                   <X className="w-5 h-5" />
                 </Button>
@@ -182,7 +182,7 @@ export function MobileNav() {
                 {profile && (
                   <button onClick={signOut} className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-sidebar-foreground/70 hover:bg-sidebar-muted transition-colors">
                     <LogOut className="w-5 h-5" />
-                    Cerrar sesión
+                    Cerrar sesi├│n
                   </button>
                 )}
               </div>
