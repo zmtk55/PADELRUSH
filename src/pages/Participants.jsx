@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Users, Plus, Search, LayoutGrid, List, SlidersHorizontal } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -13,6 +14,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabaseClient'
 
 export default function Participants() {
+  const navigate = useNavigate()
   const { isOrganizer } = useAuth()
   const { participantsQuery, createParticipant, updateParticipant, deleteParticipant } = useParticipants()
   const [showForm, setShowForm] = useState(false)
@@ -170,6 +172,7 @@ export default function Participants() {
                 editable={isOrganizer}
                 onEdit={openEdit}
                 onDelete={deleteParticipant.mutate}
+                onClick={(player) => navigate(`/jugadores/${encodeURIComponent(player.name)}`)}
               />
             ))}
           </div>
@@ -184,6 +187,7 @@ export default function Participants() {
                 editable={isOrganizer}
                 onEdit={openEdit}
                 onDelete={deleteParticipant.mutate}
+                onClick={(player) => navigate(`/jugadores/${encodeURIComponent(player.name)}`)}
               />
             ))}
           </PlayerCardGrid>

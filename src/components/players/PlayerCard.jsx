@@ -29,6 +29,7 @@ export function PlayerCard({
   editable = false,
   onEdit,
   onDelete,
+  onClick,
   className,
 }) {
   const [expanded, setExpanded] = useState(false)
@@ -72,7 +73,9 @@ export function PlayerCard({
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, x: -20 }}
-        className={`flex items-center gap-3 bg-card border border-border rounded-lg p-3 hover:shadow-md transition-shadow ${className}`}
+        whileHover={onClick ? { scale: 1.01 } : {}}
+        className={`flex items-center gap-3 bg-card border border-border rounded-lg p-3 hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''} ${className}`}
+        onClick={onClick ? () => onClick(player) : undefined}
       >
         {/* Photo / Avatar */}
         <div className="relative shrink-0">
@@ -135,7 +138,7 @@ export function PlayerCard({
                 variant="ghost"
                 size="icon"
                 className="w-7 h-7"
-                onClick={() => onEdit(player)}
+                onClick={(e) => { e.stopPropagation(); onEdit(player) }}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/>
@@ -147,7 +150,7 @@ export function PlayerCard({
                 variant="ghost"
                 size="icon"
                 className="w-7 h-7 text-destructive"
-                onClick={() => { if (confirm(`¿Eliminar a ${player?.name}?`)) onDelete(player?.id) }}
+                onClick={(e) => { e.stopPropagation(); if (confirm(`¿Eliminar a ${player?.name}?`)) onDelete(player?.id) }}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
@@ -167,8 +170,9 @@ export function PlayerCard({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      whileHover={{ y: -2, boxShadow: '0 8px 24px -6px rgba(0,0,0,0.15)' }}
-      className={`bg-card border border-border rounded-xl overflow-hidden transition-shadow ${className}`}
+      whileHover={onClick ? { y: -2, boxShadow: '0 8px 24px -6px rgba(0,0,0,0.15)' } : {}}
+      className={`bg-card border border-border rounded-xl overflow-hidden transition-shadow ${onClick ? 'cursor-pointer' : ''} ${className}`}
+      onClick={onClick ? () => onClick(player) : undefined}
     >
       {/* ── Header: photo + info ── */}
       <div className="p-5 flex items-center gap-4">
@@ -369,7 +373,7 @@ export function PlayerCard({
       {(editable || onDelete) && (
         <div className="px-5 py-3 flex gap-2 border-t border-border">
           {onEdit && (
-            <Button variant="outline" size="sm" className="flex-1" onClick={() => onEdit(player)}>
+            <Button variant="outline" size="sm" className="flex-1" onClick={(e) => { e.stopPropagation(); onEdit(player) }}>
               Editar
             </Button>
           )}
@@ -378,7 +382,7 @@ export function PlayerCard({
               variant="destructive"
               size="sm"
               className="flex-1"
-              onClick={() => { if (confirm(`¿Eliminar a ${player?.name}?`)) onDelete(player?.id) }}
+              onClick={(e) => { e.stopPropagation(); if (confirm(`¿Eliminar a ${player?.name}?`)) onDelete(player?.id) }}
             >
               Eliminar
             </Button>

@@ -13,7 +13,7 @@ import { useTheme } from '@/lib/ThemeContext'
 const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/ligas', label: 'Ligas', icon: Trophy },
-  { to: '/participantes', label: 'Participantes', icon: Users },
+  { to: '/jugadores', label: 'Jugadores', icon: Users },
 ]
 
 export function Sidebar() {

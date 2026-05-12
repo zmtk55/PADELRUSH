@@ -137,7 +137,7 @@ export default function Dashboard() {
           <h2 className="font-heading font-semibold text-lg mb-4">Acceso rápido</h2>
           <div className="space-y-3">
             <button
-              onClick={() => navigate('/participantes')}
+              onClick={() => navigate('/jugadores')}
               className="w-full flex items-center gap-3 p-4 rounded-xl bg-background border border-border hover:border-primary/30 transition-colors text-left"
             >
               <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
