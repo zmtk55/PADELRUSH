@@ -2,16 +2,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabaseClient'
 import { toast } from 'sonner'
 
-const API = 'https://xmpsqjhywmwdekuhudtt.supabase.co/rest/v1'
-const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtcHNxamh5d213ZGVrdWh1ZHR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjM5NzgsImV4cCI6MjA5MzgzOTk3OH0.-6CSavZAVZhRV72MTsaoJZN0cRvlS8ee-9Tc2jFuLRQ'
+function timeout(ms) {
+  return new Promise((_, reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado')), ms))
+}
 
-async function apiGet(url) {
-  const res = await fetch(`${API}${url}`, {
-    headers: { apikey: KEY, Authorization: `Bearer ${KEY}` },
-    signal: AbortSignal.timeout(10000),
-  })
-  if (!res.ok) throw new Error(`Error ${res.status}`)
-  return res.json()
+async function queryWithTimeout(promise, ms = 10000) {
+  const result = await Promise.race([promise, timeout(ms)])
+  return result
 }
 
 export function useLeagues() {
@@ -19,15 +16,23 @@ export function useLeagues() {
 
   const leaguesQuery = useQuery({
     queryKey: ['leagues'],
-    queryFn: () => apiGet('/leagues?select=*&order=created_at.desc'),
-    retry: 2, staleTime: 10_000,
+    queryFn: async () => {
+      const { data, error } = await queryWithTimeout(supabase.from('leagues').select('*').order('created_at', { ascending: false }))
+      if (error) throw error
+      return data
+    },
+    retry: 1, staleTime: 30_000,
   })
 
   const leagueQuery = (id) =>
     useQuery({
       queryKey: ['league', id],
-      queryFn: () => apiGet(`/leagues?select=*&id=eq.${id}`).then(r => r[0]),
-      enabled: !!id, retry: 2, staleTime: 10_000,
+      queryFn: async () => {
+        const { data, error } = await queryWithTimeout(supabase.from('leagues').select('*').eq('id', id).single())
+        if (error) throw error
+        return data
+      },
+      enabled: !!id, retry: 1, staleTime: 30_000,
     })
 
   const createLeague = useMutation({
