@@ -5,8 +5,6 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { useLeagues } from '@/hooks/useLeagues'
 import { useAuth } from '@/hooks/useAuth'
-import { supabase } from '@/lib/supabaseClient'
-
 export default function Dashboard() {
   const navigate = useNavigate()
   const { leaguesQuery } = useLeagues()
@@ -15,19 +13,31 @@ export default function Dashboard() {
   const { data: participantCount = 0 } = useQuery({
     queryKey: ['participant-count'],
     queryFn: async () => {
-      const { count } = await supabase.from('participants').select('*', { count: 'exact', head: true })
-      return count || 0
+      const res = await fetch('https://xmpsqjhywmwdekuhudtt.supabase.co/rest/v1/participants?select=id', {
+        headers: { apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtcHNxamh5d213ZGVrdWh1ZHR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjM5NzgsImV4cCI6MjA5MzgzOTk3OH0.-6CSavZAVZhRV72MTsaoJZN0cRvlS8ee-9Tc2jFuLRQ', Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtcHNxamh5d213ZGVrdWh1ZHR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjM5NzgsImV4cCI6MjA5MzgzOTk3OH0.-6CSavZAVZhRV72MTsaoJZN0cRvlS8ee-9Tc2jFuLRQ' },
+        signal: AbortSignal.timeout(8000),
+      })
+      if (!res.ok) return 0
+      const d = await res.json()
+      return d.length || 0
     },
     staleTime: 60_000,
+    retry: 1,
   })
 
   const { data: matchesPlayed = 0 } = useQuery({
     queryKey: ['matches-played-count'],
     queryFn: async () => {
-      const { count } = await supabase.from('matches').select('*', { count: 'exact', head: true }).eq('status', 'jugado')
-      return count || 0
+      const res = await fetch("https://xmpsqjhywmwdekuhudtt.supabase.co/rest/v1/matches?select=id&status=eq.jugado", {
+        headers: { apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtcHNxamh5d213ZGVrdWh1ZHR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjM5NzgsImV4cCI6MjA5MzgzOTk3OH0.-6CSavZAVZhRV72MTsaoJZN0cRvlS8ee-9Tc2jFuLRQ', Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtcHNxamh5d213ZGVrdWh1ZHR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjM5NzgsImV4cCI6MjA5MzgzOTk3OH0.-6CSavZAVZhRV72MTsaoJZN0cRvlS8ee-9Tc2jFuLRQ' },
+        signal: AbortSignal.timeout(8000),
+      })
+      if (!res.ok) return 0
+      const d = await res.json()
+      return d.length || 0
     },
     staleTime: 60_000,
+    retry: 1,
   })
 
   const leagues = leaguesQuery.data || []

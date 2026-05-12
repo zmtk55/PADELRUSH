@@ -3,6 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, Trophy, Users, Calendar, UserCircle,
+  Swords, Medal,
   Menu, X, ChevronLeft, LogOut, Sun, Moon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -13,6 +14,9 @@ import { useTheme } from '@/lib/ThemeContext'
 const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/ligas', label: 'Ligas', icon: Trophy },
+  { to: '/equipos', label: 'Equipos', icon: Swords },
+  { to: '/partidos', label: 'Partidos', icon: Calendar },
+  { to: '/clasificacion', label: 'Clasificación', icon: Medal },
   { to: '/participantes', label: 'Participantes', icon: Users },
 ]
 
