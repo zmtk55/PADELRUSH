@@ -19,6 +19,8 @@ import Equipos from '@/pages/Equipos'
 import Partidos from '@/pages/Partidos'
 import Clasificacion from '@/pages/Clasificacion'
 import Profile from '@/pages/Profile'
+import Admin from '@/pages/Admin'
+import AdminSelector from '@/pages/AdminSelector'
 
 function AuthPage() {
   const { signIn, signUp } = useAuth()
@@ -91,9 +93,11 @@ export default function App() {
         <Route path="/ligas/:leagueId/equipos" element={<Teams />} />
         <Route path="/ligas/:leagueId/partidos" element={<Matches />} />
         <Route path="/ligas/:leagueId/clasificacion" element={<Standings />} />
+        <Route path="/ligas/:leagueId/admin" element={<Admin />} />
         <Route path="/equipos" element={<Equipos />} />
         <Route path="/partidos" element={<Partidos />} />
         <Route path="/clasificacion" element={<Clasificacion />} />
+        <Route path="/admin" element={<AdminSelector />} />
         <Route path="/participantes" element={<Participants />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="*" element={<Navigate to="/" replace />} />

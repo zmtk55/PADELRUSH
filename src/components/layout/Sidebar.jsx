@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, Trophy, Users, Calendar, UserCircle,
-  Swords, Medal,
+  Swords, Medal, Shield,
   Menu, X, ChevronLeft, LogOut, Sun, Moon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -18,6 +18,11 @@ const navItems = [
   { to: '/partidos', label: 'Partidos', icon: Calendar },
   { to: '/clasificacion', label: 'Clasificación', icon: Medal },
   { to: '/participantes', label: 'Participantes', icon: Users },
+]
+
+const organizerItems = [
+  { to: '/profile', label: 'Perfil', icon: UserCircle },
+  { to: '/admin', label: 'Admin', icon: Shield },
 ]
 
 export function Sidebar() {
@@ -58,9 +63,10 @@ export function Sidebar() {
           </NavLink>
         ))}
 
-        {isOrganizer && (
+        {isOrganizer && organizerItems.map(({ to, label, icon: Icon }) => (
           <NavLink
-            to="/profile"
+            key={to}
+            to={to}
             className={({ isActive }) =>
               cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
@@ -70,10 +76,10 @@ export function Sidebar() {
               )
             }
           >
-            <UserCircle className="w-5 h-5 shrink-0" />
-            {!collapsed && <span>Perfil</span>}
+            <Icon className="w-5 h-5 shrink-0" />
+            {!collapsed && <span>{label}</span>}
           </NavLink>
-        )}
+        ))}
       </nav>
 
       <div className="p-3 border-t border-border space-y-1">
@@ -157,7 +163,7 @@ export function MobileNav() {
               </div>
 
               <nav className="p-4 space-y-1">
-                {[...navItems, ...(isOrganizer ? [{ to: '/profile', label: 'Perfil', icon: UserCircle }] : [])].map(
+                {[...navItems, ...(isOrganizer ? organizerItems : [])].map(
                   ({ to, label, icon: Icon }) => (
                     <NavLink
                       key={to}
