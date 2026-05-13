@@ -5,14 +5,11 @@ const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZi
 const H = { apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json', Accept: 'application/json' }
 
 export async function req(method, path, body) {
-  const c = new AbortController()
-  const t = setTimeout(() => c.abort(), 10000)
-  try {
-    const r = await fetch(`${URL}${path}`, { method, headers: H, body: body ? JSON.stringify(body) : undefined, signal: c.signal })
-    if (!r.ok) { const txt = await r.text().catch(() => ''); throw new Error(txt || `Error ${r.status}`) }
-    if (method === 'DELETE') return null
-    return await r.json()
-  } finally { clearTimeout(t) }
+  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('La solicitud tardó demasiado')), 10000))
+  const r = await Promise.race([fetch(`${URL}${path}`, { method, headers: H, body: body ? JSON.stringify(body) : undefined }), timeout])
+  if (!r.ok) { const txt = await r.text().catch(() => ''); throw new Error(txt || `Error ${r.status}`) }
+  if (method === 'DELETE') return null
+  return await r.json()
 }
 
 export function useFetch(fn, deps = []) {
@@ -24,10 +21,11 @@ export function useFetch(fn, deps = []) {
     let mounted = true
     setLoading(true)
     setError(null)
-    fn().then(d => { if (mounted) { setData(d); setLoading(false) } })
-       .catch(e => { if (mounted) { setError(e); setLoading(false) } })
+    const start = Date.now()
+    fn().then(d => { if (mounted) { setData(d); setLoading(false); console.log('✓ fetch OK', Date.now() - start + 'ms') } })
+       .catch(e => { if (mounted) { setError(e); setLoading(false); console.log('✗ fetch ERROR', e?.message) } })
     return () => { mounted = false }
-  }, deps) // eslint-disable-line
+  }, deps)
 
   useEffect(() => { const cancel = execute(); return cancel }, [execute])
 

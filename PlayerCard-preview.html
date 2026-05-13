@@ -1,1 +1,204 @@
-ver
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PadelRush — Player Card</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --lime: #c8f04a; --limeDim: rgba(200,240,74,0.14); --limeGlow: rgba(200,240,74,0.08);
+  --ink: #0d0d12; --surface: #14141c; --panel: #1c1c28;
+  --border: rgba(255,255,255,0.08); --text: #f0ede8; --muted: rgba(240,237,232,0.4);
+  --faint: rgba(255,255,255,0.05); --fire: #ff6b4a; --ice: #4a9eff; --gold: #f0c040; --purple: #a78bfa;
+}
+html, body { min-height: 100vh; background: var(--ink); font-family: 'Barlow Condensed', sans-serif; color: var(--text); display: flex; align-items: center; justify-content: center; padding: 32px 16px; }
+body::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0; background-image: linear-gradient(rgba(200,240,74,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(200,240,74,0.025) 1px, transparent 1px); background-size: 36px 36px; }
+.card-outer { position: relative; z-index: 1; width: 100%; max-width: 780px; }
+.card-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+.card-label::before, .card-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.card { display: grid; grid-template-columns: 220px 1fr; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: 0 0 80px rgba(200,240,74,0.04); transition: box-shadow 0.3s; }
+.card:hover { box-shadow: 0 0 100px rgba(200,240,74,0.08); }
+.left { background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 20px 16px; position: relative; overflow: hidden; }
+.left::after { content: ''; position: absolute; bottom: -60px; left: -60px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(200,240,74,0.1) 0%, transparent 70%); pointer-events: none; }
+.rank-badge { position: absolute; top: 14px; left: 12px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; background: var(--limeDim); color: var(--lime); border: 1px solid rgba(200,240,74,0.3); padding: 3px 8px; border-radius: 4px; }
+.cat-badge { position: absolute; top: 14px; right: 12px; font-size: 11px; font-weight: 800; letter-spacing: 1px; color: var(--muted); border: 1px solid var(--border); padding: 3px 8px; border-radius: 4px; }
+.avatar-wrap { position: relative; margin-top: 36px; margin-bottom: 14px; cursor: pointer; }
+.avatar-ring { width: 96px; height: 96px; border-radius: 50%; border: 2px solid var(--lime); display: flex; align-items: center; justify-content: center; position: relative; transition: transform 0.2s, box-shadow 0.2s; }
+.avatar-ring:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(200,240,74,0.25); }
+.avatar-ring svg.spin-ring { position: absolute; top: -7px; left: -7px; width: 110px; height: 110px; animation: spin 8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.avatar-img { width: 88px; height: 88px; border-radius: 50%; background: #2a2a3a; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 900; color: var(--lime); letter-spacing: -1px; overflow: hidden; user-select: none; }
+.score-pill { position: absolute; bottom: -8px; right: -8px; background: var(--lime); color: var(--ink); font-size: 13px; font-weight: 900; padding: 3px 9px; border-radius: 20px; border: 2px solid var(--surface); transition: transform 0.2s; }
+.score-pill:hover { transform: scale(1.15); }
+.player-hint { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.8px; color: rgba(240,237,232,0.2); margin-top: 2px; }
+.player-name { font-size: 22px; font-weight: 900; letter-spacing: -0.3px; text-align: center; line-height: 1.1; }
+.player-club { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-align: center; margin-top: 3px; }
+.pos-row { display: flex; gap: 6px; margin-top: 12px; }
+.pos-btn { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 800; letter-spacing: 1px; padding: 4px 14px; border-radius: 4px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; }
+.pos-btn.active { background: var(--limeDim); color: var(--lime); border-color: rgba(200,240,74,0.35); }
+.pos-btn:hover:not(.active) { border-color: rgba(255,255,255,0.2); color: var(--text); }
+.mini-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; margin-top: 14px; }
+.mini-stat { background: var(--faint); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; text-align: center; transition: background 0.15s; }
+.mini-stat:hover { background: rgba(255,255,255,0.07); }
+.mini-val { font-size: 20px; font-weight: 900; color: var(--text); line-height: 1; }
+.mini-lbl { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 0.8px; margin-top: 2px; }
+.wl-bar { width: 100%; margin-top: 12px; }
+.wl-labels { display: flex; justify-content: space-between; font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); margin-bottom: 4px; }
+.wl-track { height: 5px; background: rgba(255,107,74,0.2); border-radius: 3px; overflow: hidden; }
+.wl-fill { height: 100%; background: var(--lime); border-radius: 3px; transition: width 0.7s cubic-bezier(.4,0,.2,1); }
+.right { padding: 18px 20px 18px 16px; display: flex; flex-direction: column; gap: 0; }
+.tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+.tab { font-size: 13px; font-weight: 800; letter-spacing: 0.8px; padding: 6px 14px; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; text-transform: uppercase; }
+.tab.active { color: var(--lime); border-bottom-color: var(--lime); }
+.tab:hover:not(.active) { color: var(--text); }
+.panel { display: none; }
+.panel.active { display: block; }
+.attr-list { display: flex; flex-direction: column; gap: 10px; }
+.attr-row { display: grid; grid-template-columns: 72px 1fr 30px; align-items: center; gap: 10px; }
+.attr-name { font-size: 11px; font-weight: 800; letter-spacing: 0.8px; color: var(--muted); text-transform: uppercase; }
+.attr-row:hover .attr-name { color: var(--text); }
+.track { position: relative; height: 6px; background: var(--faint); border-radius: 3px; cursor: pointer; overflow: visible; }
+.fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 3px; transition: width 0.25s ease; pointer-events: none; }
+.fill-default { background: var(--lime); } .fill-fire { background: var(--fire); } .fill-ice { background: var(--ice); } .fill-gold { background: var(--gold); } .fill-purple { background: var(--purple); }
+.thumb { position: absolute; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--surface); cursor: ew-resize; transition: transform 0.15s, box-shadow 0.15s, left 0.25s ease; z-index: 2; }
+.thumb:hover { transform: translateY(-50%) scale(1.35); }
+.thumb-default { background: var(--lime); } .thumb-fire { background: var(--fire); } .thumb-ice { background: var(--ice); } .thumb-gold { background: var(--gold); } .thumb-purple { background: var(--purple); }
+.attr-val { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; color: var(--text); text-align: right; }
+.radar-wrap { display: flex; align-items: center; justify-content: center; padding: 8px 0; }
+.radar-container { position: relative; width: 210px; height: 210px; }
+.history-list { display: flex; flex-direction: column; gap: 6px; }
+.match-item { display: grid; grid-template-columns: 8px 1fr auto auto; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 6px; background: var(--faint); border: 1px solid var(--border); cursor: pointer; transition: all 0.15s; }
+.match-item:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.14); }
+.result-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.match-vs { font-weight: 700; font-size: 13px; color: var(--text); }
+.match-score { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+.match-pts { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; }
+.switcher { display: flex; justify-content: center; gap: 8px; margin-top: 14px; }
+.sw-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); border: 1px solid rgba(255,255,255,0.12); cursor: pointer; transition: all 0.2s; }
+.sw-dot.active { background: var(--lime); box-shadow: 0 0 8px rgba(200,240,74,0.5); }
+@keyframes valPop { 0% { transform: scale(1); } 50% { transform: scale(1.25); color: var(--lime); } 100% { transform: scale(1); } }
+.pop { animation: valPop 0.25s ease; }
+</style>
+</head>
+<body>
+<div class="card-outer">
+  <div class="card-label">PLAYER CARD · PADELRUSH</div>
+  <div class="card" id="playerCard">
+    <div class="left">
+      <div class="rank-badge" id="rankBadge">#3 RANKING</div>
+      <div class="cat-badge" id="catBadge">CAT·A</div>
+      <div class="avatar-wrap" id="avatarWrap" title="Tap para cambiar jugador">
+        <div class="avatar-ring">
+          <svg class="spin-ring" viewBox="0 0 110 110" fill="none">
+            <circle cx="55" cy="55" r="51" stroke="rgba(200,240,74,0.15)" stroke-width="2"/>
+            <circle cx="55" cy="55" r="51" stroke="#c8f04a" stroke-width="1.5" stroke-dasharray="5 10" stroke-linecap="round"/>
+          </svg>
+          <div class="avatar-img" id="avatarImg">AG</div>
+          <div class="score-pill" id="overallScore">91</div>
+        </div>
+      </div>
+      <div class="player-hint">↺ TAP TO SWITCH</div>
+      <div class="player-name" id="playerName">ANDRÉS GARZA</div>
+      <div class="player-club" id="playerClub">CLUB MONTERREY · MEX</div>
+      <div class="pos-row" id="posRow">
+        <button class="pos-btn active" data-pos="DER">DER</button>
+        <button class="pos-btn" data-pos="REV">REV</button>
+      </div>
+      <div class="mini-stats">
+        <div class="mini-stat"><div class="mini-val" id="sGanados">142</div><div class="mini-lbl">GANADOS</div></div>
+        <div class="mini-stat"><div class="mini-val" id="sPerdidos">38</div><div class="mini-lbl">PERDIDOS</div></div>
+        <div class="mini-stat"><div class="mini-val" id="sTorneos">24</div><div class="mini-lbl">TORNEOS</div></div>
+        <div class="mini-stat"><div class="mini-val" id="sPts">2,840</div><div class="mini-lbl">PUNTOS</div></div>
+      </div>
+      <div class="wl-bar">
+        <div class="wl-labels"><span id="wlW">W 79%</span><span id="wlL">L 21%</span></div>
+        <div class="wl-track"><div class="wl-fill" id="wlFill" style="width:79%"></div></div>
+      </div>
+    </div>
+    <div class="right">
+      <div class="tabs">
+        <div class="tab active" data-tab="attrs">ATRIBUTOS</div>
+        <div class="tab" data-tab="radar">RADAR</div>
+        <div class="tab" data-tab="history">HISTORIAL</div>
+      </div>
+      <div class="panel active" id="panel-attrs"><div class="attr-list" id="attrList"></div></div>
+      <div class="panel" id="panel-radar">
+        <div class="radar-wrap"><div class="radar-container">
+          <canvas id="radarCanvas" width="210" height="210" role="img" aria-label="Radar de atributos del jugador">Potencia, Saque, Volea, Bandeja, Defensa, Resistencia</canvas>
+        </div></div>
+      </div>
+      <div class="panel" id="panel-history"><div class="history-list" id="historyList"></div></div>
+    </div>
+  </div>
+  <div class="switcher" id="switcher"></div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const PLAYERS=[{name:'ANDRÉS GARZA',club:'CLUB MONTERREY · MEX',initials:'AG',rank:3,cat:'A',overall:91,pos:'DER',stats:{ganados:142,perdidos:38,torneos:24,pts:2840},attrs:[{name:'POTENCIA',val:88,color:'fire'},{name:'SAQUE',val:92,color:'default'},{name:'VOLEA',val:87,color:'ice'},{name:'BANDEJA',val:85,color:'gold'},{name:'DEFENSA',val:78,color:'default'},{name:'RESISTENCIA',val:90,color:'purple'}],history:[{vs:'Mora / Herrera',score:'6-4  6-2',pts:'+180',win:true},{vs:'Fuentes / López',score:'7-5  4-6  6-3',pts:'+160',win:true},{vs:'Ríos / Peña',score:'3-6  4-6',pts:'-20',win:false},{vs:'Torres / Vargas',score:'6-1  6-3',pts:'+200',win:true},{vs:'Díaz / Castillo',score:'6-4  6-4',pts:'+175',win:true}]},{name:'SOFÍA RÍOS',club:'CLUB SLP · MEX',initials:'SR',rank:1,cat:'A',overall:94,pos:'REV',stats:{ganados:189,perdidos:22,torneos:31,pts:3420},attrs:[{name:'POTENCIA',val:82,color:'fire'},{name:'SAQUE',val:95,color:'default'},{name:'VOLEA',val:93,color:'ice'},{name:'BANDEJA',val:97,color:'gold'},{name:'DEFENSA',val:91,color:'default'},{name:'RESISTENCIA',val:88,color:'purple'}],history:[{vs:'López / Ruiz',score:'6-2  6-1',pts:'+210',win:true},{vs:'Garza / Mora',score:'6-3  6-4',pts:'+190',win:true},{vs:'Fuentes / Torres',score:'6-0  6-2',pts:'+220',win:true},{vs:'Peña / Castillo',score:'5-7  6-4  6-2',pts:'+150',win:true},{vs:'Díaz / Herrera',score:'4-6  3-6',pts:'-15',win:false}]},{name:'CARLOS FUENTES',club:'PROPADEL GDL · MEX',initials:'CF',rank:4,cat:'A',overall:87,pos:'DER',stats:{ganados:118,perdidos:52,torneos:19,pts:2430},attrs:[{name:'POTENCIA',val:95,color:'fire'},{name:'SAQUE',val:80,color:'default'},{name:'VOLEA',val:79,color:'ice'},{name:'BANDEJA',val:88,color:'gold'},{name:'DEFENSA',val:72,color:'default'},{name:'RESISTENCIA',val:83,color:'purple'}],history:[{vs:'Mora / Ríos',score:'6-3  6-4',pts:'+165',win:true},{vs:'Garza / Herrera',score:'2-6  3-6',pts:'-25',win:false},{vs:'Torres / López',score:'6-4  7-5',pts:'+175',win:true},{vs:'Peña / Vargas',score:'1-6  2-6',pts:'-20',win:false},{vs:'Castillo / Díaz',score:'6-2  6-3',pts:'+190',win:true}]}];
+let currentIdx=0,attrs=[],radarChart=null,draggingIdx=null;
+const $=id=>document.getElementById(id);
+const calcOverall=()=>Math.round(attrs.reduce((s,a)=>s+a.val,0)/attrs.length);
+const winPct=p=>Math.round(p.stats.ganados/(p.stats.ganados+p.stats.perdidos)*100);
+function popAnimate(el){el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');}
+function loadPlayer(idx){
+  const p=PLAYERS[idx];attrs=p.attrs.map(a=>({...a}));
+  $('rankBadge').textContent=`#${p.rank} RANKING`;$('catBadge').textContent=`CAT·${p.cat}`;
+  $('avatarImg').textContent=p.initials;$('playerName').textContent=p.name;$('playerClub').textContent=p.club;
+  $('overallScore').textContent=p.overall;$('sGanados').textContent=p.stats.ganados;$('sPerdidos').textContent=p.stats.perdidos;
+  $('sTorneos').textContent=p.stats.torneos;$('sPts').textContent=p.stats.pts.toLocaleString();
+  const wp=winPct(p);$('wlW').textContent=`W ${wp}%`;$('wlL').textContent=`L ${100-wp}%`;$('wlFill').style.width=wp+'%';
+  document.querySelectorAll('.pos-btn').forEach(b=>b.classList.toggle('active',b.dataset.pos===p.pos));
+  renderAttrs();renderHistory(p);if(radarChart)updateRadar();
+  document.querySelectorAll('.sw-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+}
+function renderAttrs(){
+  const list=$('attrList');list.innerHTML='';
+  attrs.forEach((attr,idx)=>{
+    const row=document.createElement('div');row.className='attr-row';
+    row.innerHTML=`<div class="attr-name">${attr.name}</div><div class="track" data-idx="${idx}"><div class="fill fill-${attr.color}" style="width:${attr.val}%"></div><div class="thumb thumb-${attr.color}" style="left:calc(${attr.val}% - 7px)"></div></div><div class="attr-val" data-val-idx="${idx}">${attr.val}</div>`;
+    list.appendChild(row);
+  });bindSliders();
+}
+function setAttr(idx,pct,instant){
+  attrs[idx].val=pct;
+  const track=document.querySelector(`.track[data-idx="${idx}"]`);if(!track)return;
+  const fill=track.querySelector('.fill'),thumb=track.querySelector('.thumb'),valEl=document.querySelector(`.attr-val[data-val-idx="${idx}"]`);
+  if(instant){fill.style.transition='none';thumb.style.transition='none';}else{fill.style.transition='width 0.25s ease';thumb.style.transition='left 0.25s ease';}
+  fill.style.width=pct+'%';thumb.style.left=`calc(${pct}% - 7px)`;
+  if(valEl){valEl.textContent=pct;popAnimate(valEl);}
+  $('overallScore').textContent=calcOverall();if(radarChart)updateRadar();
+}
+function bindSliders(){
+  document.querySelectorAll('.track').forEach(track=>{
+    const idx=parseInt(track.dataset.idx);
+    const hit=clientX=>{const r=track.getBoundingClientRect();return Math.max(0,Math.min(100,Math.round((clientX-r.left)/r.width*100)));};
+    track.addEventListener('mousedown',e=>{draggingIdx=idx;setAttr(idx,hit(e.clientX),true);e.preventDefault();});
+    track.addEventListener('touchstart',e=>{draggingIdx=idx;setAttr(idx,hit(e.touches[0].clientX),true);e.preventDefault();},{passive:false});
+    track.addEventListener('click',e=>setAttr(idx,hit(e.clientX),false));
+  });
+}
+document.addEventListener('mousemove',e=>{if(draggingIdx===null)return;const t=document.querySelector(`.track[data-idx="${draggingIdx}"]`);if(!t)return;const r=t.getBoundingClientRect();setAttr(draggingIdx,Math.max(0,Math.min(100,Math.round((e.clientX-r.left)/r.width*100))),true);});
+document.addEventListener('touchmove',e=>{if(draggingIdx===null)return;const t=document.querySelector(`.track[data-idx="${draggingIdx}"]`);if(!t)return;const r=t.getBoundingClientRect();setAttr(draggingIdx,Math.max(0,Math.min(100,Math.round((e.touches[0].clientX-r.left)/r.width*100))),true);},{passive:false});
+document.addEventListener('mouseup',()=>{draggingIdx=null;});document.addEventListener('touchend',()=>{draggingIdx=null;});
+const RCOL={default:'#c8f04a',fire:'#ff6b4a',ice:'#4a9eff',gold:'#f0c040',purple:'#a78bfa'};
+function buildRC(){return attrs.map(a=>RCOL[a.color]||RCOL.default);}
+function renderRadar(){
+  if(radarChart){radarChart.destroy();radarChart=null;}
+  const ctx=$('radarCanvas').getContext('2d');
+  radarChart=new Chart(ctx,{type:'radar',data:{labels:attrs.map(a=>a.name),datasets:[{label:'',data:attrs.map(a=>a.val),backgroundColor:'rgba(200,240,74,0.12)',borderColor:'#c8f04a',borderWidth:2,pointBackgroundColor:buildRC(),pointBorderColor:'#14141c',pointBorderWidth:2,pointRadius:5,pointHoverRadius:7}]},options:{responsive:false,plugins:{legend:{display:false}},scales:{r:{min:0,max:100,ticks:{display:false},grid:{color:'rgba(255,255,255,0.07)'},angleLines:{color:'rgba(255,255,255,0.08)'},pointLabels:{font:{family:'Barlow Condensed',size:11,weight:'700'},color:'rgba(240,237,232,0.5)'}}}}});
+}
+function updateRadar(){if(!radarChart)return;radarChart.data.datasets[0].data=attrs.map(a=>a.val);radarChart.data.datasets[0].pointBackgroundColor=buildRC();radarChart.update('none');}
+function renderHistory(player){
+  const list=$('historyList');list.innerHTML='';
+  player.history.forEach(m=>{const item=document.createElement('div');item.className='match-item';const c=m.win?'var(--lime)':'var(--fire)';item.innerHTML=`<div class="result-dot" style="background:${c}"></div><div class="match-vs">${m.vs}</div><div class="match-score">${m.score}</div><div class="match-pts" style="color:${c}">${m.pts}</div>`;list.appendChild(item);});
+}
+document.querySelectorAll('.tab').forEach(tab=>{tab.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));tab.classList.add('active');const panel=$('panel-'+tab.dataset.tab);if(panel)panel.classList.add('active');if(tab.dataset.tab==='radar')setTimeout(renderRadar,40);});});
+document.querySelectorAll('.pos-btn').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.pos-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');});});
+$('avatarWrap').addEventListener('click',()=>{currentIdx=(currentIdx+1)%PLAYERS.length;loadPlayer(currentIdx);});
+const sw=$('switcher');PLAYERS.forEach((_,i)=>{const d=document.createElement('div');d.className='sw-dot'+(i===0?' active':'');d.addEventListener('click',()=>{currentIdx=i;loadPlayer(i);});sw.appendChild(d);});
+loadPlayer(0);
+</script>
+</body>
+</html>
