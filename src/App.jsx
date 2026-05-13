@@ -1,18 +1,18 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { Sidebar, MobileNav } from '@/components/layout/Sidebar'
 import Dashboard from '@/pages/Dashboard'
 import Leagues from '@/pages/Leagues'
 import LeagueDetail from '@/pages/LeagueDetail'
-import Participants from '@/pages/Participants'
 import Teams from '@/pages/Teams'
 import Matches from '@/pages/Matches'
 import Standings from '@/pages/Standings'
 import Profile from '@/pages/Profile'
 import Login from '@/pages/Login'
 import PlayerDetail from '@/pages/PlayerDetail'
+import Participants from '@/pages/Participants'
 
-function AuthGate({ children }) {
+function AuthGate() {
   const { user, loading } = useAuth()
   if (loading) {
     return (
@@ -25,7 +25,29 @@ function AuthGate({ children }) {
     )
   }
   if (!user) return <Navigate to="/login" replace />
-  return children
+  return <Outlet />
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route element={<AuthGate />}>
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/ligas" element={<Leagues />} />
+          <Route path="/ligas/:leagueId" element={<LeagueDetail />} />
+          <Route path="/ligas/:leagueId/equipos" element={<Teams />} />
+          <Route path="/ligas/:leagueId/partidos" element={<Matches />} />
+          <Route path="/ligas/:leagueId/standings" element={<Standings />} />
+          <Route path="/jugadores" element={<Participants />} />
+          <Route path="/jugadores/:playerName" element={<PlayerDetail />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
+      </Route>
+    </Routes>
+  )
 }
 
 function AppLayout({ children }) {
@@ -35,38 +57,9 @@ function AppLayout({ children }) {
       <MobileNav />
       <main className="flex-1 min-w-0">
         <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
-          {children}
+          <Outlet />
         </div>
       </main>
     </div>
-  )
-}
-
-export default function App() {
-  return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route
-        path="/*"
-        element={
-          <AuthGate>
-            <AppLayout>
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/ligas" element={<Leagues />} />
-                <Route path="/ligas/:leagueId" element={<LeagueDetail />} />
-                <Route path="/ligas/:leagueId/equipos" element={<Teams />} />
-                <Route path="/ligas/:leagueId/partidos" element={<Matches />} />
-                <Route path="/ligas/:leagueId/standings" element={<Standings />} />
-                <Route path="/jugadores" element={<Participants />} />
-                <Route path="/jugadores/:playerName" element={<PlayerDetail />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </AppLayout>
-          </AuthGate>
-        }
-      />
-    </Routes>
   )
 }
