@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   User, Trophy, TrendingUp, Activity,
-  ChevronDown, ChevronUp, Shield, Zap, BarChart3
+  ChevronDown, ChevronUp, Shield, BarChart3
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { MiniChart } from './MiniChart'
@@ -208,10 +208,6 @@ export function PlayerCard({
             </div>
           </motion.div>
 
-          {/* Level badge */}
-          <span className={`absolute -bottom-1 -right-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full border border-background ${levelClass}`}>
-            {player?.level || '—'}
-          </span>
         </div>
 
         {/* Info */}

@@ -1,100 +1,112 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Trophy, TrendingUp, Activity, Target, Zap, Calendar, Award, BarChart3 } from 'lucide-react'
+import {
+  ArrowLeft, Trophy, TrendingUp, Activity, Target,
+  Swords, CheckCircle2, XCircle, User
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { useParticipants } from '@/hooks/useParticipants'
 import { supabase } from '@/lib/supabaseClient'
-import {
-  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  Radar, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, LineChart, Line, Legend,
-} from 'recharts'
 
 export default function PlayerDetail() {
   const { playerName } = useParams()
   const navigate = useNavigate()
   const decodedName = decodeURIComponent(playerName)
   const { participantsQuery } = useParticipants()
-  const [selectedLeague, setSelectedLeague] = useState('all')
-
-  const { data: allStats = [] } = useQuery({
-    queryKey: ['player-stats-by-name', decodedName],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('player_stats')
-        .select('*')
-        .ilike('player_name', decodedName)
-      if (error) return []
-      return data
-    },
-  })
-
-  const { data: allLeagues = [] } = useQuery({
-    queryKey: ['leagues-for-player', decodedName],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('player_stats')
-        .select('league_id, league_name')
-        .ilike('player_name', decodedName)
-      if (error) return []
-      return [...new Map(data.map((d) => [d.league_id, { id: d.league_id, name: d.league_name }])).values()]
-    },
-  })
 
   const participant = (participantsQuery.data || []).find(
     (p) => p.name.toLowerCase() === decodedName.toLowerCase()
   )
+  const participantId = participant?.id
 
-  const filteredStats = selectedLeague === 'all'
-    ? allStats
-    : allStats.filter((s) => s.league_id === selectedLeague)
+  const { data: allStats = [] } = useQuery({
+    queryKey: ['player-stats-by-name', decodedName],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('player_stats')
+        .select('*')
+        .ilike('player_name', decodedName)
+      return data || []
+    },
+  })
 
-  const totalStats = filteredStats.reduce(
+  const { data: teamsData = [] } = useQuery({
+    queryKey: ['teams-for-player', participantId],
+    queryFn: async () => {
+      if (!participantId) return []
+      const { data: t1 } = await supabase
+        .from('teams')
+        .select('*')
+        .eq('player1_id', participantId)
+      const { data: t2 } = await supabase
+        .from('teams')
+        .select('*')
+        .eq('player2_id', participantId)
+      const teams = [...(t1 || []), ...(t2 || [])]
+      const leagueIds = [...new Set(teams.map((t) => t.league_id).filter(Boolean))]
+      let leaguesMap = {}
+      if (leagueIds.length > 0) {
+        const { data: leagues } = await supabase
+          .from('leagues')
+          .select('id, name')
+          .in('id', leagueIds)
+        if (leagues) leagues.forEach((l) => { leaguesMap[l.id] = l })
+      }
+      return teams.map((t) => ({ ...t, leagueObj: leaguesMap[t.league_id] }))
+    },
+    enabled: !!participantId,
+  })
+
+  const { data: matchesData = [] } = useQuery({
+    queryKey: ['matches-for-player-teams', teamsData.map((t) => t.id).join(',')],
+    queryFn: async () => {
+      const ids = teamsData.map((t) => t.id)
+      if (ids.length === 0) return []
+      const { data: m1 } = await supabase.from('matches').select('*').in('team1_id', ids)
+      const { data: m2 } = await supabase.from('matches').select('*').in('team2_id', ids)
+      const all = [...(m1 || []), ...(m2 || [])]
+      const seen = new Set()
+      return all.filter((m) => {
+        if (seen.has(m.id)) return false
+        seen.add(m.id)
+        return true
+      })
+    },
+    enabled: teamsData.length > 0,
+  })
+
+  const totalStats = allStats.reduce(
     (acc, s) => ({
-      matches_played: acc.matches_played + s.matches_played,
-      matches_won: acc.matches_won + s.matches_won,
-      matches_lost: acc.matches_lost + s.matches_lost,
-      sets_won: acc.sets_won + s.sets_won,
-      sets_lost: acc.sets_lost + s.sets_lost,
-      games_won: acc.games_won + s.games_won,
-      games_lost: acc.games_lost + s.games_lost,
+      matches_played: acc.matches_played + (s.matches_played || 0),
+      matches_won: acc.matches_won + (s.matches_won || 0),
+      matches_lost: acc.matches_lost + (s.matches_lost || 0),
+      sets_won: acc.sets_won + (s.sets_won || 0),
+      sets_lost: acc.sets_lost + (s.sets_lost || 0),
     }),
-    { matches_played: 0, matches_won: 0, matches_lost: 0, sets_won: 0, sets_lost: 0, games_won: 0, games_lost: 0 }
+    { matches_played: 0, matches_won: 0, matches_lost: 0, sets_won: 0, sets_lost: 0 }
   )
 
-  const winRate = totalStats.matches_played > 0
-    ? Math.round((totalStats.matches_won / totalStats.matches_played) * 100)
-    : 0
+  const played = matchesData.filter((m) => m.winner_team_number)
+  const pending = matchesData.filter((m) => !m.winner_team_number && m.status !== 'cancelado')
 
-  const setsDiff = totalStats.sets_won - totalStats.sets_lost
-  const gamesDiff = totalStats.games_won - totalStats.games_lost
+  const playerWonFromMatches = played.filter((m) => {
+    const playerTeam = teamsData.find((t) => t.id === m.team1_id || t.id === m.team2_id)
+    return playerTeam && m.winner_team_number === playerTeam.team_number
+  }).length
 
-  const radarData = [
-    { stat: 'Victorias', value: Math.min(totalStats.matches_won * 5, 100) },
-    { stat: 'Sets ganados', value: Math.min(totalStats.sets_won * 3, 100) },
-    { stat: 'Juegos', value: Math.min(totalStats.games_won * 2, 100) },
-    { stat: '% Victoria', value: winRate },
-    { stat: 'Sets dif', value: Math.min(Math.max(setsDiff * 10 + 50, 0), 100) },
-  ]
-
-  const barData = [
-    { name: 'PG', value: totalStats.matches_won, fill: '#22c55e' },
-    { name: 'PP', value: totalStats.matches_lost, fill: '#ef4444' },
-    { name: 'SG', value: totalStats.sets_won, fill: '#3b82f6' },
-    { name: 'SP', value: totalStats.sets_lost, fill: '#f97316' },
-    { name: 'JG', value: totalStats.games_won, fill: '#8b5cf6' },
-    { name: 'JP', value: totalStats.games_lost, fill: '#ec4899' },
-  ]
-
-  const leagueBarData = filteredStats.map((s) => ({
-    name: s.league_name?.substring(0, 12) || '—',
-    '%': Math.round(s.win_percentage),
-    PJ: s.matches_played,
-  }))
-
-  const hasStats = totalStats.matches_played > 0
+  const winPct = totalStats.matches_played > 0
+    ? ((totalStats.matches_won / totalStats.matches_played) * 100).toFixed(1)
+    : played.length > 0
+    ? ((playerWonFromMatches / played.length) * 100).toFixed(1)
+    : '0'
+  const pctColor = parseFloat(winPct) >= 70
+    ? 'text-primary'
+    : parseFloat(winPct) >= 40
+    ? 'text-amber-400'
+    : 'text-red-400'
+  const initials = decodedName.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
 
   const levelColors = {
     '3RA': 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
@@ -103,252 +115,231 @@ export default function PlayerDetail() {
     '6TA': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
   }
 
+  const hasStats = totalStats.matches_played > 0 || played.length > 0
+
   return (
-    <div>
-      <Button variant="ghost" onClick={() => navigate('/participantes')} className="mb-4">
-        <ArrowLeft className="w-4 h-4" />
-        Volver a jugadores
-      </Button>
+    <div className="space-y-5">
+      {/* ── Header ── */}
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" onClick={() => navigate('/jugadores')}>
+          <ArrowLeft className="w-4 h-4" />
+        </Button>
+        <div>
+          <h1 className="font-heading font-bold text-lg">Jugador</h1>
+          <p className="text-xs text-muted-foreground">clic para ver historial</p>
+        </div>
+      </div>
 
-      {/* ── Player Header ── */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-card border border-border rounded-2xl p-6 mb-6"
-      >
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-          {/* Avatar */}
-          <motion.div
-            className="w-20 h-20 rounded-2xl overflow-hidden ring-2 ring-border shrink-0"
-            whileHover={{ scale: 1.05 }}
-          >
-            {participant?.photo_url ? (
-              <img src={participant.photo_url} alt={decodedName} className="w-full h-full object-cover" />
-            ) : (
-              <div
-                className="w-full h-full flex items-center justify-center text-white text-2xl font-bold font-heading"
-                style={{ background: 'linear-gradient(135deg, var(--primary), hsl(var(--primary) / 0.5))' }}
-              >
-                {decodedName.charAt(0).toUpperCase()}
-              </div>
-            )}
-          </motion.div>
-
-          {/* Info */}
-          <div className="flex-1">
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-2xl font-heading font-bold">{decodedName}</h1>
-              {participant?.level && (
-                <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${levelColors[participant.level] || ''}`}>
-                  {participant.level}
-                </span>
-              )}
-              {participant?.gender && (
-                <span className="text-xs text-muted-foreground">
-                  {participant.gender === 'varonil' ? '♂ Varonil' : '♀ Femenil'}
-                </span>
+      {/* ── Player Card Header ── */}
+      <div className="bg-card rounded-2xl border border-border overflow-hidden">
+        {/* Banner */}
+        <div className="relative h-20 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent">
+          <div className="absolute inset-0 bg-gradient-to-r from-card/80 to-transparent" />
+        </div>
+        <div className="px-5 pb-5 -mt-10 relative">
+          <div className="flex items-end gap-4 flex-wrap">
+            <div className="shrink-0">
+              {participant?.photo_url ? (
+                <img
+                  src={participant.photo_url}
+                  alt={decodedName}
+                  className="w-20 h-20 rounded-2xl object-cover border-4 border-card shadow-xl"
+                />
+              ) : (
+                <div className="w-20 h-20 rounded-2xl bg-primary/20 text-primary flex items-center justify-center font-heading font-black text-3xl border-4 border-card shadow-xl">
+                  {initials}
+                </div>
               )}
             </div>
-            {participant?.phone && (
-              <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.854.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                {participant.phone}
+            <div className="flex-1 min-w-0 pb-1">
+              <h2 className="text-2xl font-heading font-black uppercase tracking-wide leading-tight">
+                {decodedName}
+              </h2>
+              <div className="flex gap-2 mt-1 flex-wrap">
+                {participant?.level && (
+                  <Badge className={`${levelColors[participant.level] || levelColors['5TA']} font-heading text-xs`}>
+                    {participant.level}
+                  </Badge>
+                )}
+                {participant?.gender && (
+                  <Badge variant="outline" className="font-heading text-xs">
+                    {participant.gender === 'varonil' ? '♂ Varonil' : '♀ Femenil'}
+                  </Badge>
+                )}
+              </div>
+              <button
+                onClick={() => navigate('/jugadores')}
+                className="text-xs text-muted-foreground hover:text-primary mt-1.5 transition-colors"
+              >
+                ← Volver a jugadores
+              </button>
+            </div>
+            <div className="text-right pb-1">
+              <p className={`text-5xl font-heading font-black leading-none ${pctColor}`}>
+                {winPct}%
               </p>
-            )}
+              <p className="text-xs text-muted-foreground font-body mt-0.5">% Victoria</p>
+            </div>
           </div>
 
-          {/* Win Rate Ring */}
-          {hasStats && (
-            <motion.div
-              className="text-center"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.3, type: 'spring' }}
-            >
-              <div
-                className="w-16 h-16 rounded-full flex items-center justify-center text-white text-lg font-heading font-bold"
-                style={{
-                  background: `conic-gradient(
-                    ${winRate >= 50 ? 'var(--primary)' : 'var(--destructive)'} ${winRate}%,
-                    var(--muted) ${winRate}%
-                  )`,
-                }}
-              >
-                <div className="w-12 h-12 rounded-full bg-card flex items-center justify-center">
-                  <span className={winRate >= 50 ? 'text-primary' : 'text-destructive'}>{winRate}%</span>
-                </div>
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5">
+            {[
+              { icon: Swords, label: 'Jugados', value: totalStats.matches_played || played.length, color: 'text-foreground', bg: 'bg-secondary' },
+              { icon: Trophy, label: 'Ganados', value: totalStats.matches_won || playerWonFromMatches, color: 'text-primary', bg: 'bg-primary/10' },
+              { icon: XCircle, label: 'Perdidos', value: totalStats.matches_lost || (played.length - playerWonFromMatches), color: 'text-red-400', bg: 'bg-red-500/10' },
+              { icon: Target, label: 'Pendientes', value: pending.length, color: 'text-amber-400', bg: 'bg-amber-500/10' },
+            ].map((s) => (
+              <div key={s.label} className={`${s.bg} rounded-xl p-4 text-center`}>
+                <s.icon className={`w-4 h-4 mx-auto mb-1.5 ${s.color}`} />
+                <p className={`text-2xl font-heading font-black ${s.color}`}>{s.value}</p>
+                <p className="text-[10px] text-muted-foreground font-body uppercase tracking-wide mt-0.5">{s.label}</p>
               </div>
-              <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wide">Win Rate</p>
-            </motion.div>
+            ))}
+          </div>
+
+          {/* Progress bar */}
+          {hasStats && (
+            <div className="mt-4">
+              <div className="flex justify-between text-[10px] font-body text-muted-foreground mb-1.5">
+                <span className="uppercase tracking-wide">Rendimiento global</span>
+                <span className={`font-heading font-bold ${pctColor}`}>{winPct}%</span>
+              </div>
+              <div className="h-2 bg-muted rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${winPct}%` }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
+                  className="h-full bg-primary rounded-full"
+                />
+              </div>
+            </div>
           )}
         </div>
-      </motion.div>
+      </div>
 
-      {/* ── Stats Overview ── */}
-      {hasStats ? (
-        <>
-          {/* Stat cards */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6"
-          >
-            {[
-              { label: 'Partidos', value: totalStats.matches_played, icon: <Calendar className="w-4 h-4" />, color: 'text-blue-500' },
-              { label: 'Victorias', value: totalStats.matches_won, icon: <Trophy className="w-4 h-4" />, color: 'text-emerald-500' },
-              { label: 'Derrotas', value: totalStats.matches_lost, icon: <ArrowLeft className="w-4 h-4" />, color: 'text-red-500' },
-              { label: 'Sets dif', value: (setsDiff >= 0 ? '+' : '') + setsDiff, icon: <TrendingUp className="w-4 h-4" />, color: setsDiff >= 0 ? 'text-primary' : 'text-destructive' },
-              { label: 'Juegos dif', value: (gamesDiff >= 0 ? '+' : '') + gamesDiff, icon: <Activity className="w-4 h-4" />, color: gamesDiff >= 0 ? 'text-blue-500' : 'text-destructive' },
-              { label: 'Win %', value: winRate + '%', icon: <Target className="w-4 h-4" />, color: 'text-amber-500' },
-            ].map(({ label, value, icon, color }, i) => (
-              <motion.div
-                key={label}
-                className="bg-card border border-border rounded-xl p-4 text-center"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 + i * 0.05 }}
-                whileHover={{ y: -2, boxShadow: '0 4px 12px -2px rgba(0,0,0,0.1)' }}
-              >
-                <div className={`${color} flex justify-center mb-2`}>{icon}</div>
-                <p className="text-xl font-heading font-bold">{value}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mt-1">{label}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {/* League filter */}
-          {allLeagues.length > 1 && (
-            <div className="flex gap-2 mb-6 flex-wrap">
-              <button
-                onClick={() => setSelectedLeague('all')}
-                className={`text-xs px-3 py-1.5 rounded-full font-medium transition-colors ${
-                  selectedLeague === 'all'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/70'
-                }`}
-              >
-                Todas ({allStats.length})
-              </button>
-              {allLeagues.map((l) => {
-                const count = allStats.filter((s) => s.league_id === l.id).length
-                return (
-                  <button
-                    key={l.id}
-                    onClick={() => setSelectedLeague(l.id)}
-                    className={`text-xs px-3 py-1.5 rounded-full font-medium transition-colors ${
-                      selectedLeague === l.id
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground hover:bg-muted/70'
-                    }`}
-                  >
-                    {l.name} ({count})
-                  </button>
-                )
-              })}
-            </div>
-          )}
-
-          {/* Charts Grid */}
-          <div className="grid lg:grid-cols-2 gap-6 mb-6">
-            {/* Radar Chart */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-card border border-border rounded-2xl p-6"
-            >
-              <h3 className="font-heading font-semibold mb-4 flex items-center gap-2">
-                <Zap className="w-4 h-4 text-primary" />
-                Perfil de rendimiento
-              </h3>
-              <ResponsiveContainer width="100%" height={280}>
-                <RadarChart data={radarData}>
-                  <PolarGrid stroke="var(--border)" />
-                  <PolarAngleAxis dataKey="stat" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} />
-                  <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 10 }} />
-                  <Radar name="Jugador" dataKey="value" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.2} strokeWidth={2} />
-                </RadarChart>
-              </ResponsiveContainer>
-            </motion.div>
-
-            {/* Bar Chart */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
-              className="bg-card border border-border rounded-2xl p-6"
-            >
-              <h3 className="font-heading font-semibold mb-4 flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-primary" />
-                Victorias vs Derrotas
-              </h3>
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={barData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} />
-                  <Tooltip
-                    contentStyle={{
-                      background: 'var(--card)',
-                      border: '1px solid var(--border)',
-                      borderRadius: '8px',
-                    }}
-                  />
-                  <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                    {barData.map((entry, index) => (
-                      <rect key={`bar-${index}`} fill={entry.fill} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </motion.div>
+      {/* ── Equipos ── */}
+      {teamsData.length > 0 && (
+        <div className="bg-card rounded-2xl border border-border p-5">
+          <h3 className="font-heading font-black text-sm uppercase tracking-wide flex items-center gap-2 mb-3">
+            <User className="w-4 h-4 text-primary" />
+            Equipos
+          </h3>
+          <div className="space-y-2">
+            {teamsData.map((team) => {
+              const partner = team.player1_name === decodedName ? team.player2_name : team.player1_name
+              const stats = allStats.find(
+                (s) => s.category === team.category && s.partner_name === partner
+              )
+              return (
+                <div
+                  key={team.id}
+                  className="flex items-center justify-between bg-muted/30 rounded-xl px-4 py-3 hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <Badge className="bg-primary/15 text-primary border-primary/25 font-heading text-xs">
+                      {team.category}
+                    </Badge>
+                    <div>
+                      <p className="text-sm font-body font-medium">con {partner || '—'}</p>
+                      {team.leagueObj?.name && (
+                        <p className="text-[10px] text-muted-foreground font-body">{team.leagueObj.name}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-heading font-black text-sm text-primary">
+                      {stats?.win_percentage || 0}%
+                    </p>
+                    <p className="text-[10px] text-muted-foreground font-body">
+                      {stats?.matches_won || 0}G / {stats?.matches_played || 0}J
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
           </div>
+        </div>
+      )}
 
-          {/* League comparison bar */}
-          {leagueBarData.length > 1 && (
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-card border border-border rounded-2xl p-6 mb-6"
-            >
-              <h3 className="font-heading font-semibold mb-4 flex items-center gap-2">
-                <Award className="w-4 h-4 text-primary" />
-                Rendimiento por liga
-              </h3>
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={leagueBarData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                  <YAxis tick={{ fontSize: 10 }} />
-                  <Tooltip
-                    contentStyle={{
-                      background: 'var(--card)',
-                      border: '1px solid var(--border)',
-                      borderRadius: '8px',
-                    }}
-                  />
-                  <Bar dataKey="%" fill="var(--primary)" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </motion.div>
+      {/* ── Historial de Partidos ── */}
+      <div className="bg-card rounded-2xl border border-border overflow-hidden">
+        <div className="px-5 py-3 border-b border-border flex items-center gap-2">
+          <TrendingUp className="w-4 h-4 text-primary" />
+          <h3 className="font-heading font-black text-sm uppercase tracking-wide">
+            Historial ({played.length} partidos)
+          </h3>
+        </div>
+        <div className="divide-y divide-border max-h-96 overflow-y-auto">
+          {played.length === 0 && (
+            <p className="text-center text-muted-foreground font-body py-8 text-sm">
+              Sin partidos jugados
+            </p>
           )}
-        </>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="bg-card border border-border rounded-2xl p-12 text-center"
-        >
-          <div className="w-16 h-16 rounded-full bg-muted mx-auto mb-4 flex items-center justify-center">
-            <Activity className="w-8 h-8 text-muted-foreground" />
+          {played.map((m) => {
+            const playerTeam = teamsData.find((t) => t.id === m.team1_id || t.id === m.team2_id)
+            const won = playerTeam && m.winner_team_number === playerTeam.team_number
+            const isT1 = playerTeam && m.team1_id === playerTeam.id
+            const oppName = isT1
+              ? m.team2_name || `Equipo ${m.team2_number}`
+              : m.team1_name || `Equipo ${m.team1_number}`
+
+            const sets = [
+              isT1 ? { t1: m.set1_team1, t2: m.set1_team2 } : { t1: m.set1_team2, t2: m.set1_team1 },
+              isT1 && m.set2_team1 != null ? { t1: m.set2_team1, t2: m.set2_team2 } : !isT1 && m.set2_team1 != null ? { t1: m.set2_team2, t2: m.set2_team1 } : null,
+              isT1 && m.set3_team1 != null ? { t1: m.set3_team1, t2: m.set3_team2 } : !isT1 && m.set3_team1 != null ? { t1: m.set3_team2, t2: m.set3_team1 } : null,
+            ].filter(Boolean)
+
+            return (
+              <div
+                key={m.id}
+                className={`px-5 py-3 flex items-center gap-3 ${won ? 'bg-primary/5' : 'bg-red-500/5'}`}
+              >
+                {won ? (
+                  <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+                ) : (
+                  <XCircle className="w-4 h-4 text-red-400 shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-body font-medium truncate">vs {oppName}</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px]">
+                      {m.category}
+                    </Badge>
+                    {m.match_number && (
+                      <span className="text-[10px] text-muted-foreground font-body">#{m.match_number}</span>
+                    )}
+                    {m.court && (
+                      <span className="text-[10px] text-muted-foreground font-body">· {m.court}</span>
+                    )}
+                  </div>
+                </div>
+                <div className="shrink-0 text-right text-xs font-heading font-black space-y-0.5">
+                  {sets.map((s, i) => (
+                    <div key={i} className={won ? 'text-primary' : 'text-muted-foreground'}>
+                      {s.t1}-{s.t2}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* ── Empty state ── */}
+      {!hasStats && played.length === 0 && teamsData.length === 0 && (
+        <div className="text-center py-20">
+          <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+            <Activity className="w-10 h-10 text-primary/40" />
           </div>
-          <h3 className="font-heading font-semibold text-lg mb-2">Sin estadísticas</h3>
-          <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-            {decodedName} aún no tiene partidos registrados. Las estadísticas aparecerán aquí cuando se jueguen partidos.
+          <p className="text-foreground font-heading font-black text-lg uppercase tracking-wide">
+            Sin estadísticas
           </p>
-        </motion.div>
+          <p className="text-muted-foreground font-body text-sm mt-1">
+            {decodedName} aún no tiene partidos registrados
+          </p>
+        </div>
       )}
     </div>
   )
