@@ -69,21 +69,21 @@ export default function LeagueSetupWizard() {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '')
 
-  const handleSave = async () => {
-    if (!form.name) return
+    const handleSave = async () => {
+      if (!form.name) return
 
-    const leagueData = {
-      ...form,
-      slug: form.slug || generateSlug(form.name),
-      organizer_id: user?.id,
-    }
+      const leagueData = {
+        ...form,
+        slug: form.slug || generateSlug(form.name),
+        organizer_id: user?.id,
+      }
 
-    let savedLeague
-    if (isEditing) {
-      savedLeague = await updateLeague.mutateAsync({ id: leagueId, ...leagueData })
-    } else {
-      savedLeague = await createLeague.mutateAsync(leagueData)
-    }
+      let savedLeague = null
+      if (isEditing) {
+        savedLeague = await updateLeague.mutateAsync({ id: leagueId, ...leagueData })
+      } else {
+        savedLeague = await createLeague.mutateAsync(leagueData)
+      }
 
     if (teams.length > 0 && savedLeague?.id) {
       const teamRecords = teams.map((t) => ({
