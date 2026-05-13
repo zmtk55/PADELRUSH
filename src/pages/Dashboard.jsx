@@ -1,44 +1,17 @@
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
 import { Trophy, Users, Calendar, TrendingUp } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { useLeagues } from '@/hooks/useLeagues'
+import { useFetch } from '@/lib/data'
+import { req } from '@/lib/data'
 import { useAuth } from '@/hooks/useAuth'
 export default function Dashboard() {
   const navigate = useNavigate()
   const { leaguesQuery } = useLeagues()
   const { isOrganizer } = useAuth()
-
-  const { data: participantCount = 0 } = useQuery({
-    queryKey: ['participant-count'],
-    queryFn: async () => {
-      const res = await fetch('https://xmpsqjhywmwdekuhudtt.supabase.co/rest/v1/participants?select=id', {
-        headers: { apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtcHNxamh5d213ZGVrdWh1ZHR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjM5NzgsImV4cCI6MjA5MzgzOTk3OH0.-6CSavZAVZhRV72MTsaoJZN0cRvlS8ee-9Tc2jFuLRQ', Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtcHNxamh5d213ZGVrdWh1ZHR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjM5NzgsImV4cCI6MjA5MzgzOTk3OH0.-6CSavZAVZhRV72MTsaoJZN0cRvlS8ee-9Tc2jFuLRQ' },
-        signal: AbortSignal.timeout(8000),
-      })
-      if (!res.ok) return 0
-      const d = await res.json()
-      return d.length || 0
-    },
-    staleTime: 60_000,
-    retry: 1,
-  })
-
-  const { data: matchesPlayed = 0 } = useQuery({
-    queryKey: ['matches-played-count'],
-    queryFn: async () => {
-      const res = await fetch("https://xmpsqjhywmwdekuhudtt.supabase.co/rest/v1/matches?select=id&status=eq.jugado", {
-        headers: { apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtcHNxamh5d213ZGVrdWh1ZHR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjM5NzgsImV4cCI6MjA5MzgzOTk3OH0.-6CSavZAVZhRV72MTsaoJZN0cRvlS8ee-9Tc2jFuLRQ', Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtcHNxamh5d213ZGVrdWh1ZHR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjM5NzgsImV4cCI6MjA5MzgzOTk3OH0.-6CSavZAVZhRV72MTsaoJZN0cRvlS8ee-9Tc2jFuLRQ' },
-        signal: AbortSignal.timeout(8000),
-      })
-      if (!res.ok) return 0
-      const d = await res.json()
-      return d.length || 0
-    },
-    staleTime: 60_000,
-    retry: 1,
-  })
+  const pc = useFetch(() => req('GET', '/participants?select=id').then(r => r?.length || 0))
+  const mp = useFetch(() => req('GET', '/matches?select=id&status=eq.jugado').then(r => r?.length || 0))
 
   const leagues = leaguesQuery.data || []
   const activas = leagues.filter((l) => l.status === 'activa').length
@@ -46,8 +19,8 @@ export default function Dashboard() {
 
   const stats = [
     { label: 'Ligas activas', icon: Trophy, color: 'text-primary', value: activas },
-    { label: 'Participantes', icon: Users, color: 'text-blue-500', value: participantCount },
-    { label: 'Partidos jugados', icon: Calendar, color: 'text-emerald-500', value: matchesPlayed },
+    { label: 'Participantes', icon: Users, color: 'text-blue-500', value: pc.data ?? 0 },
+    { label: 'Partidos jugados', icon: Calendar, color: 'text-emerald-500', value: mp.data ?? 0 },
     { label: 'Categorías', icon: TrendingUp, color: 'text-amber-500', value: totalCategories || '—' },
   ]
 
@@ -155,7 +128,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <p className="font-medium text-sm">Participantes</p>
-                <p className="text-xs text-muted-foreground">{participantCount} registrados</p>
+                <p className="text-xs text-muted-foreground">{pc.data ?? 0} registrados</p>
               </div>
             </button>
 

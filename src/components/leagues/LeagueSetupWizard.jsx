@@ -9,7 +9,6 @@ import { Select } from '@/components/ui/select'
 import { useLeagues } from '@/hooks/useLeagues'
 import { useParticipants } from '@/hooks/useParticipants'
 import { useAuth } from '@/hooks/useAuth'
-import { supabase } from '@/lib/supabaseClient'
 import { queryClient } from '@/lib/query-client'
 import { PlayerPickerPanel } from './PlayerPickerPanel'
 
@@ -95,8 +94,12 @@ export default function LeagueSetupWizard() {
         player2_id: t.player2_id,
         team_name: `Equipo ${t.team_number}`,
       }))
-      const { error } = await supabase.from('teams').insert(teamRecords).select()
-      if (!error) queryClient.invalidateQueries({ queryKey: ['teams', savedLeague.id] })
+      const r = await fetch('https://xmpsqjhywmwdekuhudtt.supabase.co/rest/v1/teams', {
+        method: 'POST',
+        headers: { apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtcHNxamh5d213ZGVrdWh1ZHR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjM5NzgsImV4cCI6MjA5MzgzOTk3OH0.-6CSavZAVZhRV72MTsaoJZN0cRvlS8ee-9Tc2jFuLRQ', Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtcHNxamh5d213ZGVrdWh1ZHR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjM5NzgsImV4cCI6MjA5MzgzOTk3OH0.-6CSavZAVZhRV72MTsaoJZN0cRvlS8ee-9Tc2jFuLRQ', 'Content-Type': 'application/json', Prefer: 'return=representation' },
+        body: JSON.stringify(teamRecords),
+      })
+      if (r.ok) queryClient.invalidateQueries({ queryKey: ['teams', savedLeague.id] })
     }
 
     navigate(savedLeague ? `/ligas/${savedLeague.id}` : '/ligas')
