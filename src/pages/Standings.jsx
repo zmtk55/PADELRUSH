@@ -5,7 +5,8 @@ import { useAuth } from '@/hooks/useAuth'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Trophy, Medal, TrendingUp, BarChart3 } from 'lucide-react'
+import { ArrowLeft, Trophy, Medal, TrendingUp, BarChart3, Download } from 'lucide-react'
+import { exportStandings } from '@/lib/exportUtils'
 import { motion } from 'framer-motion'
 
 const levelOrder = { '3RA': 0, '4TA': 1, '5TA': 2, '6TA': 3 }
@@ -18,6 +19,8 @@ export default function Standings() {
   const { data: league } = leagueQuery(leagueId)
   const { statsQuery } = usePlayerStats(leagueId)
   const stats = statsQuery.data || []
+
+  const allStandings = stats.map((s) => ({ ...s, name: s.player_name }))
 
   const grouped = stats.reduce((acc, s) => {
     const cat = s.category || 'Sin categoría'
@@ -49,6 +52,14 @@ export default function Standings() {
       <PageHeader
         title="Clasificación"
         description={league?.name}
+        action={
+          stats.length > 0 && (
+            <Button variant="outline" size="sm" onClick={() => exportStandings(allStandings, league?.name || 'liga')}>
+              <Download className="w-4 h-4" />
+              CSV
+            </Button>
+          )
+        }
       />
 
       {stats.length === 0 ? (
