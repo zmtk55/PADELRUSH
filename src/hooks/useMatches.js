@@ -1,21 +1,23 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabaseClient'
+import { supabase, supabaseUrl, supabaseAnonKey } from '@/lib/supabaseClient'
 import { toast } from 'sonner'
+
+async function fetchFrom(path, signal) {
+  const res = await fetch(`${supabaseUrl}/rest/v1/${path}`, {
+    headers: { apikey: supabaseAnonKey, Authorization: `Bearer ${supabaseAnonKey}` },
+    signal,
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
 
 export function useMatches(leagueId) {
   const queryClient = useQueryClient()
 
   const matchesQuery = useQuery({
     queryKey: ['matches', leagueId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('matches')
-        .select('*')
-        .eq('league_id', leagueId)
-        .order('round', { ascending: true, nullsFirst: false })
-        .order('match_number', { ascending: true, nullsFirst: false })
-      if (error) throw error
-      return data
+    queryFn: async ({ signal }) => {
+      return fetchFrom(`matches?select=*&league_id=eq.${leagueId}&order=round.asc.nullsfirst&order=match_number.asc.nullsfirst`, signal)
     },
     enabled: !!leagueId,
   })

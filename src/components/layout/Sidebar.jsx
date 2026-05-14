@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  LayoutDashboard, Trophy, Users, Calendar, UserCircle,
-  Menu, X, ChevronLeft, LogOut, Sun, Moon,
+  LayoutDashboard, Trophy, Users, Calendar, UserCircle, Settings, Shield,
+  Menu, X, ChevronLeft, LogOut, Sun, Moon, Bell,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
 import { useTheme } from '@/lib/ThemeContext'
+import { useNotifications } from '@/lib/NotificationContext'
 
 const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -18,8 +19,9 @@ const navItems = [
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
-  const { profile, isOrganizer, signOut } = useAuth()
+  const { profile, isOrganizer, isAdmin, signOut } = useAuth()
   const { theme, toggleTheme } = useTheme()
+  const { unreadCount, markAllRead } = useNotifications()
 
   return (
     <aside
@@ -54,21 +56,67 @@ export function Sidebar() {
           </NavLink>
         ))}
 
-        {isOrganizer && (
-          <NavLink
-            to="/profile"
-            className={({ isActive }) =>
-              cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                isActive
-                  ? 'bg-sidebar-accent/10 text-sidebar-accent'
-                  : 'text-sidebar-foreground/70 hover:bg-sidebar-muted hover:text-sidebar-foreground'
-              )
-            }
-          >
-            <UserCircle className="w-5 h-5 shrink-0" />
-            {!collapsed && <span>Perfil</span>}
-          </NavLink>
+        <NavLink
+          to="/profile"
+          className={({ isActive }) =>
+            cn(
+              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+              isActive
+                ? 'bg-sidebar-accent/10 text-sidebar-accent'
+                : 'text-sidebar-foreground/70 hover:bg-sidebar-muted hover:text-sidebar-foreground'
+            )
+          }
+        >
+          <div className="relative">
+            <Bell className="w-5 h-5 shrink-0" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                {unreadCount}
+              </span>
+            )}
+          </div>
+          {!collapsed && (
+            <span className="flex-1">Notificaciones</span>
+          )}
+          {!collapsed && unreadCount > 0 && (
+            <button onClick={(e) => { e.preventDefault(); markAllRead() }} className="text-xs text-primary hover:underline">Leer</button>
+          )}
+        </NavLink>
+
+        {isAdmin && (
+          <>
+            <div className="pt-3 pb-1">
+              {!collapsed && <p className="px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Admin</p>}
+            </div>
+            <NavLink
+              to="/admin/usuarios"
+              className={({ isActive }) =>
+                cn(
+                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                  isActive
+                    ? 'bg-sidebar-accent/10 text-sidebar-accent'
+                    : 'text-sidebar-foreground/70 hover:bg-sidebar-muted hover:text-sidebar-foreground'
+                )
+              }
+            >
+              <Shield className="w-5 h-5 shrink-0" />
+              {!collapsed && <span>Usuarios</span>}
+            </NavLink>
+            <NavLink
+              to="/admin/config"
+              className={({ isActive }) =>
+                cn(
+                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                  isActive
+                    ? 'bg-sidebar-accent/10 text-sidebar-accent'
+                    : 'text-sidebar-foreground/70 hover:bg-sidebar-muted hover:text-sidebar-foreground'
+                )
+              }
+            >
+              <Settings className="w-5 h-5 shrink-0" />
+              {!collapsed && <span>Configuración</span>}
+            </NavLink>
+          </>
         )}
       </nav>
 
@@ -110,11 +158,19 @@ export function Sidebar() {
 
 export function MobileNav() {
   const [open, setOpen] = useState(false)
-  const { isOrganizer, signOut, profile } = useAuth()
+  const { isOrganizer, isAdmin, signOut, profile } = useAuth()
   const { theme, toggleTheme } = useTheme()
+  const { unreadCount } = useNotifications()
   const location = useLocation()
 
   useEffect(() => { setOpen(false) }, [location.pathname])
+
+  const adminItems = isAdmin
+    ? [
+        { to: '/admin/usuarios', label: 'Admin: Usuarios', icon: Shield },
+        { to: '/admin/config', label: 'Admin: Configuración', icon: Settings },
+      ]
+    : []
 
   return (
     <>
@@ -123,9 +179,19 @@ export function MobileNav() {
           <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-heading font-bold text-xs">PR</div>
           <span className="font-heading font-semibold">PadelRush</span>
         </div>
-        <Button variant="ghost" size="icon" onClick={() => setOpen(true)}>
-          <Menu className="w-5 h-5" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" className="relative" onClick={() => setOpen(true)}>
+            <Bell className="w-5 h-5" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                {unreadCount}
+              </span>
+            )}
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => setOpen(true)}>
+            <Menu className="w-5 h-5" />
+          </Button>
+        </div>
       </header>
 
       <AnimatePresence>
@@ -153,7 +219,7 @@ export function MobileNav() {
               </div>
 
               <nav className="p-4 space-y-1">
-                {[...navItems, ...(isOrganizer ? [{ to: '/profile', label: 'Perfil', icon: UserCircle }] : [])].map(
+                {[...navItems, { to: '/profile', label: 'Perfil', icon: UserCircle }, ...adminItems].map(
                   ({ to, label, icon: Icon }) => (
                     <NavLink
                       key={to}

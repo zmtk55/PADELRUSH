@@ -9,7 +9,8 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Select } from '@/components/ui/select'
-import { ArrowLeft, Edit } from 'lucide-react'
+import { ArrowLeft, Edit, Download } from 'lucide-react'
+import { exportMatches } from '@/lib/exportUtils'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { ScheduleBuilder } from '@/components/leagues/ScheduleBuilder'
@@ -44,11 +45,17 @@ export default function Matches() {
         title="Partidos"
         description="Calendario y resultados"
         action={
-          isOrganizer && (
-            <Button variant="outline" onClick={() => setShowScheduler(!showScheduler)}>
-              {showScheduler ? 'Cancelar' : 'Generar horarios'}
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => exportMatches(matches)}>
+              <Download className="w-4 h-4" />
+              CSV
             </Button>
-          )
+            {isOrganizer && (
+              <Button variant="outline" onClick={() => setShowScheduler(!showScheduler)}>
+                {showScheduler ? 'Cancelar' : 'Generar horarios'}
+              </Button>
+            )}
+          </div>
         }
       />
 

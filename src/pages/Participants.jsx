@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Users, Plus, Search, LayoutGrid, List, SlidersHorizontal } from 'lucide-react'
+import { Users, Plus, Search, LayoutGrid, List, SlidersHorizontal, Download } from 'lucide-react'
+import { exportParticipants } from '@/lib/exportUtils'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { PlayerCard, PlayerCardGrid } from '@/components/players/PlayerCard'
 import { useParticipants } from '@/hooks/useParticipants'
 import { useAuth } from '@/hooks/useAuth'
-import { supabase } from '@/lib/supabaseClient'
+import { supabaseUrl, supabaseAnonKey } from '@/lib/supabaseClient'
 
 export default function Participants() {
   const navigate = useNavigate()
@@ -27,10 +28,13 @@ export default function Participants() {
 
   const { data: allStats = [] } = useQuery({
     queryKey: ['all-player-stats'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('player_stats').select('*')
-      if (error) return []
-      return data
+    queryFn: async ({ signal }) => {
+      const res = await fetch(`${supabaseUrl}/rest/v1/player_stats?select=*&limit=1000`, {
+        headers: { apikey: supabaseAnonKey, Authorization: `Bearer ${supabaseAnonKey}` },
+        signal,
+      })
+      if (!res.ok) return []
+      return res.json()
     },
     enabled: !participantsQuery.isLoading,
   })
@@ -89,19 +93,24 @@ export default function Participants() {
   return (
     <div>
       <PageHeader
-        title="Jugadores"
+        title="Participantes"
         description={`${participants.length} registrados`}
         action={
-          isOrganizer && (
-            <Button onClick={() => { resetForm(); setShowForm(true) }}>
-              <Plus className="w-4 h-4" />
-              Nuevo jugador
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => exportParticipants(participants)}>
+              <Download className="w-4 h-4" />
+              CSV
             </Button>
-          )
+            {isOrganizer && (
+              <Button onClick={() => { resetForm(); setShowForm(true) }}>
+                <Plus className="w-4 h-4" />
+                Nuevo
+              </Button>
+            )}
+          </div>
         }
       />
 
-      {/* ── Filters & Controls ── */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />

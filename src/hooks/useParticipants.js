@@ -1,16 +1,23 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabaseClient'
+import { supabase, supabaseUrl, supabaseAnonKey } from '@/lib/supabaseClient'
 import { toast } from 'sonner'
+
+async function fetchFrom(path, signal) {
+  const res = await fetch(`${supabaseUrl}/rest/v1/${path}`, {
+    headers: { apikey: supabaseAnonKey, Authorization: `Bearer ${supabaseAnonKey}` },
+    signal,
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
 
 export function useParticipants() {
   const queryClient = useQueryClient()
 
   const participantsQuery = useQuery({
     queryKey: ['participants'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('participants').select('*').order('name')
-      if (error) throw error
-      return data
+    queryFn: async ({ signal }) => {
+      return fetchFrom('participants?select=*&order=name.asc', signal)
     },
   })
 

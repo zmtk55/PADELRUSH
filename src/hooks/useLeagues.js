@@ -1,26 +1,32 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabaseClient'
+import { supabase, supabaseUrl, supabaseAnonKey } from '@/lib/supabaseClient'
 import { toast } from 'sonner'
+
+async function fetchFrom(path, signal) {
+  const res = await fetch(`${supabaseUrl}/rest/v1/${path}`, {
+    headers: { apikey: supabaseAnonKey, Authorization: `Bearer ${supabaseAnonKey}` },
+    signal,
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
 
 export function useLeagues() {
   const queryClient = useQueryClient()
 
   const leaguesQuery = useQuery({
     queryKey: ['leagues'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('leagues').select('*').order('created_at', { ascending: false })
-      if (error) throw error
-      return data
+    queryFn: async ({ signal }) => {
+      return fetchFrom('leagues?select=*&order=created_at.desc', signal)
     },
   })
 
   const leagueQuery = (id) =>
     useQuery({
       queryKey: ['league', id],
-      queryFn: async () => {
-        const { data, error } = await supabase.from('leagues').select('*').eq('id', id).single()
-        if (error) throw error
-        return data
+      queryFn: async ({ signal }) => {
+        const data = await fetchFrom(`leagues?select=*&id=eq.${id}&limit=1`, signal)
+        return data[0] || null
       },
       enabled: !!id,
     })

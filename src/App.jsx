@@ -3,7 +3,6 @@ import { useAuth } from '@/hooks/useAuth'
 import { Sidebar, MobileNav } from '@/components/layout/Sidebar'
 import Dashboard from '@/pages/Dashboard'
 import Leagues from '@/pages/Leagues'
-import LeagueDetail from '@/pages/LeagueDetail'
 import Teams from '@/pages/Teams'
 import Matches from '@/pages/Matches'
 import Standings from '@/pages/Standings'
@@ -11,6 +10,9 @@ import Profile from '@/pages/Profile'
 import Login from '@/pages/Login'
 import PlayerDetail from '@/pages/PlayerDetail'
 import Participants from '@/pages/Participants'
+import AdminUsers from '@/pages/admin/Users'
+import AdminConfig from '@/pages/admin/Config'
+import { NotificationProvider } from '@/lib/NotificationContext'
 
 function AuthGate() {
   const { user, loading } = useAuth()
@@ -28,25 +30,37 @@ function AuthGate() {
   return <Outlet />
 }
 
+function AdminGate() {
+  const { isAdmin, loading } = useAuth()
+  if (loading) return null
+  if (!isAdmin) return <Navigate to="/" replace />
+  return <Outlet />
+}
+
 export default function App() {
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route element={<AuthGate />}>
-        <Route element={<AppLayout />}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/ligas" element={<Leagues />} />
-          <Route path="/ligas/:leagueId" element={<LeagueDetail />} />
-          <Route path="/ligas/:leagueId/equipos" element={<Teams />} />
-          <Route path="/ligas/:leagueId/partidos" element={<Matches />} />
-          <Route path="/ligas/:leagueId/standings" element={<Standings />} />
-          <Route path="/jugadores" element={<Participants />} />
-          <Route path="/jugadores/:playerName" element={<PlayerDetail />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+    <NotificationProvider>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route element={<AuthGate />}>
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/ligas/*" element={<Leagues />} />
+            <Route path="/ligas/:leagueId/equipos" element={<Teams />} />
+            <Route path="/ligas/:leagueId/partidos" element={<Matches />} />
+            <Route path="/ligas/:leagueId/standings" element={<Standings />} />
+            <Route path="/jugadores" element={<Participants />} />
+            <Route path="/jugadores/:playerName" element={<PlayerDetail />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route element={<AdminGate />}>
+              <Route path="/admin/usuarios" element={<AdminUsers />} />
+              <Route path="/admin/config" element={<AdminConfig />} />
+            </Route>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
         </Route>
-      </Route>
-    </Routes>
+      </Routes>
+    </NotificationProvider>
   )
 }
 

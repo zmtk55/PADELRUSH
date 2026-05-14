@@ -8,7 +8,16 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useParticipants } from '@/hooks/useParticipants'
-import { supabase } from '@/lib/supabaseClient'
+import { supabaseUrl, supabaseAnonKey } from '@/lib/supabaseClient'
+
+async function fetchFrom(path, signal) {
+  const res = await fetch(`${supabaseUrl}/rest/v1/${path}`, {
+    headers: { apikey: supabaseAnonKey, Authorization: `Bearer ${supabaseAnonKey}` },
+    signal,
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
 
 export default function PlayerDetail() {
   const { playerName } = useParams()
@@ -23,36 +32,25 @@ export default function PlayerDetail() {
 
   const { data: allStats = [] } = useQuery({
     queryKey: ['player-stats-by-name', decodedName],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('player_stats')
-        .select('*')
-        .ilike('player_name', decodedName)
-      return data || []
+    queryFn: async ({ signal }) => {
+      return fetchFrom(`player_stats?select=*&player_name=ilike.${encodeURIComponent(decodedName)}`, signal)
     },
   })
 
   const { data: teamsData = [] } = useQuery({
     queryKey: ['teams-for-player', participantId],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       if (!participantId) return []
-      const { data: t1 } = await supabase
-        .from('teams')
-        .select('*')
-        .eq('player1_id', participantId)
-      const { data: t2 } = await supabase
-        .from('teams')
-        .select('*')
-        .eq('player2_id', participantId)
-      const teams = [...(t1 || []), ...(t2 || [])]
+      const [t1, t2] = await Promise.all([
+        fetchFrom(`teams?select=*&player1_id=eq.${participantId}`, signal),
+        fetchFrom(`teams?select=*&player2_id=eq.${participantId}`, signal),
+      ])
+      const teams = [...t1, ...t2]
       const leagueIds = [...new Set(teams.map((t) => t.league_id).filter(Boolean))]
       let leaguesMap = {}
       if (leagueIds.length > 0) {
-        const { data: leagues } = await supabase
-          .from('leagues')
-          .select('id, name')
-          .in('id', leagueIds)
-        if (leagues) leagues.forEach((l) => { leaguesMap[l.id] = l })
+        const leagues = await fetchFrom(`leagues?select=id,name&id=in.(${leagueIds.join(',')})`, signal)
+        leagues.forEach((l) => { leaguesMap[l.id] = l })
       }
       return teams.map((t) => ({ ...t, leagueObj: leaguesMap[t.league_id] }))
     },
@@ -61,12 +59,14 @@ export default function PlayerDetail() {
 
   const { data: matchesData = [] } = useQuery({
     queryKey: ['matches-for-player-teams', teamsData.map((t) => t.id).join(',')],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const ids = teamsData.map((t) => t.id)
       if (ids.length === 0) return []
-      const { data: m1 } = await supabase.from('matches').select('*').in('team1_id', ids)
-      const { data: m2 } = await supabase.from('matches').select('*').in('team2_id', ids)
-      const all = [...(m1 || []), ...(m2 || [])]
+      const [m1, m2] = await Promise.all([
+        fetchFrom(`matches?select=*&team1_id=in.(${ids.join(',')})`, signal),
+        fetchFrom(`matches?select=*&team2_id=in.(${ids.join(',')})`, signal),
+      ])
+      const all = [...m1, ...m2]
       const seen = new Set()
       return all.filter((m) => {
         if (seen.has(m.id)) return false

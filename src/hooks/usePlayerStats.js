@@ -1,17 +1,20 @@
 import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabaseClient'
+import { supabaseUrl, supabaseAnonKey } from '@/lib/supabaseClient'
+
+async function fetchFrom(path, signal) {
+  const res = await fetch(`${supabaseUrl}/rest/v1/${path}`, {
+    headers: { apikey: supabaseAnonKey, Authorization: `Bearer ${supabaseAnonKey}` },
+    signal,
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
 
 export function usePlayerStats(leagueId) {
   const statsQuery = useQuery({
     queryKey: ['player-stats', leagueId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('player_stats')
-        .select('*')
-        .eq('league_id', leagueId)
-        .order('win_percentage', { ascending: false })
-      if (error) throw error
-      return data
+    queryFn: async ({ signal }) => {
+      return fetchFrom(`player_stats?select=*&league_id=eq.${leagueId}&order=win_percentage.desc`, signal)
     },
     enabled: !!leagueId,
   })
