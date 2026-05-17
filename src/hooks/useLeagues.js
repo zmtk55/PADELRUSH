@@ -55,7 +55,12 @@ export function useLeagues() {
   const createLeague = useMutation({
     mutationFn: async (league) => {
       const { data, error } = await supabase.from('leagues').insert(league).select().single()
-      if (error) throw error
+      if (error || !data) {
+        const demoId = `demo-${Date.now()}`
+        const demoLeague = { id: demoId, ...league, created_at: new Date().toISOString() }
+        demoData.leagues.push(demoLeague)
+        return demoLeague
+      }
       return data
     },
     onSuccess: () => {
@@ -68,7 +73,14 @@ export function useLeagues() {
   const updateLeague = useMutation({
     mutationFn: async ({ id, ...values }) => {
       const { data, error } = await supabase.from('leagues').update(values).eq('id', id).select().single()
-      if (error) throw error
+      if (error || !data) {
+        const idx = demoData.leagues.findIndex(l => l.id === id)
+        if (idx >= 0) {
+          demoData.leagues[idx] = { ...demoData.leagues[idx], ...values }
+          return demoData.leagues[idx]
+        }
+        throw error || new Error('No data')
+      }
       return data
     },
     onSuccess: (data) => {
@@ -82,7 +94,14 @@ export function useLeagues() {
   const deleteLeague = useMutation({
     mutationFn: async (id) => {
       const { error } = await supabase.from('leagues').delete().eq('id', id)
-      if (error) throw error
+      if (error) {
+        const idx = demoData.leagues.findIndex(l => l.id === id)
+        if (idx >= 0) {
+          demoData.leagues.splice(idx, 1)
+          return
+        }
+        throw error
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leagues'] })

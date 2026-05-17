@@ -22,8 +22,8 @@ export default function Participants() {
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState(null)
   const [search, setSearch] = useState('')
-  const [filterLevel, setFilterLevel] = useState('')
-  const [filterGender, setFilterGender] = useState('')
+  const [filterLevel, setFilterLevel] = useState('all')
+  const [filterGender, setFilterGender] = useState('all')
   const [viewMode, setViewMode] = useState('grid')
   const [form, setForm] = useState({ name: '', level: '5TA', gender: 'femenil', phone: '', photo_url: '' })
 
@@ -84,12 +84,12 @@ export default function Participants() {
   const participants = participantsQuery.data || []
   const filtered = participants.filter((p) => {
     if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false
-    if (filterLevel && p.level !== filterLevel) return false
-    if (filterGender && p.gender !== filterGender) return false
+    if (filterLevel !== 'all' && p.level !== filterLevel) return false
+    if (filterGender !== 'all' && p.gender !== filterGender) return false
     return true
   })
 
-  const hasActiveFilters = search || filterLevel || filterGender
+  const hasActiveFilters = search || filterLevel !== 'all' || filterGender !== 'all'
 
   return (
     <div>
@@ -166,7 +166,7 @@ export default function Participants() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => { setSearch(''); setFilterLevel(''); setFilterGender('') }}
+              onClick={() => { setSearch(''); setFilterLevel('all'); setFilterGender('all') }}
               className="text-red-500 hover:text-red-600"
             >
               <SlidersHorizontal className="w-4 h-4" />
@@ -222,7 +222,7 @@ export default function Participants() {
               : 'Ningún jugador coincide con esos filtros'}
           </p>
           {hasActiveFilters && (
-            <Button variant="outline" size="sm" className="mt-4" onClick={() => { setSearch(''); setFilterLevel(''); setFilterGender('') }}>
+            <Button variant="outline" size="sm" className="mt-4" onClick={() => { setSearch(''); setFilterLevel('all'); setFilterGender('all') }}>
               Limpiar filtros
             </Button>
           )}

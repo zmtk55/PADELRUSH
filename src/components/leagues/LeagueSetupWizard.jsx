@@ -12,6 +12,7 @@ import { useParticipants } from '@/hooks/useParticipants'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabaseClient'
 import { queryClient } from '@/lib/query-client'
+import { demoData } from '@/lib/demo-data'
 import { PlayerPickerPanel } from './PlayerPickerPanel'
 
 const steps = [
@@ -97,7 +98,11 @@ export default function LeagueSetupWizard() {
         team_name: `Equipo ${t.team_number}`,
       }))
       const { error } = await supabase.from('teams').insert(teamRecords).select()
-      if (!error) queryClient.invalidateQueries({ queryKey: ['teams', savedLeague.id] })
+      if (!error) {
+        queryClient.invalidateQueries({ queryKey: ['teams', savedLeague.id] })
+      } else {
+        teamRecords.forEach(t => demoData.teams.push({ id: `t-${Date.now()}-${t.team_number}`, ...t }))
+      }
     }
 
     navigate(savedLeague ? `/ligas/${savedLeague.id}` : '/ligas')
