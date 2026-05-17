@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import { Calendar, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Select } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
 import { useAuth } from '@/hooks/useAuth'
 
 function getGreeting() {
@@ -36,15 +37,16 @@ export default function DashboardHeader({ leagues, selectedLeagueId, onLeagueCha
       </div>
       <div className="flex items-center gap-3">
         {leagues.length > 0 && (
-          <Select
-            value={selectedLeagueId || ''}
-            onChange={(e) => onLeagueChange(e.target.value)}
-            className="w-[200px]"
-          >
-            <option value="all">Todas las ligas</option>
-            {leagues.map((l) => (
-              <option key={l.id} value={l.id}>{l.name}</option>
-            ))}
+          <Select value={selectedLeagueId || ''} onValueChange={onLeagueChange}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Todas las ligas" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas las ligas</SelectItem>
+              {leagues.map((l) => (
+                <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
+              ))}
+            </SelectContent>
           </Select>
         )}
         {isOrganizer && (

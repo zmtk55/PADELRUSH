@@ -7,7 +7,6 @@ import Teams from '@/pages/Teams'
 import Matches from '@/pages/Matches'
 import Standings from '@/pages/Standings'
 import Profile from '@/pages/Profile'
-import Login from '@/pages/Login'
 import PlayerDetail from '@/pages/PlayerDetail'
 import Participants from '@/pages/Participants'
 import AdminUsers from '@/pages/admin/Users'
@@ -15,7 +14,7 @@ import AdminConfig from '@/pages/admin/Config'
 import { NotificationProvider } from '@/lib/NotificationContext'
 
 function AuthGate() {
-  const { user, loading } = useAuth()
+  const { loading } = useAuth()
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -26,7 +25,6 @@ function AuthGate() {
       </div>
     )
   }
-  if (!user) return <Navigate to="/login" replace />
   return <Outlet />
 }
 
@@ -41,11 +39,13 @@ export default function App() {
   return (
     <NotificationProvider>
       <Routes>
-        <Route path="/login" element={<Login />} />
         <Route element={<AuthGate />}>
           <Route element={<AppLayout />}>
             <Route path="/" element={<Dashboard />} />
-            <Route path="/ligas/*" element={<Leagues />} />
+            <Route path="/ligas" element={<Leagues />} />
+            <Route path="/ligas/nueva" element={<Leagues />} />
+            <Route path="/ligas/:leagueId" element={<Leagues />} />
+            <Route path="/ligas/:leagueId/editar" element={<Leagues />} />
             <Route path="/ligas/:leagueId/equipos" element={<Teams />} />
             <Route path="/ligas/:leagueId/partidos" element={<Matches />} />
             <Route path="/ligas/:leagueId/standings" element={<Standings />} />
@@ -64,7 +64,7 @@ export default function App() {
   )
 }
 
-function AppLayout({ children }) {
+function AppLayout() {
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar />

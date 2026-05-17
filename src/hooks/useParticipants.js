@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase, supabaseUrl, supabaseAnonKey } from '@/lib/supabaseClient'
 import { toast } from 'sonner'
+import { demoData } from '@/lib/demo-data'
 
 async function fetchFrom(path, signal) {
   const res = await fetch(`${supabaseUrl}/rest/v1/${path}`, {
@@ -17,7 +18,11 @@ export function useParticipants() {
   const participantsQuery = useQuery({
     queryKey: ['participants'],
     queryFn: async ({ signal }) => {
-      return fetchFrom('participants?select=*&order=name.asc', signal)
+      const data = await fetchFrom('participants?select=*&order=name.asc', signal)
+      if (!data || data.length === 0) {
+        return demoData.participants
+      }
+      return data
     },
   })
 

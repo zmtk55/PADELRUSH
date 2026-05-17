@@ -8,7 +8,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
-import { Select } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
 import { ArrowLeft, Edit, Download } from 'lucide-react'
 import { exportMatches } from '@/lib/exportUtils'
 import { useState } from 'react'
@@ -237,10 +238,15 @@ function ScoreEditor({ match, open, onClose, onSave }) {
         <div className="space-y-4">
           <div>
             <Label>Estado</Label>
-            <Select value={status} onChange={(e) => setStatus(e.target.value)}>
-              <option value="jugado">Jugado (con resultado)</option>
-              <option value="walkover">Walkover (W/O)</option>
-              <option value="cancelado">Cancelado</option>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="jugado">Jugado (con resultado)</SelectItem>
+                <SelectItem value="walkover">Walkover (W/O)</SelectItem>
+                <SelectItem value="cancelado">Cancelado</SelectItem>
+              </SelectContent>
             </Select>
           </div>
 

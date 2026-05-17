@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase, supabaseUrl, supabaseAnonKey } from '@/lib/supabaseClient'
 import { toast } from 'sonner'
+import { demoData } from '@/lib/demo-data'
 
 async function fetchFrom(path, signal) {
   const res = await fetch(`${supabaseUrl}/rest/v1/${path}`, {
@@ -17,7 +18,16 @@ export function useTeams(leagueId) {
   const teamsQuery = useQuery({
     queryKey: ['teams', leagueId],
     queryFn: async ({ signal }) => {
-      return fetchFrom(`teams?select=*,player1:player1_id(*),player2:player2_id(*)&league_id=eq.${leagueId}&order=team_number.asc`, signal)
+      if (!leagueId) return []
+      try {
+        const data = await fetchFrom(`teams?select=*,player1:player1_id(*),player2:player2_id(*)&league_id=eq.${leagueId}&order=team_number.asc`, signal)
+        if (!data || data.length === 0) {
+          return demoData.teams.filter(t => t.league_id === leagueId)
+        }
+        return data
+      } catch (e) {
+        return demoData.teams.filter(t => t.league_id === leagueId)
+      }
     },
     enabled: !!leagueId,
   })

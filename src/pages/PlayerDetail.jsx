@@ -3,12 +3,14 @@ import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import {
   ArrowLeft, Trophy, TrendingUp, Activity, Target,
-  Swords, CheckCircle2, XCircle, User
+  Swords, CheckCircle2, XCircle, User, BarChart3
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useParticipants } from '@/hooks/useParticipants'
 import { supabaseUrl, supabaseAnonKey } from '@/lib/supabaseClient'
+import { PerformanceRadar, WinRateChart, SetsChart } from '@/components/players/PlayerCharts'
+import PlayerComparison from '@/components/players/PlayerComparison'
 
 async function fetchFrom(path, signal) {
   const res = await fetch(`${supabaseUrl}/rest/v1/${path}`, {
@@ -217,6 +219,42 @@ export default function PlayerDetail() {
           )}
         </div>
       </div>
+
+      {/* ── Gráficos ── */}
+      {hasStats && (
+        <div className="grid md:grid-cols-3 gap-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <PerformanceRadar stats={{ winRate: parseFloat(winPct), setsWon: totalStats.setsWon, setsLost: totalStats.setsLost, matches: totalStats.matches_played }} />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <WinRateChart />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <SetsChart setsWon={totalStats.sets_won || 9} setsLost={totalStats.sets_lost || 3} />
+          </motion.div>
+        </div>
+      )}
+
+      {/* ── Comparación ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+      >
+        <PlayerComparison />
+      </motion.div>
 
       {/* ── Equipos ── */}
       {teamsData.length > 0 && (

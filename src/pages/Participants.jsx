@@ -7,7 +7,8 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { PlayerCard, PlayerCardGrid } from '@/components/players/PlayerCard'
 import { useParticipants } from '@/hooks/useParticipants'
@@ -123,31 +124,38 @@ export default function Participants() {
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          <Select value={filterLevel} onChange={(e) => setFilterLevel(e.target.value)} className="w-24">
-            <option value="">Nivel</option>
-            <option value="3RA">3RA</option>
-            <option value="4TA">4TA</option>
-            <option value="5TA">5TA</option>
-            <option value="6TA">6TA</option>
+          <Select value={filterLevel} onValueChange={setFilterLevel}>
+            <SelectTrigger className="w-24">
+              <SelectValue placeholder="Nivel" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="3RA">3RA</SelectItem>
+              <SelectItem value="4TA">4TA</SelectItem>
+              <SelectItem value="5TA">5TA</SelectItem>
+              <SelectItem value="6TA">6TA</SelectItem>
+            </SelectContent>
           </Select>
-          <Select value={filterGender} onChange={(e) => setFilterGender(e.target.value)} className="w-28">
-            <option value="">Género</option>
-            <option value="femenil">Femenil</option>
-            <option value="varonil">Varonil</option>
+          <Select value={filterGender} onValueChange={setFilterGender}>
+            <SelectTrigger className="w-28">
+              <SelectValue placeholder="Género" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="femenil">Femenil</SelectItem>
+              <SelectItem value="varonil">Varonil</SelectItem>
+            </SelectContent>
           </Select>
 
-          {/* View toggle */}
-          <div className="flex items-center border border-border rounded-lg overflow-hidden bg-background ml-auto">
+          <div className="flex items-center border rounded-lg overflow-hidden bg-background ml-auto">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-2 transition-colors ${viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}
+              className={`p-2 transition-colors ${viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground'}`}
               title="Vista en tarjetas"
             >
               <LayoutGrid className="w-4 h-4" />
             </button>
             <button
               onClick={() => setViewMode('compact')}
-              className={`p-2 transition-colors ${viewMode === 'compact' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}
+              className={`p-2 transition-colors ${viewMode === 'compact' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground'}`}
               title="Vista compacta"
             >
               <List className="w-4 h-4" />
@@ -159,7 +167,7 @@ export default function Participants() {
               variant="ghost"
               size="sm"
               onClick={() => { setSearch(''); setFilterLevel(''); setFilterGender('') }}
-              className="text-destructive hover:text-destructive"
+              className="text-red-500 hover:text-red-600"
             >
               <SlidersHorizontal className="w-4 h-4" />
               Limpiar
@@ -168,7 +176,6 @@ export default function Participants() {
         </div>
       </div>
 
-      {/* ── Players Grid/List ── */}
       {filtered.length > 0 ? (
         viewMode === 'compact' ? (
           <div className="space-y-2">
@@ -202,22 +209,20 @@ export default function Participants() {
           </PlayerCardGrid>
         )
       ) : (
-        <div className="text-center py-20">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
-            <Users className="w-8 h-8 text-muted-foreground" />
+        <div className="text-center py-16 bg-card rounded-xl shadow-sm border">
+          <div className="w-14 h-14 rounded-xl bg-muted flex items-center justify-center mx-auto mb-4">
+            <Users className="w-7 h-7 text-muted-foreground/50" />
           </div>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-base font-semibold mb-1">
+            {participants.length === 0 ? 'Sin jugadores' : 'Sin resultados'}
+          </p>
+          <p className="text-sm text-muted-foreground">
             {participants.length === 0
-              ? 'No hay jugadores registrados'
-              : 'Sin resultados con esos filtros'}
+              ? 'No hay jugadores registrados aún'
+              : 'Ningún jugador coincide con esos filtros'}
           </p>
           {hasActiveFilters && (
-            <Button
-              variant="link"
-              size="sm"
-              className="mt-2"
-              onClick={() => { setSearch(''); setFilterLevel(''); setFilterGender('') }}
-            >
+            <Button variant="outline" size="sm" className="mt-4" onClick={() => { setSearch(''); setFilterLevel(''); setFilterGender('') }}>
               Limpiar filtros
             </Button>
           )}
@@ -244,18 +249,28 @@ export default function Participants() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Nivel</Label>
-                <Select value={form.level} onChange={(e) => setForm({ ...form, level: e.target.value })}>
-                  <option value="3RA">3RA — Alta</option>
-                  <option value="4TA">4TA — Media-Alta</option>
-                  <option value="5TA">5TA — Media</option>
-                  <option value="6TA">6TA — Iniciación</option>
+                <Select value={form.level} onValueChange={(v) => setForm({ ...form, level: v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar nivel" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="3RA">3RA — Alta</SelectItem>
+                    <SelectItem value="4TA">4TA — Media-Alta</SelectItem>
+                    <SelectItem value="5TA">5TA — Media</SelectItem>
+                    <SelectItem value="6TA">6TA — Iniciación</SelectItem>
+                  </SelectContent>
                 </Select>
               </div>
               <div>
                 <Label>Género</Label>
-                <Select value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value })}>
-                  <option value="femenil">Femenil</option>
-                  <option value="varonil">Varonil</option>
+                <Select value={form.gender} onValueChange={(v) => setForm({ ...form, gender: v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar género" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="femenil">Femenil</SelectItem>
+                    <SelectItem value="varonil">Varonil</SelectItem>
+                  </SelectContent>
                 </Select>
               </div>
             </div>

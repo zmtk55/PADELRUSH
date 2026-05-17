@@ -14,7 +14,13 @@ import { useNotifications } from '@/lib/NotificationContext'
 const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/ligas', label: 'Ligas', icon: Trophy },
+  { to: '/ligas/nueva', label: 'Nueva Liga', icon: Trophy, orgOnly: true },
+  { to: '/ligas/demo-1/equipos', label: 'Equipos', icon: Users },
+  { to: '/ligas/demo-1/partidos', label: 'Partidos', icon: Calendar },
+  { to: '/ligas/demo-1/standings', label: 'Clasificación', icon: Trophy },
   { to: '/jugadores', label: 'Jugadores', icon: Users },
+  { to: '/profile', label: 'Mi Perfil', icon: UserCircle },
+  { to: '/admin/usuarios', label: 'Admin', icon: Shield, adminOnly: true },
 ]
 
 export function Sidebar() {
@@ -27,120 +33,87 @@ export function Sidebar() {
     <aside
       className={cn(
         'hidden md:flex flex-col h-screen bg-sidebar border-r border-border transition-all duration-300',
-        collapsed ? 'w-16' : 'w-60'
+        collapsed ? 'w-20' : 'w-64'
       )}
     >
-      <div className="flex items-center gap-3 px-4 h-16 border-b border-border">
-        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-heading font-bold text-sm shrink-0">
+      <div className="flex items-center gap-3 px-4 h-16 border-b shrink-0">
+        <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-semibold text-base shrink-0">
           PR
         </div>
-        {!collapsed && <span className="font-heading font-semibold text-lg">PadelRush</span>}
+        {!collapsed && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <span className="font-semibold text-base">PadelRush</span>
+            <span className="text-[10px] text-muted-foreground block -mt-0.5">Liga Manager</span>
+          </motion.div>
+        )}
       </div>
 
-      <nav className="flex-1 p-3 space-y-1">
-        {navItems.map(({ to, label, icon: Icon }) => (
-          <NavLink
-            key={to}
-            to={to}
-            className={({ isActive }) =>
-              cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                isActive
-                  ? 'bg-sidebar-accent/10 text-sidebar-accent'
-                  : 'text-sidebar-foreground/70 hover:bg-sidebar-muted hover:text-sidebar-foreground'
-              )
-            }
-          >
-            <Icon className="w-5 h-5 shrink-0" />
-            {!collapsed && <span>{label}</span>}
-          </NavLink>
-        ))}
+      <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+        <div className="text-[10px] font-medium text-muted-foreground px-3 mb-1.5">
+          {!collapsed && 'Menú'}
+        </div>
+        
+        {navItems.map(({ to, label, icon: Icon, orgOnly, adminOnly }) => {
+          if (orgOnly && !isOrganizer) return null
+          if (adminOnly && !isAdmin) return null
+          return (
+            <NavLink key={to} to={to}>
+              {({ isActive }) => (
+                <div className={cn(
+                  'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                  isActive ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                )}>
+                  <Icon className={cn('w-4 h-4', isActive ? 'text-primary' : '')} />
+                  {!collapsed && <span>{label}</span>}
+                </div>
+              )}
+            </NavLink>
+          )
+        })}
 
-        <NavLink
-          to="/profile"
-          className={({ isActive }) =>
-            cn(
-              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-              isActive
-                ? 'bg-sidebar-accent/10 text-sidebar-accent'
-                : 'text-sidebar-foreground/70 hover:bg-sidebar-muted hover:text-sidebar-foreground'
-            )
-          }
-        >
-          <div className="relative">
-            <Bell className="w-5 h-5 shrink-0" />
-            {unreadCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
-                {unreadCount}
-              </span>
-            )}
+        <div className="pt-3 mt-2 border-t">
+          <div className="text-[10px] font-medium text-muted-foreground px-3 mb-1.5">
+            {!collapsed && 'Cuenta'}
           </div>
-          {!collapsed && (
-            <span className="flex-1">Notificaciones</span>
-          )}
-          {!collapsed && unreadCount > 0 && (
-            <button onClick={(e) => { e.preventDefault(); markAllRead() }} className="text-xs text-primary hover:underline">Leer</button>
-          )}
-        </NavLink>
-
-        {isAdmin && (
-          <>
-            <div className="pt-3 pb-1">
-              {!collapsed && <p className="px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Admin</p>}
-            </div>
-            <NavLink
-              to="/admin/usuarios"
-              className={({ isActive }) =>
-                cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                  isActive
-                    ? 'bg-sidebar-accent/10 text-sidebar-accent'
-                    : 'text-sidebar-foreground/70 hover:bg-sidebar-muted hover:text-sidebar-foreground'
-                )
-              }
-            >
-              <Shield className="w-5 h-5 shrink-0" />
-              {!collapsed && <span>Usuarios</span>}
-            </NavLink>
-            <NavLink
-              to="/admin/config"
-              className={({ isActive }) =>
-                cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                  isActive
-                    ? 'bg-sidebar-accent/10 text-sidebar-accent'
-                    : 'text-sidebar-foreground/70 hover:bg-sidebar-muted hover:text-sidebar-foreground'
-                )
-              }
-            >
-              <Settings className="w-5 h-5 shrink-0" />
-              {!collapsed && <span>Configuración</span>}
-            </NavLink>
-          </>
-        )}
+          
+          <NavLink to="/profile">
+            {({ isActive }) => (
+              <div className={cn(
+                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                isActive ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+              )}>
+                <UserCircle className={cn('w-4 h-4', isActive ? 'text-primary' : '')} />
+                {!collapsed && <span>Mi Perfil</span>}
+              </div>
+            )}
+          </NavLink>
+        </div>
       </nav>
 
-      <div className="p-3 border-t border-border space-y-1">
+      <div className="p-3 border-t space-y-0.5">
         <button
           onClick={toggleTheme}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-sidebar-foreground/70 hover:bg-sidebar-muted transition-colors"
+          className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
         >
-          {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           {!collapsed && <span>{theme === 'dark' ? 'Claro' : 'Oscuro'}</span>}
         </button>
 
         {profile && (
           <button
             onClick={signOut}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-sidebar-foreground/70 hover:bg-sidebar-muted transition-colors"
+            className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut className="w-4 h-4" />
             {!collapsed && <span>Cerrar sesión</span>}
           </button>
         )}
 
         {!collapsed && profile && (
-          <div className="px-3 py-2 text-xs text-muted-foreground truncate">
+          <div className="px-3 py-1.5 text-xs text-muted-foreground truncate">
             {profile.display_name || profile.email}
           </div>
         )}
@@ -148,7 +121,7 @@ export function Sidebar() {
 
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute bottom-4 -right-3 w-6 h-6 rounded-full bg-sidebar border border-border flex items-center justify-center shadow-sm"
+        className="absolute bottom-3 -right-3 w-6 h-6 rounded-full bg-background border shadow-sm flex items-center justify-center"
       >
         <ChevronLeft className={cn('w-3 h-3 transition-transform', collapsed && 'rotate-180')} />
       </button>
