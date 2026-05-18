@@ -72,7 +72,7 @@ export default function LeagueDetail() {
                 Editar
               </Button>
             )}
-            <Button size="sm" onClick={() => navigate(`/ligas/${leagueId}/standings`)}>
+            <Button size="sm" onClick={() => navigate(`/ligas/${leagueId}/clasificacion`)}>
               <Trophy className="w-4 h-4" />
               Clasificación
             </Button>
@@ -117,9 +117,9 @@ export default function LeagueDetail() {
                       <p className="text-xs text-muted-foreground">#{team.team_number} · {team.category}</p>
                     </div>
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    {team.player1?.name?.split(' ')[0] || '?'} / {team.player2?.name?.split(' ')[0] || '?'}
-                  </span>
+                    <span className="text-xs text-muted-foreground">
+                      {(team.player1_name || team.player1?.name || '?').split(' ')[0]} / {(team.player2_name || team.player2?.name || '?').split(' ')[0]}
+                    </span>
                 </div>
               ))}
             </div>

@@ -1,68 +1,36 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { supabase, supabaseUrl, supabaseAnonKey } from '@/lib/supabaseClient'
-import { toast } from 'sonner'
-import { demoData } from '@/lib/demo-data'
-
-async function fetchFrom(path, signal) {
-  const res = await fetch(`${supabaseUrl}/rest/v1/${path}`, {
-    headers: { apikey: supabaseAnonKey, Authorization: `Bearer ${supabaseAnonKey}` },
-    signal,
-  })
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
-  return res.json()
-}
+import { req, useFetch } from '@/lib/data'
+import { supabase } from '@/lib/supabaseClient'
+import { demoData } from '@/lib/demoData'
 
 export function useParticipants() {
-  const queryClient = useQueryClient()
-
-  const participantsQuery = useQuery({
-    queryKey: ['participants'],
-    queryFn: async ({ signal }) => {
-      const data = await fetchFrom('participants?select=*&order=name.asc', signal)
-      if (!data || data.length === 0) {
-        return demoData.participants
-      }
-      return data
+  const q = useFetch(
+    () => req('GET', '/participants?select=*&order=name')
+      .catch(() => demoData.participants),
+    []
+  )
+  return {
+    participantsQuery: q,
+    createParticipant: {
+      mutateAsync: async (p) => {
+        const r = await supabase.from('participants').insert(p).select().single()
+        if (r.error) throw r.error
+        return r.data
+      },
+      isPending: false,
     },
-  })
-
-  const createParticipant = useMutation({
-    mutationFn: async (participant) => {
-      const { data, error } = await supabase.from('participants').insert(participant).select().single()
-      if (error) throw error
-      return data
+    updateParticipant: {
+      mutateAsync: async ({ id, ...v }) => {
+        const r = await supabase.from('participants').update(v).eq('id', id).select().single()
+        if (r.error) throw r.error
+        return r.data
+      },
+      isPending: false,
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['participants'] })
-      toast.success('Participante registrado')
+    deleteParticipant: {
+      mutateAsync: async (id) => {
+        const r = await supabase.from('participants').delete().eq('id', id)
+        if (r.error) throw r.error
+      },
     },
-    onError: (error) => toast.error(error.message),
-  })
-
-  const updateParticipant = useMutation({
-    mutationFn: async ({ id, ...values }) => {
-      const { data, error } = await supabase.from('participants').update(values).eq('id', id).select().single()
-      if (error) throw error
-      return data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['participants'] })
-      toast.success('Participante actualizado')
-    },
-    onError: (error) => toast.error(error.message),
-  })
-
-  const deleteParticipant = useMutation({
-    mutationFn: async (id) => {
-      const { error } = await supabase.from('participants').delete().eq('id', id)
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['participants'] })
-      toast.success('Participante eliminado')
-    },
-    onError: (error) => toast.error(error.message),
-  })
-
-  return { participantsQuery, createParticipant, updateParticipant, deleteParticipant }
+  }
 }
