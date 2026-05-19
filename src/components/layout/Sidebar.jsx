@@ -14,9 +14,6 @@ import { useTheme } from '@/lib/ThemeContext'
 const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/ligas', label: 'Ligas', icon: Trophy },
-  { to: '/equipos', label: 'Equipos', icon: Swords },
-  { to: '/partidos', label: 'Partidos', icon: Calendar },
-  { to: '/clasificacion', label: 'Clasificación', icon: Medal },
   { to: '/participantes', label: 'Participantes', icon: Users },
 ]
 
