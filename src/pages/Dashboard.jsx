@@ -4,6 +4,7 @@ import { Trophy } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { useLeagues } from '@/hooks/useLeagues'
+import { useAuth } from '@/hooks/useAuth'
 import { useDashboard } from '@/hooks/useDashboard'
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton'
 import { EmptyDashboard } from '@/components/dashboard/EmptyDashboard'
@@ -17,8 +18,9 @@ import { LeagueSelector } from '@/components/dashboard/LeagueSelector'
 
 export default function Dashboard() {
   const navigate = useNavigate()
-  const { leaguesQuery, isOrganizer } = useLeagues()
-  const leagues = leaguesQuery.data || []
+  const { leaguesQuery } = useLeagues()
+  const { isOrganizer } = useAuth()
+  const leagues = leaguesQuery?.data || []
   const [selectedLeague, setSelectedLeague] = useState(null)
   const [timeRange, setTimeRange] = useState('week')
 
@@ -87,7 +89,7 @@ export default function Dashboard() {
         <StatsGrid stats={stats} />
 
         {/* Activity Chart */}
-        <ActivityChart data={activityData} />
+        <ActivityChart data={activityData} timeRange={timeRange} onTimeRangeChange={setTimeRange} />
 
         {/* Two Column Layout */}
         <div className="grid lg:grid-cols-2 gap-6">

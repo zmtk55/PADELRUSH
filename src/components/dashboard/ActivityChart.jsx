@@ -1,9 +1,7 @@
-import { useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { Calendar, TrendingUp } from 'lucide-react'
 
-export function ActivityChart({ data }) {
-  const [timeRange, setTimeRange] = useState('week')
+export function ActivityChart({ data, timeRange = 'week', onTimeRangeChange }) {
 
   if (!data?.length) {
     return (
@@ -31,7 +29,7 @@ export function ActivityChart({ data }) {
         </div>
         <div className="flex gap-1 bg-muted rounded-lg p-1">
           <button
-            onClick={() => setTimeRange('week')}
+            onClick={() => onTimeRangeChange?.('week')}
             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
               timeRange === 'week' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
             }`}
@@ -39,7 +37,7 @@ export function ActivityChart({ data }) {
             Semana
           </button>
           <button
-            onClick={() => setTimeRange('month')}
+            onClick={() => onTimeRangeChange?.('month')}
             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
               timeRange === 'month' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
             }`}
