@@ -1,4 +1,4 @@
-import { Users, Plus, Search, Upload, X } from 'lucide-react'
+import { Users, Plus, Search, X } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -7,7 +7,6 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { useParticipants } from '@/hooks/useParticipants'
 import { useAuth } from '@/hooks/useAuth'
-import { demoData } from '@/lib/demoData'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 
@@ -44,19 +43,9 @@ export default function Participants() {
     if (!form.name.trim()) return
     try {
       if (editing) {
-        try {
-          await updateParticipant.mutateAsync({ id: editing.id, ...form })
-        } catch {
-          const idx = demoData.participants.findIndex(p => p.id === editing.id)
-          if (idx !== -1) Object.assign(demoData.participants[idx], form)
-        }
+        await updateParticipant.mutateAsync({ id: editing.id, ...form })
       } else {
-        try {
-          await createParticipant.mutateAsync(form)
-        } catch {
-          const newP = { id: `demo-p-${Date.now()}`, ...form }
-          demoData.participants.push(newP)
-        }
+        await createParticipant.mutateAsync(form)
       }
       resetForm()
       participantsQuery.refetch()
@@ -74,11 +63,7 @@ export default function Participants() {
   const handleDelete = async (p) => {
     if (!confirm(`¿Eliminar a ${p.name}?`)) return
     try {
-      try {
-        await deleteParticipant.mutateAsync(p.id)
-      } catch {
-        demoData.participants = demoData.participants.filter(x => x.id !== p.id)
-      }
+      await deleteParticipant.mutateAsync(p.id)
       participantsQuery.refetch()
     } catch (err) {
       alert('Error al eliminar')

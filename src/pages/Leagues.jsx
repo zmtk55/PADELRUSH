@@ -1,52 +1,32 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '@/hooks/useAuth'
 import { useLeagues } from '@/hooks/useLeagues'
+import { useAuth } from '@/hooks/useAuth'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Plus, Edit, Trash2, Trophy } from 'lucide-react'
-import { demoData } from '@/lib/demoData'
 
 export default function Leagues() {
   const navigate = useNavigate()
-  const { user, profile, isOrganizer, loading } = useAuth()
-  const leagues = useLeagues()
-  const { data: items, isLoading, isError, error, refetch } = leagues.leaguesQuery
-  const [deleting, setDeleting] = useState(null)
-
-  // FORZAR datos demo siempre
-  const leaguesList = (items && items.length > 0) ? items : (demoData.leagues || [])
-  
-  console.log('DEBUG Leagues:', { 
-    user: user?.id, 
-    profile, 
-    isOrganizer, 
-    loading,
-    items,
-    itemsLength: items?.length,
-    demoLeagues: demoData.leagues?.length,
-    leaguesList
-  })
+  const { isOrganizer } = useAuth()
+  const { leaguesQuery, deleteLeague } = useLeagues()
+  const leagues = leaguesQuery.data || []
+  const loading = leaguesQuery.isLoading
+  const error = leaguesQuery.error
 
   const del = async (id) => {
     if (!confirm('¿Eliminar esta liga?')) return
-    setDeleting(id)
     try {
-      await leagues.deleteLeague.mutateAsync(id)
-      refetch()
-    } catch {
-      leagues.deleteLeague.fallback(id)
-      refetch()
+      await deleteLeague.mutateAsync(id)
+      leaguesQuery.refetch()
+    } catch (err) {
+      console.error('Error deleting league:', err)
     }
-    setDeleting(null)
   }
 
-  if (isLoading) return (
+  if (loading) return (
     <div>
-      <div className="mb-4 p-3 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 rounded-lg text-xs">
-        DEBUG: user={user?.id?.slice(0,8)||'null'} | role={profile?.role||'sin perfil'} | isOrg={String(isOrganizer)} | loading={String(loading)}
-      </div>
       <PageHeader title="Ligas" description="Cargando..." action={isOrganizer && <Button onClick={() => navigate('/ligas/nueva')}><Plus className="w-4 h-4" /> Nueva Liga</Button>} />
       <div className="text-center py-16">
         <div className="w-10 h-10 border-[3px] border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
@@ -55,24 +35,21 @@ export default function Leagues() {
     </div>
   )
 
-  if (isError) return (
+  if (error) return (
     <div>
       <PageHeader title="Ligas" description="Error" />
       <div className="text-center py-16">
-        <p className="text-destructive mb-4">{error?.message}</p>
-        <Button variant="outline" onClick={() => refetch()}>Reintentar</Button>
+        <p className="text-destructive mb-4">{error.message || 'Error al cargar'}</p>
+        <Button variant="outline" onClick={() => leaguesQuery.refetch()}>Reintentar</Button>
       </div>
     </div>
   )
 
   return (
     <div>
-      <div className="mb-4 p-3 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 rounded-lg text-xs">
-        DEBUG: user={user?.id?.slice(0,8)||'null'} | role={profile?.role||'sin perfil'} | isOrg={String(isOrganizer)}
-      </div>
-      <PageHeader title="Ligas" description={`${leaguesList.length} ligas`} action={isOrganizer && <Button onClick={() => navigate('/ligas/nueva')}><Plus className="w-4 h-4" /> Nueva Liga</Button>} />
+      <PageHeader title="Ligas" description={`${leagues.length} ligas`} action={isOrganizer && <Button onClick={() => navigate('/ligas/nueva')}><Plus className="w-4 h-4" /> Nueva Liga</Button>} />
       <div className="grid gap-4">
-        {leaguesList.map(l => (
+        {leagues.map(l => (
           <div key={l.id} onClick={() => navigate(`/ligas/${l.id}`)}
             className="bg-card border border-border rounded-xl p-5 hover:shadow-md transition-shadow cursor-pointer">
             <div className="flex items-start justify-between">
@@ -95,12 +72,12 @@ export default function Leagues() {
             {isOrganizer && (
               <div className="flex gap-2 mt-4 pt-3 border-t border-border" onClick={e => e.stopPropagation()}>
                 <Button variant="ghost" size="sm" onClick={() => navigate(`/ligas/${l.id}/editar`)}><Edit className="w-3.5 h-3.5" /> Editar</Button>
-                <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" disabled={deleting === l.id} onClick={() => del(l.id)}><Trash2 className="w-3.5 h-3.5" /> Eliminar</Button>
+                <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => del(l.id)}><Trash2 className="w-3.5 h-3.5" /> Eliminar</Button>
               </div>
             )}
           </div>
         ))}
-        {leaguesList.length === 0 && (
+        {leagues.length === 0 && (
           <div className="text-center py-20">
             <Trophy className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
             <p className="text-lg font-medium mb-2">No hay ligas todavía</p>

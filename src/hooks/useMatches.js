@@ -1,21 +1,11 @@
 import { req, useFetch } from '@/lib/data'
 import { supabase } from '@/lib/supabaseClient'
-import { demoData } from '@/lib/demoData'
 
 export function useMatches(leagueId) {
-  const initialMatches = demoData.matches?.filter(m => m.league_id === leagueId) || []
   const q = useFetch(
-    async () => {
-      try {
-        const result = await req('GET', `/matches?select=*&league_id=eq.${leagueId}&order=round.asc.nullslast&order=match_number.asc.nullslast`)
-        return result
-      } catch (e) {
-        console.log('Matches fallback to demo data', e?.message)
-        return demoData.matches?.filter(m => m.league_id === leagueId) || []
-      }
-    },
+    async () => await req('GET', `/matches?select=*&league_id=eq.${leagueId}&order=round.asc.nullslast&order=match_number.asc.nullslast`),
     [leagueId],
-    initialMatches
+    []
   )
   return {
     matchesQuery: q,

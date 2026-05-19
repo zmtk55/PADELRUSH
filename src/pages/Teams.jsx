@@ -10,7 +10,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { ArrowLeft, Trash2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
-import { demoData } from '@/lib/demoData'
 
 export default function Teams() {
   const { leagueId } = useParams()
@@ -19,11 +18,7 @@ export default function Teams() {
   const { leagueQuery } = useLeagues()
   const { data: league } = leagueQuery(leagueId)
   const { teamsQuery, deleteTeam, updateTeam } = useTeams(leagueId)
-  const apiTeams = teamsQuery.data || []
-  // FORZAR datos demo siempre
-  const teams = apiTeams.length > 0 ? apiTeams : (demoData.teams?.filter(t => t.league_id === leagueId) || [])
-  
-  console.log('Teams DEBUG:', { leagueId, apiTeams, demoTeams: demoData.teams?.filter(t => t.league_id === leagueId), teams })
+  const teams = teamsQuery.data || []
   
   const [editingTeam, setEditingTeam] = useState(null)
   const [editName, setEditName] = useState('')

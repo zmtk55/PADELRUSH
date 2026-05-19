@@ -11,7 +11,6 @@ import { useParticipants } from '@/hooks/useParticipants'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabaseClient'
 import { queryClient } from '@/lib/query-client'
-import { demoData, addDemoTeams } from '@/lib/demoData'
 import { PlayerPickerPanel } from './PlayerPickerPanel'
 
 const steps = [
@@ -107,23 +106,14 @@ export default function LeagueSetupWizard() {
         sets_per_match: parseInt(form.sets_per_match),
       }
       let savedLeague
-      try {
-        if (isEditing) savedLeague = await updateLeague.mutateAsync({ id: leagueId, ...leagueData })
-        else savedLeague = await createLeague.mutateAsync(leagueData)
-      } catch {
-        if (isEditing) savedLeague = updateLeague.fallback({ id: leagueId, ...leagueData })
-        else savedLeague = createLeague.fallback(leagueData)
-      }
+      if (isEditing) savedLeague = await updateLeague.mutateAsync({ id: leagueId, ...leagueData })
+      else savedLeague = await createLeague.mutateAsync(leagueData)
 
       if (teams.length > 0 && savedLeague?.id) {
-        try {
-          const { error: teamsErr } = await supabase.from('teams').insert(
-            teams.map(t => ({ league_id: savedLeague.id, category: t.category, team_number: t.team_number, player1_id: t.player1_id, player2_id: t.player2_id, team_name: `Equipo ${t.team_number}` }))
-          )
-          if (teamsErr) throw teamsErr
-        } catch {
-          addDemoTeams(savedLeague.id, teams)
-        }
+        const { error: teamsErr } = await supabase.from('teams').insert(
+          teams.map(t => ({ league_id: savedLeague.id, category: t.category, team_number: t.team_number, player1_id: t.player1_id, player2_id: t.player2_id, team_name: `Equipo ${t.team_number}` }))
+        )
+        if (teamsErr) console.error('Teams error:', teamsErr)
         queryClient.invalidateQueries({ queryKey: ['teams', savedLeague.id] })
       }
       navigate(`/ligas/${savedLeague.id}`)
