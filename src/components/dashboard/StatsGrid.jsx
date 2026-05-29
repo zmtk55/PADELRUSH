@@ -1,26 +1,47 @@
-import { Trophy, Users, Calendar, TrendingUp, Target } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Trophy, Users, Calendar, Flag } from 'lucide-react'
 
 const statConfig = [
-  { label: 'Ligas activas', icon: Trophy, color: 'text-primary', bg: 'bg-primary/10', key: 'activeLeagues' },
-  { label: 'Participantes', icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10', key: 'totalParticipants' },
-  { label: 'Partidos jugados', icon: Calendar, color: 'text-emerald-500', bg: 'bg-emerald-500/10', key: 'totalMatches' },
-  { label: 'Equipos', icon: Target, color: 'text-amber-500', bg: 'bg-amber-500/10', key: 'totalTeams' },
+  { label: 'Ligas activas', icon: Trophy, key: 'activeLeagues' },
+  { label: 'Participantes', icon: Users, key: 'totalParticipants' },
+  { label: 'Partidos jugados', icon: Calendar, key: 'totalMatches' },
+  { label: 'Equipos', icon: Flag, key: 'totalTeams' },
 ]
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+}
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+}
 
 export function StatsGrid({ stats }) {
   if (!stats) return null
-
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {statConfig.map(({ label, icon: Icon, color, bg, key }) => (
-        <div key={key} className="bg-card border border-border rounded-xl p-5 hover:shadow-md transition-shadow">
-          <div className={`p-2 rounded-lg w-fit mb-3 ${bg} ${color}`}>
-            <Icon className="w-5 h-5" />
+    <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      {statConfig.map(({ label, icon: Icon, key }) => (
+        <motion.div key={key} variants={item} className="card-base p-5">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-body font-medium text-muted-foreground uppercase tracking-wider">{label}</span>
+            <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+              <Icon className="w-3.5 h-3.5 text-muted-foreground" />
+            </div>
           </div>
-          <p className="text-2xl font-heading font-bold">{stats[key] ?? 0}</p>
-          <p className="text-sm text-muted-foreground">{label}</p>
-        </div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="font-heading text-3xl font-bold text-foreground">{stats[key] ?? 0}</span>
+            <span className="text-xs text-muted-foreground font-body">total</span>
+          </div>
+          <div className="mt-3 h-1 rounded-full bg-muted/50 overflow-hidden">
+            <motion.div initial={{ width: 0 }} animate={{ width: Math.min((stats[key] || 0) / 20 * 100, 100) + '%' }} transition={{ duration: 1, delay: 0.3 }} className="h-full rounded-full bg-primary" />
+          </div>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   )
 }

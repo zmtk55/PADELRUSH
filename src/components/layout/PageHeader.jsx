@@ -1,15 +1,29 @@
-export function PageHeader({ title, description, action }) {
+import { cn } from "../../lib/utils"
+
+function PageHeader({ title, description, action, className }) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 animate-fade-in">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground">
+    <div className={cn(
+      "flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8",
+      className
+    )}>
+      <div className="space-y-1">
+        <h1 className="font-heading text-2xl md:text-3xl tracking-wider text-foreground">
           {title}
         </h1>
         {description && (
-          <p className="text-muted-foreground mt-1 text-sm">{description}</p>
+          <p className="text-sm font-body text-muted-foreground">
+            {description}
+          </p>
         )}
       </div>
-      {action && <div>{action}</div>}
+      {action && (
+        <div className="shrink-0">
+          {action}
+        </div>
+      )}
     </div>
   )
 }
+
+export default PageHeader
+export { PageHeader }

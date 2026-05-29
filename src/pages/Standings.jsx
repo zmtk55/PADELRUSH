@@ -1,19 +1,22 @@
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { usePlayerStats } from '@/hooks/usePlayerStats'
 import { useLeagues } from '@/hooks/useLeagues'
-import { useAuth } from '@/hooks/useAuth'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { ArrowLeft, Trophy, Medal, TrendingUp, BarChart3 } from 'lucide-react'
+import { Medal, TrendingUp, BarChart3, ChevronRight, Swords } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { cn } from '@/lib/utils'
 
 const levelOrder = { '3RA': 0, '4TA': 1, '5TA': 2, '6TA': 3 }
+
+const getStreakText = (wins, losses) => {
+  if (wins > losses) return `${wins}G`
+  if (losses > wins) return `${losses}P`
+  return null
+}
 
 export default function Standings() {
   const { leagueId } = useParams()
   const navigate = useNavigate()
-  const { isOrganizer } = useAuth()
   const { leagueQuery } = useLeagues()
   const { data: league } = leagueQuery(leagueId)
   const { statsQuery } = usePlayerStats(leagueId)
@@ -32,119 +35,145 @@ export default function Standings() {
     return la - lb
   })
 
-  const getMedal = (pos) => {
-    if (pos === 1) return <Medal className="w-4 h-4 text-amber-500" />
-    if (pos === 2) return <Medal className="w-4 h-4 text-gray-400" />
-    if (pos === 3) return <Medal className="w-4 h-4 text-amber-700" />
-    return null
-  }
-
   return (
-    <div>
-      <Button variant="ghost" onClick={() => navigate(`/ligas/${leagueId}`)} className="mb-4">
-        <ArrowLeft className="w-4 h-4" />
-        Volver a liga
-      </Button>
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+        <Link to="/ligas" className="hover:text-foreground transition-colors">Ligas</Link>
+        <ChevronRight className="w-3 h-3" />
+        <Link to={`/ligas/${leagueId}`} className="hover:text-foreground transition-colors truncate max-w-[150px]">{league?.name || '...'}</Link>
+        <ChevronRight className="w-3 h-3" />
+        <span className="text-foreground font-bold">Clasificación</span>
+      </div>
 
-      <PageHeader
-        title="Clasificación"
-        description={league?.name}
-      />
+      <PageHeader title="Clasificación" description={league?.name} />
 
       {stats.length === 0 ? (
-        <div className="text-center py-16 bg-card border border-border rounded-xl">
-          <Trophy className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <p className="text-lg font-medium mb-2">Sin estadísticas aún</p>
-          <p className="text-sm text-muted-foreground">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20 bg-card border border-border">
+          <div className="w-16 h-16 border border-border flex items-center justify-center mx-auto mb-4">
+            <Swords className="w-8 h-8 text-muted-foreground" />
+          </div>
+          <p className="text-lg font-heading font-bold mb-2">Sin estadísticas aún</p>
+          <p className="text-sm text-muted-foreground max-w-xs mx-auto">
             Las clasificaciones se generan al registrar resultados de partidos
           </p>
-        </div>
+        </motion.div>
       ) : (
-        sortedCats.map((category) => {
-          const catStats = grouped[category]
-            .sort((a, b) => {
-              if (b.win_percentage !== a.win_percentage) return b.win_percentage - a.win_percentage
-              return b.matches_played - a.matches_played
-            })
-            .map((s, i) => ({ ...s, position: i + 1 }))
+        <div className="space-y-8">
+          {sortedCats.map((category) => {
+            const catStats = grouped[category]
+              .sort((a, b) => {
+                if (b.win_percentage !== a.win_percentage) return b.win_percentage - a.win_percentage
+                return b.matches_played - a.matches_played
+              })
+              .map((s, i) => ({ ...s, position: i + 1 }))
 
-          return (
-            <motion.div
-              key={category}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-card border border-border rounded-xl overflow-hidden mb-6"
-            >
-              <div className="px-5 py-4 border-b border-border bg-muted/30">
-                <h3 className="font-heading font-semibold text-lg flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5 text-primary" />
-                  {category}
-                </h3>
-              </div>
+            return (
+              <motion.div
+                key={category}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-card border border-border overflow-hidden"
+              >
+                <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+                  <h3 className="font-heading font-bold text-lg tracking-tight flex items-center gap-2">
+                    <BarChart3 className="w-4 h-4 text-muted-foreground" />
+                    {category}
+                  </h3>
+                  <span className="text-sm text-muted-foreground">{catStats.length} jugadores</span>
+                </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border text-muted-foreground text-xs uppercase tracking-wider">
-                      <th className="text-left px-4 py-3 w-12">#</th>
-                      <th className="text-left px-4 py-3">Jugador</th>
-                      <th className="text-center px-3 py-3">PJ</th>
-                      <th className="text-center px-3 py-3">G</th>
-                      <th className="text-center px-3 py-3">P</th>
-                      <th className="text-center px-3 py-3 hidden sm:table-cell">SF</th>
-                      <th className="text-center px-3 py-3 hidden sm:table-cell">SC</th>
-                      <th className="text-center px-3 py-3 hidden md:table-cell">JF</th>
-                      <th className="text-center px-3 py-3 hidden md:table-cell">JC</th>
-                      <th className="text-center px-3 py-3">%</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {catStats.map((s) => (
-                      <tr
-                        key={s.id}
-                        className="border-b border-border/50 hover:bg-muted/30 transition-colors"
-                      >
-                        <td className="px-4 py-3">
-                          <div className="flex items-center justify-center">
-                            {getMedal(s.position) || (
-                              <span className="text-muted-foreground font-medium">{s.position}</span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
-                              {s.player_name.charAt(0)}
-                            </div>
-                            <span className="font-medium">{s.player_name}</span>
-                            {s.partner_name && (
-                              <span className="text-xs text-muted-foreground hidden lg:inline">
-                                c/{s.partner_name}
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="text-center px-3 py-3 font-medium">{s.matches_played}</td>
-                        <td className="text-center px-3 py-3 text-emerald-600 font-medium">{s.matches_won}</td>
-                        <td className="text-center px-3 py-3 text-red-500 font-medium">{s.matches_lost}</td>
-                        <td className="text-center px-3 py-3 hidden sm:table-cell">{s.sets_won}</td>
-                        <td className="text-center px-3 py-3 hidden sm:table-cell">{s.sets_lost}</td>
-                        <td className="text-center px-3 py-3 hidden md:table-cell">{s.games_won}</td>
-                        <td className="text-center px-3 py-3 hidden md:table-cell">{s.games_lost}</td>
-                        <td className="text-center px-3 py-3">
-                          <Badge variant={s.win_percentage >= 50 ? 'default' : 'secondary'} className="text-xs">
-                            {s.win_percentage}%
-                          </Badge>
-                        </td>
+                <div className="overflow-x-auto overscroll-x-contain">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border text-muted-foreground text-xs font-medium">
+                        <th className="text-left px-4 py-3 w-10">#</th>
+                        <th className="text-left px-4 py-3">Jugador</th>
+                        <th className="text-center px-2 py-3">PJ</th>
+                        <th className="text-center px-2 py-3">G</th>
+                        <th className="text-center px-2 py-3">P</th>
+                        <th className="text-center px-2 py-3 hidden sm:table-cell">SF</th>
+                        <th className="text-center px-2 py-3 hidden sm:table-cell">SC</th>
+                        <th className="text-center px-3 py-3">%</th>
+                        <th className="text-center px-2 py-3 hidden md:table-cell">Racha</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </motion.div>
-          )
-        })
+                    </thead>
+                    <tbody>
+                      {catStats.map((s, i) => {
+                        const streakText = getStreakText(s.current_win_streak || 0, s.current_lose_streak || 0)
+                        const isTop3 = s.position <= 3
+                        const medalColors = { 1: '#b8860b', 2: '#a0a0a0', 3: '#cd7f32' }
+                        return (
+                          <motion.tr
+                            key={s.id}
+                            initial={{ opacity: 0, y: 5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.02 }}
+                            className={cn(
+                              'border-b border-border hover:bg-muted transition-colors',
+                              isTop3 && 'bg-muted'
+                            )}
+                          >
+                            <td className="px-4 py-3">
+                              <div className="flex items-center justify-center">
+                                {isTop3 ? (
+                                  <Medal className="w-4 h-4" style={{ color: medalColors[s.position] }} />
+                                ) : (
+                                  <span className="text-muted-foreground font-mono">{s.position}</span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-8 h-8 bg-muted text-muted-foreground flex items-center justify-center text-xs font-bold shrink-0">
+                                  {s.player_name.charAt(0)}
+                                </div>
+                                <div>
+                                  <span className="font-semibold text-sm">{s.player_name}</span>
+                                  {s.partner_name && (
+                                    <span className="text-xs text-muted-foreground block leading-tight">
+                                      c/{s.partner_name}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="text-center px-2 py-3 font-mono">{s.matches_played}</td>
+                            <td className="text-center px-2 py-3 font-mono text-foreground">{s.matches_won}</td>
+                            <td className="text-center px-2 py-3 font-mono text-muted-foreground">{s.matches_lost}</td>
+                            <td className="text-center px-2 py-3 hidden sm:table-cell text-muted-foreground font-mono">{s.sets_won}</td>
+                            <td className="text-center px-2 py-3 hidden sm:table-cell text-muted-foreground font-mono">{s.sets_lost}</td>
+                            <td className="text-center px-3 py-3">
+                              <span className={cn(
+                                'text-xs font-medium px-2 py-0.5',
+                                s.win_percentage >= 75 ? 'text-foreground' : s.win_percentage >= 50 ? 'text-muted-foreground' : 'text-muted-foreground'
+                              )}>
+                                {s.win_percentage}%
+                              </span>
+                            </td>
+                            <td className="text-center px-2 py-3 hidden md:table-cell">
+                              {streakText ? (
+                                <span className={cn(
+                                  'text-xs font-medium',
+                                  streakText.includes('G') ? 'text-foreground' : 'text-muted-foreground'
+                                )}>
+                                  {streakText}
+                                </span>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">—</span>
+                              )}
+                            </td>
+                          </motion.tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </motion.div>
+            )
+          })}
+        </div>
       )}
-    </div>
+    </motion.div>
   )
 }

@@ -1,17 +1,34 @@
+﻿import { motion } from "framer-motion"
+import { cn } from "../../lib/utils"
+
 export default function CategoryTabs({ categories, active, onChange, counts = {}, variant = 'underline' }) {
   if (variant === 'pill') {
     return (
       <div className="flex gap-2 flex-wrap">
         {categories.map((cat) => (
-          <button key={cat} onClick={() => onChange(cat)}
-            className={`px-4 py-2 rounded-xl text-sm font-body font-semibold transition-all ${
+          <button
+            key={cat}
+            onClick={() => onChange(cat)}
+            className={cn(
+              "relative px-4 py-2 rounded-xl text-sm font-body font-semibold transition-all duration-200",
               active === cat
-                ? 'bg-accent text-accent-foreground shadow-lg shadow-accent/20'
-                : 'bg-secondary text-muted-foreground hover:text-foreground border border-border'
-            }`}>
-            {cat}
+                ? "text-primary-foreground shadow-glow-sm"
+                : "bg-secondary/50 text-muted-foreground hover:text-foreground border border-border/50 hover:border-primary/20"
+            )}
+          >
+            {active === cat && (
+              <motion.div
+                layoutId="pill-bg"
+                className="absolute inset-0 rounded-xl bg-gradient-primary"
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              />
+            )}
+            <span className="relative z-10">{cat}</span>
             {counts[cat] !== undefined && (
-              <span className={`ml-2 px-1.5 py-0.5 rounded text-[10px] ${active === cat ? 'bg-accent-foreground/20' : 'bg-muted'}`}>
+              <span className={cn(
+                "ml-2 px-1.5 py-0.5 rounded text-[10px] font-mono relative z-10",
+                active === cat ? "bg-white/20" : "bg-muted"
+              )}>
                 {counts[cat]}
               </span>
             )}
@@ -20,15 +37,36 @@ export default function CategoryTabs({ categories, active, onChange, counts = {}
       </div>
     )
   }
+
   return (
-    <div className="flex gap-4 border-b border-border">
+    <div className="flex gap-1 p-1 rounded-xl bg-muted/30 border border-border/30">
       {categories.map((cat) => (
-        <button key={cat} onClick={() => onChange(cat)}
-          className={`pb-2 text-sm font-body font-medium transition-all border-b-2 ${
-            active === cat ? 'border-accent text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}>
-          {cat}
-          {counts[cat] !== undefined && <span className="ml-2 text-xs text-muted-foreground">({counts[cat]})</span>}
+        <button
+          key={cat}
+          onClick={() => onChange(cat)}
+          className={cn(
+            "relative px-4 py-2 rounded-lg text-sm font-body font-medium transition-all duration-200",
+            active === cat
+              ? "text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          {active === cat && (
+            <motion.div
+              layoutId="tab-bg"
+              className="absolute inset-0 rounded-lg bg-card border border-border/50"
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            />
+          )}
+          <span className="relative z-10">{cat}</span>
+          {counts[cat] !== undefined && (
+            <span className={cn(
+              "ml-2 text-xs font-mono relative z-10",
+              active === cat ? "text-primary" : "text-muted-foreground"
+            )}>
+              {counts[cat]}
+            </span>
+          )}
         </button>
       ))}
     </div>

@@ -1,15 +1,15 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Calendar, Plus, X, Save } from 'lucide-react'
+import { Calendar, Plus, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select } from '@/components/ui/select'
-import { useMatches } from '@/hooks/useMatches'
 
-export function ScheduleBuilder({ leagueId, teams, onComplete, onCancel }) {
-  const { createMatchesBatch } = useMatches(leagueId)
-  const [schedules, setSchedules] = useState([])
+
+export function ScheduleBuilder({ leagueId, teams, schedules: externalSchedules, onSchedulesChange }) {
+
+  const [schedules, setSchedules] = useState(externalSchedules || [])
 
   const categories = [...new Set(teams.map((t) => t.category))]
 
@@ -49,7 +49,9 @@ export function ScheduleBuilder({ leagueId, teams, onComplete, onCancel }) {
       teamsList.splice(1, 0, teamsList.pop())
     }
 
-    setSchedules((prev) => [...prev.filter((s) => s.category !== category), ...generated])
+    const updated = [...schedules.filter((s) => s.category !== category), ...generated]
+    setSchedules(updated)
+    onSchedulesChange?.(updated)
   }
 
   const updateSchedule = (id, field, value) => {
@@ -60,32 +62,20 @@ export function ScheduleBuilder({ leagueId, teams, onComplete, onCancel }) {
     setSchedules((prev) => prev.filter((s) => s.id !== id))
   }
 
-  const handleSave = async () => {
-    const matches = schedules.map(({ id, ...rest }) => ({
-      ...rest,
-      league_id: leagueId,
-    }))
-    await createMatchesBatch.mutateAsync(matches)
-    onComplete?.()
-  }
+
 
   const allGenerated = categories.every((cat) => schedules.some((s) => s.category === cat))
 
   return (
-    <div className="bg-card border border-border rounded-xl p-5 space-y-5">
+    <div className="bg-card border border-border rounded-lg p-3 sm:p-4 sm:p-5 space-y-3 sm:space-y-4 sm:space-y-5">
       <div className="flex items-center justify-between">
-        <h3 className="font-heading font-semibold">Generar calendario</h3>
+        <h3 className=" font-mono font-semibold">Generar calendario</h3>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={onCancel}>
+          <Button variant="outline" size="sm" onClick={() => { setSchedules([]); onSchedulesChange?.([]) }}>
             <X className="w-4 h-4" />
-            Cancelar
+            Limpiar
           </Button>
-          {schedules.length > 0 && (
-            <Button size="sm" onClick={handleSave}>
-              <Save className="w-4 h-4" />
-              Guardar calendario
-            </Button>
-          )}
+
         </div>
       </div>
 
@@ -125,30 +115,30 @@ export function ScheduleBuilder({ leagueId, teams, onComplete, onCancel }) {
                             key={match.id}
                             initial={{ opacity: 0, y: 5 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="flex items-center gap-2 bg-background rounded-lg px-3 py-2 border border-border text-sm"
+                            className="flex flex-col sm:flex-row sm:items-center gap-2 bg-muted border border-border rounded-lg px-3 py-2.5 text-sm"
                           >
                             <span className="font-medium w-32 truncate">{match.team1_name}</span>
                             <span className="text-muted-foreground">vs</span>
                             <span className="font-medium w-32 truncate">{match.team2_name}</span>
 
-                            <div className="flex items-center gap-2 ml-auto">
+                            <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
                               <input
                                 type="date"
                                 value={match.scheduled_date || ''}
                                 onChange={(e) => updateSchedule(match.id, 'scheduled_date', e.target.value)}
-                                className="border border-input rounded px-2 py-1 text-xs bg-transparent w-32"
+                                className="border border-input rounded px-2 py-1 text-xs bg-transparent w-full sm:w-32"
                               />
                               <input
                                 type="time"
                                 value={match.scheduled_time || ''}
                                 onChange={(e) => updateSchedule(match.id, 'scheduled_time', e.target.value)}
-                                className="border border-input rounded px-2 py-1 text-xs bg-transparent w-20"
+                                className="border border-input rounded px-2 py-1 text-xs bg-transparent w-full sm:w-20"
                               />
                               <input
                                 placeholder="Cancha"
                                 value={match.court || ''}
                                 onChange={(e) => updateSchedule(match.id, 'court', e.target.value)}
-                                className="border border-input rounded px-2 py-1 text-xs bg-transparent w-20"
+                                className="border border-input rounded px-2 py-1 text-xs bg-transparent w-full sm:w-20"
                               />
                               <Button variant="ghost" size="icon" className="w-6 h-6" onClick={() => removeSchedule(match.id)}>
                                 <X className="w-3 h-3" />

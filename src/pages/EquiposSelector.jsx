@@ -1,17 +1,17 @@
 import { useNavigate } from 'react-router-dom'
-import { Shield, ChevronRight } from 'lucide-react'
+import { Users, ChevronRight } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { useLeagues } from '@/hooks/useLeagues'
 import { motion } from 'framer-motion'
 
-export default function AdminSelector() {
+export default function EquiposSelector() {
   const navigate = useNavigate()
   const { leaguesQuery } = useLeagues()
   const leagues = leaguesQuery.data || []
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-      <PageHeader title="Panel de Control" description="Selecciona una liga para administrar" />
+      <PageHeader title="Equipos" description="Selecciona una liga para ver sus equipos" />
 
       {leaguesQuery.isLoading && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -38,7 +38,7 @@ export default function AdminSelector() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
               whileHover={{ y: -2 }}
-              onClick={() => navigate(`/ligas/${l.id}/admin`)}
+              onClick={() => navigate(`/ligas/${l.id}/equipos`)}
               className="group bg-card border border-border rounded-xl p-5 hover:shadow-card-hover transition-all cursor-pointer"
             >
               <div className="flex items-center gap-3">
@@ -58,10 +58,10 @@ export default function AdminSelector() {
           {leagues.length === 0 && (
             <div className="text-center py-20 col-span-full">
               <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-8 h-8 text-muted-foreground" />
+                <Users className="w-8 h-8 text-muted-foreground" />
               </div>
               <p className="text-lg font-medium mb-2">No hay ligas disponibles</p>
-              <p className="text-sm text-muted-foreground">Crea una liga primero para poder administrarla</p>
+              <p className="text-sm text-muted-foreground">Crea una liga primero para ver sus equipos</p>
             </div>
           )}
         </div>

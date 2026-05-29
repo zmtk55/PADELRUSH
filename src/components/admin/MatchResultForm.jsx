@@ -24,7 +24,7 @@ export default function MatchResultForm({ leagueId, category }) {
 
   return (
     <div className="space-y-4">
-      <h3 className="font-heading font-semibold">Registrar resultado</h3>
+      <h3 className=" font-mono font-semibold">Registrar resultado</h3>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <Label className="text-xs text-muted-foreground">Equipo 1</Label>

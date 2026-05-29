@@ -1,83 +1,307 @@
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 40 30% 96%;
-    --foreground: 20 14% 12%;
-    --card: 40 25% 94%;
-    --card-foreground: 20 14% 12%;
-    --popover: 40 25% 94%;
-    --popover-foreground: 20 14% 12%;
-    --primary: 14 55% 52%;
-    --primary-foreground: 40 30% 96%;
-    --secondary: 30 20% 88%;
-    --secondary-foreground: 20 14% 12%;
-    --muted: 30 15% 90%;
-    --muted-foreground: 20 8% 45%;
-    --accent: 30 20% 88%;
-    --accent-foreground: 20 14% 12%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 40 30% 96%;
-    --border: 30 15% 84%;
-    --input: 30 15% 84%;
-    --ring: 14 55% 52%;
+    --background: 220 25% 8%;
+    --foreground: 0 0% 96%;
+    --card: 220 22% 12%;
+    --card-hover: 220 22% 15%;
+    --card-foreground: 0 0% 96%;
+    --popover: 220 22% 12%;
+    --popover-foreground: 0 0% 96%;
+    --primary: 14 100% 58%;
+    --primary-light: 14 100% 68%;
+    --primary-dark: 14 90% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 18% 16%;
+    --secondary-foreground: 0 0% 90%;
+    --muted: 220 18% 16%;
+    --muted-foreground: 220 12% 55%;
+    --accent: 180 80% 42%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 70% 50%;
+    --success-foreground: 0 0% 100%;
+    --warning: 35 92% 55%;
+    --warning-foreground: 0 0% 10%;
+    --border: 220 16% 20%;
+    --input: 220 16% 20%;
+    --ring: 14 100% 58%;
     --radius: 0.5rem;
-    --sidebar: 40 25% 94%;
-    --sidebar-foreground: 20 14% 12%;
-    --sidebar-muted: 30 15% 88%;
-    --sidebar-accent: 14 55% 52%;
+    --sidebar: 220 22% 9%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-accent: 14 100% 58%;
+    --sidebar-muted: 220 14% 35%;
+    --sidebar-border: 220 18% 16%;
+
+    --shadow-border: 0px 0px 0px 1px rgba(255, 255, 255, 0.06);
+    --shadow-card: 0px 0px 0px 1px rgba(255, 255, 255, 0.06), 0px 2px 2px rgba(0, 0, 0, 0.2);
+    --shadow-elevated: 0px 0px 0px 1px rgba(255, 255, 255, 0.08), 0px 2px 2px rgba(0, 0, 0, 0.2), 0px 8px 8px -8px rgba(0, 0, 0, 0.3);
+    --shadow-focus: 0px 0px 0px 2px hsla(14, 100%, 58%, 0.6);
   }
 
-  .dark {
-    --background: 20 14% 8%;
-    --foreground: 40 30% 92%;
-    --card: 20 14% 12%;
-    --card-foreground: 40 30% 92%;
-    --popover: 20 14% 12%;
-    --popover-foreground: 40 30% 92%;
-    --primary: 14 55% 52%;
-    --primary-foreground: 40 30% 96%;
-    --secondary: 20 10% 20%;
-    --secondary-foreground: 40 30% 92%;
-    --muted: 20 10% 18%;
-    --muted-foreground: 20 8% 60%;
-    --accent: 20 10% 20%;
-    --accent-foreground: 40 30% 92%;
-    --destructive: 0 62% 40%;
-    --destructive-foreground: 40 30% 96%;
-    --border: 20 10% 24%;
-    --input: 20 10% 24%;
-    --ring: 14 55% 52%;
-    --sidebar: 20 14% 10%;
-    --sidebar-foreground: 40 30% 92%;
-    --sidebar-muted: 20 10% 18%;
-    --sidebar-accent: 14 55% 52%;
-  }
-}
+  .light {
+    --background: 0 0% 98%;
+    --foreground: 220 20% 12%;
+    --card: 0 0% 100%;
+    --card-hover: 0 0% 97%;
+    --card-foreground: 220 20% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 12%;
+    --primary: 14 100% 52%;
+    --primary-light: 14 100% 62%;
+    --primary-dark: 14 90% 40%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 92%;
+    --secondary-foreground: 220 20% 20%;
+    --muted: 220 14% 94%;
+    --muted-foreground: 220 12% 45%;
+    --accent: 180 80% 38%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 52%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 65% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 35 90% 50%;
+    --warning-foreground: 0 0% 10%;
+    --border: 220 14% 85%;
+    --input: 220 14% 88%;
+    --ring: 14 100% 52%;
+    --radius: 0.5rem;
+    --sidebar: 220 20% 97%;
+    --sidebar-foreground: 220 20% 15%;
+    --sidebar-accent: 14 100% 52%;
+    --sidebar-muted: 220 12% 50%;
+    --sidebar-border: 220 14% 85%;
 
-@layer base {
-  * {
-    @apply border-border;
+    --shadow-border: 0px 0px 0px 1px rgba(0, 0, 0, 0.08);
+    --shadow-card: 0px 0px 0px 1px rgba(0, 0, 0, 0.08), 0px 2px 2px rgba(0, 0, 0, 0.04);
+    --shadow-elevated: 0px 0px 0px 1px rgba(0, 0, 0, 0.08), 0px 2px 2px rgba(0, 0, 0, 0.04), 0px 8px 8px -8px rgba(0, 0, 0, 0.08);
+    --shadow-focus: 0px 0px 0px 2px hsla(14, 100%, 52%, 0.5);
   }
+
+  * { @apply border-border; }
+
+  html { scroll-behavior: smooth; }
 
   body {
-    @apply bg-background text-foreground font-body antialiased;
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: Geist, system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* Better mobile readability */
+  @media (max-width: 374px) {
+    body { font-size: 13px; }
+  }
+  @media (min-width: 640px) {
+    body { font-size: 15px; }
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-heading;
+    font-family: Geist, system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.3);
+    color: hsl(var(--primary-foreground));
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+  }
+
+  /* Mobile: thinner scrollbar to save space */
+  @media (max-width: 768px) {
+    ::-webkit-scrollbar {
+      width: 3px;
+      height: 3px;
+    }
+  }
+
+  :focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
+}
+
+@layer components {
+  .card-base {
+    background: hsl(var(--card));
+    box-shadow: var(--shadow-card);
+    border-radius: 0.5rem;
+    transition: box-shadow 0.2s ease, background 0.2s ease;
+  }
+
+  .card-base:hover {
+    background: hsl(var(--card-hover));
+    box-shadow: var(--shadow-elevated);
+  }
+
+  .sidebar-base {
+    background: hsl(var(--sidebar));
+    border-right: 1px solid hsl(var(--sidebar-border));
+  }
+
+  .skeleton-shimmer {
+    background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--muted-foreground) / 0.15) 50%, hsl(var(--muted)) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s ease-in-out infinite;
+  }
+
+  .score-display {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .nav-link-active {
+    position: relative;
+    color: hsl(var(--primary));
+  }
+
+  .nav-link-active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 24px;
+    border-radius: 0 3px 3px 0;
+    background: hsl(var(--primary));
+  }
+
+  .hover-lift {
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-1px);
+  }
+
+  .badge-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 10px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    background: hsl(var(--primary) / 0.15);
+    color: hsl(var(--primary));
   }
 }
 
 @layer utilities {
-  .animate-fade-in {
-    animation: fade-in 0.3s ease-out;
+  .text-balance { text-wrap: balance; }
+  .text-pretty { text-wrap: pretty; }
+
+  /* ===== RESPONSIVE & MOBILE UTILITIES ===== */
+
+  /* Safe area padding for notched phones */
+  .safe-top { padding-top: env(safe-area-inset-top, 0px); }
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .safe-left { padding-left: env(safe-area-inset-left, 0px); }
+  .safe-right { padding-right: env(safe-area-inset-right, 0px); }
+  .safe-y { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .safe-x { padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
+
+  /* Touch-friendly minimum sizes (44px = iOS minimum tap target) */
+  .touch-target { min-height: 44px; min-width: 44px; }
+  .touch-y { min-height: 44px; }
+  .touch-x { min-width: 44px; }
+
+  /* Mobile tap highlight reset */
+  .tap-highlight-none { -webkit-tap-highlight-color: transparent; }
+
+  /* Prevent mobile text size adjustment on orientation change */
+  .text-size-adjust-none { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+  /* Improved overscroll behavior */
+  .overscroll-none { overscroll-behavior: none; }
+  .overscroll-contain { overscroll-behavior: contain; }
+  .overscroll-x-contain { overscroll-behavior-x: contain; }
+
+  /* Mobile scroll momentum */
+  .scroll-momentum { -webkit-overflow-scrolling: touch; }
+
+  /* Hide scrollbar on mobile but keep functionality */
+  .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+
+  /* Prevent layout shift from scrollbar */
+  .scrollbar-gutter-stable { scrollbar-gutter: stable; }
+
+  /* Responsive container padding */
+  .container-pad { padding-left: max(1rem, env(safe-area-inset-left, 0px)); padding-right: max(1rem, env(safe-area-inset-right, 0px)); }
+}
+
+/* ===== RESPONSIVE BREAKPOINT OVERRIDES ===== */
+
+/* Very small screens (< 375px like iPhone SE / older Androids) */
+@media (max-width: 375px) {
+  html { font-size: 13px; }
+  .container-pad { padding-left: 0.75rem; padding-right: 0.75rem; }
+}
+
+/* Small screens (375px - 639px like most phones) */
+@media (min-width: 375px) and (max-width: 639px) {
+  .container-pad { padding-left: 1rem; padding-right: 1rem; }
+}
+
+/* Landscape phones */
+@media (max-height: 430px) and (orientation: landscape) {
+  .hide-landscape { display: none !important; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  :root {
+    --shadow-border: 0px 0px 0px 1px rgba(255, 255, 255, 0.15);
+    --shadow-card: 0px 0px 0px 1px rgba(255, 255, 255, 0.15);
+  }
+  .light {
+    --shadow-border: 0px 0px 0px 1px rgba(0, 0, 0, 0.2);
+    --shadow-card: 0px 0px 0px 1px rgba(0, 0, 0, 0.2);
+  }
 }

@@ -1,58 +1,53 @@
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, Trophy } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Trophy, Users, Calendar, ChevronRight } from 'lucide-react'
 
-export function LeagueOverview({ leagues }) {
+function LeagueCard({ league, index }) {
   const navigate = useNavigate()
-
-  if (!leagues?.length) {
-    return (
-      <div className="bg-card border border-border rounded-xl p-6">
-        <h2 className="font-heading font-semibold text-lg mb-4">Ligas</h2>
-        <div className="text-center py-8 text-muted-foreground">
-          <Trophy className="w-10 h-10 mx-auto mb-3 text-muted-foreground/50" />
-          <p className="text-sm">No hay ligas creadas</p>
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.08, duration: 0.3 }}
+      onClick={() => navigate(`/ligas/${league.id}`)}
+      className="group flex items-center gap-4 py-3.5 px-6 cursor-pointer transition-all duration-200 hover:bg-muted/30 hover:pl-7 border-b border-border/50 last:border-b-0"
+    >
+      <div className="w-10 h-10 rounded-lg bg-muted border border-border/50 flex items-center justify-center shrink-0">
+        <Trophy className="w-4 h-4 text-muted-foreground" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-body font-semibold text-foreground truncate">{league.name}</p>
+        <div className="flex items-center gap-3 mt-0.5">
+          <span className="flex items-center gap-1 text-xs text-muted-foreground font-body"><Users className="w-3 h-3" />{league.participant_count || 0}</span>
+          <span className="flex items-center gap-1 text-xs text-muted-foreground font-body"><Calendar className="w-3 h-3" />{new Date(league.created_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}</span>
         </div>
       </div>
-    )
-  }
-
-  return (
-    <div className="bg-card border border-border rounded-xl p-6">
-      <h2 className="font-heading font-semibold text-lg mb-4">Tus ligas</h2>
-      <div className="space-y-2">
-        {leagues.slice(0, 8).map((league) => (
-          <div
-            key={league.id}
-            onClick={() => navigate(`/ligas/${league.id}`)}
-            className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <div
-                className="w-10 h-10 rounded-lg flex items-center justify-center text-white text-sm font-bold"
-                style={{ backgroundColor: league.color || '#c96442' }}
-              >
-                {league.name.charAt(0)}
-              </div>
-              <div>
-                <p className="font-medium text-sm">{league.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {league.gender} · {league.season || '—'}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                league.status === 'activa' ? 'bg-emerald-100 text-emerald-700' :
-                league.status === 'finalizada' ? 'bg-gray-100 text-gray-600' :
-                'bg-amber-100 text-amber-700'
-              }`}>
-                {league.status}
-              </span>
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            </div>
-          </div>
-        ))}
+      <div className="text-right">
+        <span className="text-[10px] px-2.5 py-1 rounded-full bg-primary/10 text-primary font-semibold font-body">{league.category || 'General'}</span>
       </div>
-    </div>
+      <ChevronRight className="w-4 h-4 text-muted-foreground/0 group-hover:text-muted-foreground transition-all duration-200" />
+    </motion.div>
+  )
+}
+
+export function LeagueOverview({ leagues }) {
+  if (!leagues?.length) return null
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3 }}
+      className="card-base p-0"
+    >
+      <div className="flex items-center justify-between px-6 pt-5 pb-3">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center"><Trophy className="w-4 h-4 text-muted-foreground" /></div>
+          <div><h3 className="font-heading text-base font-semibold text-foreground tracking-wider">Tus Ligas</h3><p className="text-xs font-body text-muted-foreground">{leagues.length} {leagues.length === 1 ? 'liga' : 'ligas'}</p></div>
+        </div>
+      </div>
+      <div className="divide-y divide-border/50">
+        {leagues.slice(0, 5).map((league, i) => (<LeagueCard key={league.id} league={league} index={i} />))}
+      </div>
+    </motion.div>
   )
 }

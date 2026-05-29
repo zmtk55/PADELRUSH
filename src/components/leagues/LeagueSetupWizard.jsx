@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabaseClient'
 import { queryClient } from '@/lib/query-client'
 import { PlayerPickerPanel } from './PlayerPickerPanel'
+import { ScheduleBuilder } from './ScheduleBuilder'
 
 const steps = [
   { id: 'basicos', label: 'Datos básicos', icon: Trophy },
@@ -44,6 +45,7 @@ const setsOptions = [
 
 const formatOptions = [
   { value: 'todos-contra-todos', label: 'Todos contra todos' },
+  { value: 'round-robin-express', label: 'Round Robin Express' },
   { value: 'grupos-y-eliminatorias', label: 'Grupos + eliminatorias' },
   { value: 'eliminatoria-directa', label: 'Eliminatoria directa' },
 ]
@@ -79,6 +81,8 @@ export default function LeagueSetupWizard() {
   })
 
   const [teams, setTeams] = useState([])
+  const [schedules, setSchedules] = useState([])
+  const participants = participantsQuery.data || []
   const [categoryInput, setCategoryInput] = useState('')
 
   const handleChange = (field, value) => setForm(f => ({ ...f, [field]: value }))
@@ -101,7 +105,7 @@ export default function LeagueSetupWizard() {
     try {
       const leagueData = {
         ...form,
-        slug: form.slug || generateSlug(form.name),
+        slug: isEditing ? form.slug : `${(generateSlug(form.name) || "liga")}-${Math.random().toString(36).slice(2, 6)}`,
         organizer_id: user?.id,
         sets_per_match: parseInt(form.sets_per_match),
       }
@@ -110,13 +114,92 @@ export default function LeagueSetupWizard() {
       else savedLeague = await createLeague.mutateAsync(leagueData)
 
       if (teams.length > 0 && savedLeague?.id) {
-        const { error: teamsErr } = await supabase.from('teams').insert(
-          teams.map(t => ({ league_id: savedLeague.id, category: t.category, team_number: t.team_number, player1_id: t.player1_id, player2_id: t.player2_id, team_name: `Equipo ${t.team_number}` }))
-        )
+        const nameToId = {}
+        participants.forEach(p => { nameToId[p.name?.toLowerCase().trim()] = p.id })
+        
+        const teamsData = []
+        for (const t of teams) {
+          let p1Id = t.player1_id
+          let p2Id = t.player2_id
+          
+          if (typeof p1Id === 'string' && p1Id.startsWith('temp-')) {
+            const key = (t.player1_name || '').toLowerCase().trim()
+            if (nameToId[key]) {
+              p1Id = nameToId[key]
+            } else {
+              const { data: newP, error: errP } = await supabase.from('participants').insert({
+                name: t.player1_name || 'Jugador',
+                // league_id removed - participants are global
+              }).select().single()
+              if (!errP && newP) {
+                nameToId[key] = newP.id
+                p1Id = newP.id
+              }
+            }
+          }
+          
+          if (typeof p2Id === 'string' && p2Id.startsWith('temp-')) {
+            const key = (t.player2_name || '').toLowerCase().trim()
+            if (nameToId[key]) {
+              p2Id = nameToId[key]
+            } else {
+              const { data: newP, error: errP } = await supabase.from('participants').insert({
+                name: t.player2_name || 'Jugador',
+                // league_id removed - participants are global
+              }).select().single()
+              if (!errP && newP) {
+                nameToId[key] = newP.id
+                p2Id = newP.id
+              }
+            }
+          }
+          
+          teamsData.push({
+            // league_id removed - participants are global
+            category: t.category,
+            team_number: t.team_number,
+            player1_id: p1Id,
+            player2_id: p2Id,
+            team_name: t.team_name || 'Equipo ' + t.team_number,
+            group: t.group || null,
+          })
+        }
+        
+        const { data: savedTeams, error: teamsErr } = await supabase.from('teams').insert(teamsData).select()
         if (teamsErr) console.error('Teams error:', teamsErr)
+        const teamIdMap = {}
+        if (savedTeams && savedTeams.length > 0) {
+          teamsData.forEach((td, i) => {
+            const originalTeam = teams[i]
+            if (originalTeam && savedTeams[i]) {
+              teamIdMap[originalTeam.id] = savedTeams[i].id
+            }
+          })
+        }
         queryClient.invalidateQueries({ queryKey: ['teams', savedLeague.id] })
       }
-      navigate(`/ligas/${savedLeague.id}`)
+      
+      if (schedules.length > 0 && savedLeague?.id) {
+        const matchesData = schedules.map(s => ({
+          // league_id removed - participants are global
+          category: s.category,
+          round: s.round,
+          match_number: s.match_number,
+          team1_id: teamIdMap?.[s.team1_id] || s.team1_id,
+          team2_id: teamIdMap?.[s.team2_id] || s.team2_id,
+          team1_name: s.team1_name,
+          team2_name: s.team2_name,
+          status: s.status || 'programado',
+          scheduled_date: s.scheduled_date || null,
+          scheduled_time: s.scheduled_time || null,
+          court: s.court || null,
+        }))
+        const { error: matchesErr } = await supabase.from('matches').insert(matchesData)
+        if (matchesErr) console.error('Matches error:', matchesErr)
+        queryClient.invalidateQueries({ queryKey: ['matches', savedLeague.id] })
+      }
+      
+      navigate('/ligas/' + savedLeague.id)
     } catch (e) {
       alert('Error: ' + (e?.message || e?.error?.message || 'Error desconocido'))
       setSaving(false)
@@ -124,7 +207,7 @@ export default function LeagueSetupWizard() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto px-3 sm:px-0">
       {/* Progress Steps */}
       <div className="flex items-center justify-between mb-8">
         {steps.map((s, i) => (
@@ -141,14 +224,14 @@ export default function LeagueSetupWizard() {
       </div>
 
       {/* Form Content */}
-      <div className="bg-card border border-border rounded-xl p-6 min-h-[400px]">
+      <div className="bg-card border border-border rounded-lg p-4 sm:p-5 sm:p-6">
         <AnimatePresence mode="wait">
           <motion.div key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
             
             {/* Step 0: Datos básicos */}
             {step === 0 && (
               <div className="space-y-5">
-                <h2 className="font-heading text-xl font-semibold">Datos básicos</h2>
+                <h2 className="font-mono text-xl font-semibold">Datos básicos</h2>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
                     <Label>Nombre de la liga *</Label>
@@ -227,7 +310,7 @@ export default function LeagueSetupWizard() {
             {/* Step 1: Configuración */}
             {step === 1 && (
               <div className="space-y-5">
-                <h2 className="font-heading text-xl font-semibold">Configuración</h2>
+                <h2 className="font-mono text-xl font-semibold">Configuración</h2>
                 
                 <div>
                   <Label>Categorías</Label>
@@ -298,46 +381,12 @@ export default function LeagueSetupWizard() {
 
             {/* Step 3: Calendario */}
             {step === 3 && (
-              <div className="space-y-5">
-                <h2 className="font-heading text-xl font-semibold">Vista previa del calendario</h2>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="bg-background rounded-lg p-4 text-center">
-                    <p className="text-2xl font-heading font-bold text-primary">{teams.length}</p>
-                    <p className="text-xs text-muted-foreground">Equipos</p>
-                  </div>
-                  <div className="bg-background rounded-lg p-4 text-center">
-                    <p className="text-2xl font-heading font-bold text-primary">{teams.length > 1 ? teams.length - 1 : 0}</p>
-                    <p className="text-xs text-muted-foreground">Jornadas</p>
-                  </div>
-                  <div className="bg-background rounded-lg p-4 text-center">
-                    <p className="text-2xl font-heading font-bold text-primary">{teams.length >= 2 ? Math.ceil(teams.length * (teams.length - 1) / 2) : 0}</p>
-                    <p className="text-xs text-muted-foreground">Partidos</p>
-                  </div>
-                </div>
-                
-                {teams.length >= 2 && form.categories.length > 0 && (
-                  <div className="bg-background rounded-lg p-4">
-                    <p className="text-sm font-medium mb-2">Por categoría:</p>
-                    {form.categories.map(cat => {
-                      const catTeams = teams.filter(t => t.category === cat).length
-                      const jornadas = catTeams > 1 ? catTeams - 1 : 0
-                      const partidos = catTeams >= 2 ? Math.ceil(catTeams * (catTeams - 1) / 2) : 0
-                      return (
-                        <div key={cat} className="text-sm text-muted-foreground flex justify-between py-1">
-                          <span className="font-medium">{cat}</span>
-                          <span>{catTeams} equipos · {jornadas} jornadas · {partidos} partidos</span>
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
-                
-                {teams.length < 2 && (
-                  <p className="text-sm text-muted-foreground text-center py-8 text-amber-600">
-                    Agrega al menos 2 equipos en el paso anterior para ver la estructura completa
-                  </p>
-                )}
-              </div>
+              <ScheduleBuilder 
+                leagueId={null}
+                teams={teams}
+                schedules={schedules}
+                onSchedulesChange={setSchedules}
+              />
             )}
           </motion.div>
         </AnimatePresence>

@@ -29,7 +29,7 @@ export default function PlayerAvatarManager({ teams }) {
 
   return (
     <div className="space-y-4">
-      <h3 className="font-heading font-semibold">Fotos de jugadores</h3>
+      <h3 className=" font-mono font-semibold">Fotos de jugadores</h3>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         {players.map((p, i) => (
           <div key={`${p.id}-${i}`} onClick={() => { setSelected(p); setUrl(p.photo || '') }}

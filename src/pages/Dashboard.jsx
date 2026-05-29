@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Trophy } from 'lucide-react'
-import { PageHeader } from '@/components/layout/PageHeader'
+import { motion } from 'framer-motion'
+import PageHeader from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { useLeagues } from '@/hooks/useLeagues'
 import { useAuth } from '@/hooks/useAuth'
@@ -19,7 +20,7 @@ import { LeagueSelector } from '@/components/dashboard/LeagueSelector'
 export default function Dashboard() {
   const navigate = useNavigate()
   const { leaguesQuery } = useLeagues()
-  const { isOrganizer } = useAuth()
+  const { isOrganizer, profile } = useAuth()
   const leagues = leaguesQuery?.data || []
   const [selectedLeague, setSelectedLeague] = useState(null)
   const [timeRange, setTimeRange] = useState('week')
@@ -33,41 +34,20 @@ export default function Dashboard() {
     error,
   } = useDashboard(selectedLeague, timeRange)
 
-  if (leaguesQuery.isLoading || loading) {
-    return (
-      <div>
-        <PageHeader
-          title="Dashboard"
-          description="Resumen general de tus ligas"
-          action={
-            <div className="flex items-center gap-3">
-              <LeagueSelector leagues={leagues} selectedLeague={selectedLeague} onSelect={setSelectedLeague} />
-              {isOrganizer && (
-                <Button onClick={() => navigate('/ligas/nueva')}>
-                  <Trophy className="w-4 h-4" />
-                  Nueva Liga
-                </Button>
-              )}
-            </div>
-          }
-        />
-        <DashboardSkeleton />
-      </div>
-    )
-  }
-
-  if (!leagues?.length) {
-    return <EmptyDashboard />
-  }
+  const isLoading = leaguesQuery.isLoading || loading
 
   return (
-    <div>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
       <PageHeader
         title="Dashboard"
-        description="Resumen general de tus ligas"
+        description={
+          isLoading ? 'Cargando...' : leagues?.length > 0 ? 'Resumen general de tus ligas' : 'Resumen general de tus ligas'
+        }
         action={
           <div className="flex items-center gap-3">
-            <LeagueSelector leagues={leagues} selectedLeague={selectedLeague} onSelect={setSelectedLeague} />
+            {!isLoading && leagues?.length > 0 && (
+              <LeagueSelector leagues={leagues} selectedLeague={selectedLeague} onSelect={setSelectedLeague} />
+            )}
             {isOrganizer && (
               <Button onClick={() => navigate('/ligas/nueva')}>
                 <Trophy className="w-4 h-4" />
@@ -78,30 +58,47 @@ export default function Dashboard() {
         }
       />
 
-      {error && (
-        <div className="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/20">
-          <p className="text-sm text-destructive">{error}</p>
-        </div>
+      {!isLoading && leagues?.length > 0 && profile?.display_name && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8 pb-6 border-b border-border/50"
+        >
+          <p className="text-sm font-body text-muted-foreground">
+            Buenos d&iacute;as, <span className="text-foreground font-semibold">{profile.display_name.split(' ')[0]}</span>
+            {stats?.activeLeagues > 0 && (
+              <> &middot; <span className="text-muted-foreground">{stats.activeLeagues} {stats.activeLeagues === 1 ? 'liga activa' : 'ligas activas'}</span></>
+            )}
+          </p>
+        </motion.div>
       )}
 
-      <div className="space-y-6">
-        {/* Stats */}
-        <StatsGrid stats={stats} />
+      {isLoading ? (
+        <DashboardSkeleton />
+      ) : !leagues?.length ? (
+        <EmptyDashboard />
+      ) : (
+        <div className="space-y-8">
+          {error && (
+            <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20">
+              <p className="text-sm font-body text-destructive">{error}</p>
+            </div>
+          )}
 
-        {/* Activity Chart */}
-        <ActivityChart data={activityData} timeRange={timeRange} onTimeRangeChange={setTimeRange} />
+          <StatsGrid stats={stats} />
+          <ActivityChart data={activityData} timeRange={timeRange} onTimeRangeChange={setTimeRange} />
 
-        {/* Two Column Layout */}
-        <div className="grid lg:grid-cols-2 gap-6">
-          <LeagueOverview leagues={leagues} />
-          <QuickActions />
+          <div className="grid lg:grid-cols-2 gap-4 sm:gap-6">
+            <LeagueOverview leagues={leagues} />
+            <QuickActions />
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-4 sm:gap-6">
+            <UpcomingMatches matches={upcomingMatches} />
+            <RecentActivity activities={recentActivity} />
+          </div>
         </div>
-
-        <div className="grid lg:grid-cols-2 gap-6">
-          <UpcomingMatches matches={upcomingMatches} />
-          <RecentActivity activities={recentActivity} />
-        </div>
-      </div>
-    </div>
+      )}
+    </motion.div>
   )
 }

@@ -50,11 +50,11 @@ export function TeamStatsModal({ team, league, open, onClose }) {
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-border">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center text-lg font-bold font-heading">
+                <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center text-lg font-bold font-mono">
                   {team.team_number}
                 </div>
                 <div>
-                  <h2 className="font-heading text-xl font-bold">{team.team_name || `Equipo ${team.team_number}`}</h2>
+                  <h2 className="font-mono text-xl font-bold">{team.team_name || `Equipo ${team.team_number}`}</h2>
                   <p className="text-sm text-muted-foreground">
                     {team.player1?.name || '?'} / {team.player2?.name || '?'}
                   </p>
@@ -78,7 +78,7 @@ export function TeamStatsModal({ team, league, open, onClose }) {
                 <>
                   {/* Radar Chart */}
                   <div className="bg-background rounded-xl p-4 border border-border">
-                    <h3 className="font-heading font-semibold text-sm mb-4 flex items-center gap-2">
+                    <h3 className="font-mono font-semibold text-sm mb-4 flex items-center gap-2">
                       <Activity className="w-4 h-4 text-primary" />
                       Comparativa de jugadores
                     </h3>
@@ -96,7 +96,7 @@ export function TeamStatsModal({ team, league, open, onClose }) {
 
                   {/* Bar Chart */}
                   <div className="bg-background rounded-xl p-4 border border-border">
-                    <h3 className="font-heading font-semibold text-sm mb-4 flex items-center gap-2">
+                    <h3 className="font-mono font-semibold text-sm mb-4 flex items-center gap-2">
                       <BarChart3 className="w-4 h-4 text-primary" />
                       Victorias / Derrotas
                     </h3>
@@ -130,7 +130,7 @@ export function TeamStatsModal({ team, league, open, onClose }) {
 
                   {/* Line chart - progression */}
                   <div className="bg-background rounded-xl p-4 border border-border">
-                    <h3 className="font-heading font-semibold text-sm mb-4 flex items-center gap-2">
+                    <h3 className="font-mono font-semibold text-sm mb-4 flex items-center gap-2">
                       <TrendingUp className="w-4 h-4 text-primary" />
                       Rendimiento histórico
                     </h3>

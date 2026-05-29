@@ -1,11 +1,10 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLeagues } from '@/hooks/useLeagues'
 import { useAuth } from '@/hooks/useAuth'
-import { PageHeader } from '@/components/layout/PageHeader'
+import PageHeader from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Plus, Edit, Trash2, Trophy } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Plus, Edit, Trash2, Trophy, Calendar, Swords, ChevronRight, Users, Sparkles } from 'lucide-react'
 
 export default function Leagues() {
   const navigate = useNavigate()
@@ -16,7 +15,7 @@ export default function Leagues() {
   const error = leaguesQuery.error
 
   const del = async (id) => {
-    if (!confirm('¿Eliminar esta liga?')) return
+    if (!confirm('Eliminar esta liga?')) return
     try {
       await deleteLeague.mutateAsync(id)
       leaguesQuery.refetch()
@@ -26,66 +25,133 @@ export default function Leagues() {
   }
 
   if (loading) return (
-    <div>
-      <PageHeader title="Ligas" description="Cargando..." action={isOrganizer && <Button onClick={() => navigate('/ligas/nueva')}><Plus className="w-4 h-4" /> Nueva Liga</Button>} />
-      <div className="text-center py-16">
-        <div className="w-10 h-10 border-[3px] border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-muted-foreground">Cargando ligas...</p>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+      <PageHeader
+        title="Ligas"
+        description="Cargando..."
+        action={isOrganizer && <Button onClick={() => navigate('/ligas/nueva')}><Plus className="w-4 h-4" /> Nueva Liga</Button>}
+      />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="glass-card rounded-xl p-6 animate-pulse">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-xl bg-muted/60" />
+              <div className="flex-1 space-y-3">
+                <div className="h-5 bg-muted/60 rounded w-3/4" />
+                <div className="h-3 bg-muted/40 rounded w-1/2" />
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
-    </div>
+    </motion.div>
   )
 
   if (error) return (
-    <div>
-      <PageHeader title="Ligas" description="Error" />
-      <div className="text-center py-16">
-        <p className="text-destructive mb-4">{error.message || 'Error al cargar'}</p>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+      <PageHeader title="Ligas" description="Error al cargar" />
+      <div className="glass-card rounded-xl p-12 text-center">
+        <div className="w-14 h-14 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center justify-center mx-auto mb-4">
+          <Swords className="w-7 h-7 text-destructive" />
+        </div>
+        <p className="text-sm font-body text-destructive mb-4">{error.message || 'Error al cargar las ligas'}</p>
         <Button variant="outline" onClick={() => leaguesQuery.refetch()}>Reintentar</Button>
       </div>
-    </div>
+    </motion.div>
   )
 
   return (
-    <div>
-      <PageHeader title="Ligas" description={`${leagues.length} ligas`} action={isOrganizer && <Button onClick={() => navigate('/ligas/nueva')}><Plus className="w-4 h-4" /> Nueva Liga</Button>} />
-      <div className="grid gap-4">
-        {leagues.map(l => (
-          <div key={l.id} onClick={() => navigate(`/ligas/${l.id}`)}
-            className="bg-card border border-border rounded-xl p-5 hover:shadow-md transition-shadow cursor-pointer">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-heading font-bold text-lg"
-                  style={{ backgroundColor: l.color || '#c96442' }}>{l.name.charAt(0)}</div>
-                <div>
-                  <h3 className="font-heading font-semibold text-lg">{l.name}</h3>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Badge variant="secondary" className="text-xs">{l.gender} · {l.sport}</Badge>
-                    {l.season && <span className="text-xs text-muted-foreground">{l.season}</span>}
-                  </div>
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+      <PageHeader
+        title="Ligas"
+        description={`${leagues.length} ${leagues.length === 1 ? 'liga' : 'ligas'} en total`}
+        action={isOrganizer && <Button onClick={() => navigate('/ligas/nueva')}><Plus className="w-4 h-4" /> Nueva Liga</Button>}
+      />
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {leagues.map((l, i) => (
+          <motion.div
+            key={l.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.05, type: 'spring', stiffness: 300, damping: 25 }}
+            onClick={() => navigate(`/ligas/${l.id}`)}
+            className="glass-card rounded-xl p-6 group cursor-pointer hover:shadow-glow-sm"
+          >
+            <div className="flex items-start gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/20 flex items-center justify-center shrink-0 group-hover:shadow-glow-sm transition-all duration-300">
+                <Trophy className="w-7 h-7 text-primary" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="font-heading font-bold text-lg tracking-tight truncate text-foreground group-hover:text-primary transition-colors">
+                  {l.name}
+                </h3>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
+                  <span className="text-sm font-body text-muted-foreground flex items-center gap-1">
+                    <Users className="w-3.5 h-3.5" />
+                    {l.gender} - {l.sport}
+                  </span>
+                  {l.season && (
+                    <span className="text-sm font-body text-muted-foreground flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5" />
+                      {l.season}
+                    </span>
+                  )}
                 </div>
               </div>
-              <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${l.status === 'activa' ? 'bg-emerald-100 text-emerald-700' : l.status === 'finalizada' ? 'bg-gray-100 text-gray-600' : 'bg-amber-100 text-amber-700'}`}>{l.status}</span>
+              <ChevronRight className="w-5 h-5 text-muted-foreground/40 group-hover:text-primary/60 transition-all duration-300 group-hover:translate-x-0.5 shrink-0 mt-1" />
             </div>
-            {l.categories?.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-3">{l.categories.map(cat => <span key={cat} className="text-xs px-2 py-0.5 rounded-md bg-muted text-muted-foreground">{cat}</span>)}</div>
-            )}
+
+            <div className="flex items-center gap-3 mt-4 pt-4 border-t border-border/50">
+              <span className="inline-flex items-center gap-1.5 text-xs font-body font-medium px-3 py-1 rounded-full bg-gradient-to-r from-primary/10 to-accent/10 text-primary-light border border-primary/10">
+                <Sparkles className="w-3 h-3" />
+                {l.status || 'Activa'}
+              </span>
+              {l.categories?.length > 0 && l.categories.slice(0, 2).map(cat => (
+                <span key={cat} className="text-xs font-body text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-full border border-border/50">
+                  {cat}
+                </span>
+              ))}
+              {l.categories?.length > 2 && (
+                <span className="text-xs font-body text-muted-foreground">+{l.categories.length - 2}</span>
+              )}
+            </div>
+
             {isOrganizer && (
-              <div className="flex gap-2 mt-4 pt-3 border-t border-border" onClick={e => e.stopPropagation()}>
-                <Button variant="ghost" size="sm" onClick={() => navigate(`/ligas/${l.id}/editar`)}><Edit className="w-3.5 h-3.5" /> Editar</Button>
-                <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => del(l.id)}><Trash2 className="w-3.5 h-3.5" /> Eliminar</Button>
+              <div className="flex gap-2 mt-4 pt-3 border-t border-border/50 opacity-0 group-hover:opacity-100 transition-all duration-300" onClick={e => e.stopPropagation()}>
+                <Button variant="outline" size="sm" onClick={() => navigate(`/ligas/${l.id}/editar`)} className="h-8 text-xs">
+                  <Edit className="w-3 h-3" /> Editar
+                </Button>
+                <Button variant="outline" size="sm" className="text-destructive hover:text-destructive h-8 text-xs border-destructive/20 hover:border-destructive/40" onClick={() => del(l.id)}>
+                  <Trash2 className="w-3 h-3" /> Eliminar
+                </Button>
               </div>
             )}
-          </div>
+          </motion.div>
         ))}
+
         {leagues.length === 0 && (
-          <div className="text-center py-20">
-            <Trophy className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <p className="text-lg font-medium mb-2">No hay ligas todavía</p>
-            <p className="text-sm text-muted-foreground mb-4">Crea tu primera liga para empezar</p>
-            {isOrganizer && <Button onClick={() => navigate('/ligas/nueva')}><Plus className="w-4 h-4" /> Crear Liga</Button>}
-          </div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="col-span-full glass-card rounded-xl p-12 text-center"
+          >
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20 flex items-center justify-center mx-auto mb-5">
+              <Swords className="w-8 h-8 text-primary" />
+            </div>
+            <h2 className="font-heading text-2xl font-bold tracking-wider text-foreground mb-2">No hay ligas todavia</h2>
+            <p className="text-sm font-body text-muted-foreground mb-6 max-w-sm mx-auto">
+              Crea tu primera liga de padel y empieza a organizar torneos
+            </p>
+            {isOrganizer && (
+              <Button onClick={() => navigate('/ligas/nueva')}>
+                <Plus className="w-4 h-4" />
+                Crear Liga
+              </Button>
+            )}
+          </motion.div>
         )}
       </div>
-    </div>
+    </motion.div>
   )
 }
