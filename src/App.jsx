@@ -13,6 +13,7 @@ import Leagues from '@/pages/Leagues'
 import LeagueSetupWizard from '@/components/leagues/LeagueSetupWizard'
 import LeagueDetail from '@/pages/LeagueDetail'
 import Teams from '@/pages/Teams'
+import TeamDetail from '@/pages/TeamDetail'
 import Matches from '@/pages/Matches'
 import Participants from '@/pages/Participants'
 import Standings from '@/pages/Standings'
@@ -198,6 +199,7 @@ export default function App() {
         <Route path="/ligas/:leagueId" element={<LeagueDetail />} />
         <Route path="/ligas/:leagueId/editar" element={<LeagueSetupWizard />} />
         <Route path="/ligas/:leagueId/equipos" element={<Teams />} />
+        <Route path="/ligas/:leagueId/equipos/:teamId" element={<TeamDetail />} />
         <Route path="/ligas/:leagueId/partidos" element={<Matches />} />
         <Route path="/ligas/:leagueId/clasificacion" element={<Standings />} />
         <Route path="/ligas/:leagueId/admin" element={<Admin />} />
