@@ -4,6 +4,7 @@ import {
   X, Plus, LayoutGrid, List, UserPlus, Shuffle, Pencil, Trash2,
   Search, Check, Users, ArrowRight, RotateCcw
 } from 'lucide-react'
+import KanbanBoard from '../teams/KanbanBoard'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -484,87 +485,31 @@ export function PlayerPickerPanel({ participants, categories, teams, onTeamsChan
             exit={{ opacity: 0 }}
             className="overflow-x-auto overscroll-x-contain pb-2"
           >
-            <div
-              className="inline-flex gap-3"
-              style={{ minWidth: (enabledGroups.length + 1) * 220 + 'px' }}
-            >
-              {/* Ungrouped column */}
-              <div className="w-[200px] shrink-0">
-                <div className="bg-muted/30 border-2 border-dashed border-border rounded-lg p-2.5 min-h-[100px]">
-                  <h3 className="font-bold text-xs uppercase text-muted-foreground mb-2.5
-                    flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-muted-foreground" />
-                    Sin grupo
-                    <span className="ml-auto bg-muted text-muted-foreground
-                      text-[10px] px-1.5 py-0.5 rounded-full font-bold">
-                      {teams.filter(t => t.category === selectedCategory && !t.group).length}
-                    </span>
-                  </h3>
-                  <div className="space-y-2">
-                    {teams
-                      .filter(t => t.category === selectedCategory && !t.group)
-                      .map(team => (
-                        <TeamCard
-                          key={team.id}
-                          team={team}
-                          categories={categories}
-                          onMove={moveTeam}
-                          onDelete={removeTeam}
-                          onAssignGroup={assignGroup}
-                          onEdit={setEditingTeam}
-                        />
-                      ))}
-                    {teams.filter(t => t.category === selectedCategory && !t.group).length === 0 && (
-                      <div className="text-center py-6">
-                        <p className="text-xs text-muted-foreground">
-                          Arrastra equipos aquí o usa
-                        </p>
-                        <p className="text-xs text-muted-foreground">el randomizer arriba</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-              {/* Group columns */}
-              {enabledGroups.map(group => (
-                <div key={group} className="w-[200px] shrink-0">
-                  <div className={
-                    'bg-muted/30 border-2 border-dashed rounded-lg p-2.5 min-h-[100px] ' +
-                    (groupColors[group]?.border || 'border-border')
-                  }>
-                    <h3 className={
-                      'font-bold text-xs uppercase mb-2.5 flex items-center gap-2 ' +
-                      (groupColors[group]?.accent || 'text-muted-foreground')
-                    }>
-                      <span className={
-                        'w-2 h-2 rounded-full ' +
-                        (groupColors[group]?.bg?.replace('/10', '/40') || 'bg-muted-foreground')
-                      } />
-                      Grupo {group}
-                      <span className="ml-auto bg-muted/50 text-muted-foreground
-                        text-[10px] px-1.5 py-0.5 rounded-full font-bold">
-                        {teams.filter(t => t.category === selectedCategory && t.group === group).length}
-                      </span>
-                    </h3>
-                    <div className="space-y-2">
-                      {teams
-                        .filter(t => t.category === selectedCategory && t.group === group)
-                        .map(team => (
-                          <TeamCard
-                            key={team.id}
-                            team={team}
-                            categories={categories}
-                            onMove={moveTeam}
-                            onDelete={removeTeam}
-                            onAssignGroup={assignGroup}
-                            onEdit={setEditingTeam}
-                          />
-                        ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <KanbanBoard
+              teams={teams.filter(t => t.category === selectedCategory)}
+              gruposLetras={enabledGroups}
+              onMoveTeam={(teamId, newGroup) => {
+                setTeams(teams.map(t => 
+                  t.id === teamId ? { ...t, group: newGroup } : t
+                ));
+              }}
+              onReorderTeam={(activeId, overId) => {
+                const filtered = teams.filter(t => t.category === selectedCategory);
+                const activeIdx = filtered.findIndex(t => t.id === activeId);
+                const overIdx = filtered.findIndex(t => t.id === overId);
+                if (activeIdx === -1 || overIdx === -1) return;
+                const newTeams = [...teams];
+                const activeTeam = newTeams.find(t => t.id === activeId);
+                const overTeam = newTeams.find(t => t.id === overId);
+                if (activeTeam && overTeam) {
+                  const activeOriginalIdx = teams.indexOf(activeTeam);
+                  const overOriginalIdx = teams.indexOf(overTeam);
+                  newTeams.splice(activeOriginalIdx, 1);
+                  newTeams.splice(overOriginalIdx, 0, activeTeam);
+                  setTeams(newTeams);
+                }
+              }}
+            />
           </motion.div>
         )}
 

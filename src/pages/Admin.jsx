@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { PlayerPickerPanel } from '@/components/leagues/PlayerPickerPanel'
 
 const emptyTeam = { player1_id: '', player2_id: '', category: '', team_number: 1, team_name: '' }
 
@@ -39,6 +40,7 @@ export default function Admin() {
   const [form, setForm] = useState(emptyTeam)
   const [searchP1, setSearchP1] = useState('')
   const [searchP2, setSearchP2] = useState('')
+  const [showPlayerPicker, setShowPlayerPicker] = useState(false)
 
   const filtered = teams.filter(t => t.category === category)
   const isLoading = teamsQuery.isLoading || participantsQuery.isLoading
@@ -65,7 +67,7 @@ export default function Admin() {
     setForm({ ...emptyTeam, category })
     setSearchP1('')
     setSearchP2('')
-    setDialogOpen(true)
+    setShowPlayerPicker(true)
   }
 
   const openEdit = (team) => {
@@ -477,6 +479,43 @@ export default function Admin() {
               <Trash2 className="w-3.5 h-3.5" /> Eliminar
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* PlayerPickerPanel Modal */}
+      <Dialog open={showPlayerPicker} onOpenChange={(o) => !o && setShowPlayerPicker(false)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Crear Equipos</DialogTitle>
+            <DialogDescription>Arrastra y organiza los equipos por grupo</DialogDescription>
+          </DialogHeader>
+          <PlayerPickerPanel
+            teams={teams}
+            onTeamsChange={(updated) => {
+              const teamsToInsert = updated.filter(t => !t.id).map(t => ({
+                league_id: leagueId,
+                category: t.category,
+                team_name: t.team_name,
+                team_number: t.team_number,
+                player1_id: t.player1_id,
+                player2_id: t.player2_id,
+              }))
+              if (teamsToInsert.length > 0) {
+                createTeamsBatch.mutateAsync(teamsToInsert).then(() => {
+                  teamsQuery.refetch()
+                  setShowPlayerPicker(false)
+                  toast.success(`${teamsToInsert.length} equipos creados`)
+                }).catch(err => {
+                  toast.error('Error: ' + err.message)
+                })
+              } else {
+                setShowPlayerPicker(false)
+              }
+            }}
+            participants={participants}
+            categories={categories}
+            mode="full"
+          />
         </DialogContent>
       </Dialog>
     </motion.div>
