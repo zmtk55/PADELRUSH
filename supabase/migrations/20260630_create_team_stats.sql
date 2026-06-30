@@ -37,7 +37,8 @@ BEGIN
   SELECT 
     COUNT(*) as total,
     COUNT(*) FILTER (WHERE winner_team_id = NEW.team1_id) as won,
-    COUNT(*) FILTER (WHERE winner_team_id = NEW.team2_id) as lost
+    COUNT(*) FILTER (WHERE winner_team_id = NEW.team2_id) as lost,
+    AVG(CASE WHEN team1_id = NEW.team1_id THEN team1_score ELSE team2_score END) as avg
   INTO team1_stats
   FROM matches 
   WHERE league_id = NEW.league_id 
@@ -51,6 +52,7 @@ BEGIN
     win_rate = CASE WHEN team1_stats.total > 0 
       THEN ROUND((team1_stats.won::DECIMAL / team1_stats.total) * 100, 2) 
       ELSE 0 END,
+    avg_score = ROUND(COALESCE(team1_stats.avg, 0), 2),
     updated_at = NOW()
   WHERE team_id = NEW.team1_id AND league_id = NEW.league_id;
 
@@ -58,7 +60,8 @@ BEGIN
   SELECT 
     COUNT(*) as total,
     COUNT(*) FILTER (WHERE winner_team_id = NEW.team2_id) as won,
-    COUNT(*) FILTER (WHERE winner_team_id = NEW.team1_id) as lost
+    COUNT(*) FILTER (WHERE winner_team_id = NEW.team1_id) as lost,
+    AVG(CASE WHEN team1_id = NEW.team2_id THEN team1_score ELSE team2_score END) as avg
   INTO team2_stats
   FROM matches 
   WHERE league_id = NEW.league_id 
@@ -72,6 +75,7 @@ BEGIN
     win_rate = CASE WHEN team2_stats.total > 0 
       THEN ROUND((team2_stats.won::DECIMAL / team2_stats.total) * 100, 2) 
       ELSE 0 END,
+    avg_score = ROUND(COALESCE(team2_stats.avg, 0), 2),
     updated_at = NOW()
   WHERE team_id = NEW.team2_id AND league_id = NEW.league_id;
 
