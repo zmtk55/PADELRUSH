@@ -172,10 +172,10 @@ function PlayerAutocomplete({ participants, value, onChange, placeholder, exclud
 
 
 // ========== Main Component ==========
-export function PlayerPickerPanel({ participants, categories, teams, onTeamsChange }) {
+export function PlayerPickerPanel({ participants, categories, teams, onTeamsChange, mode = 'full' }) {
   const [selectedCategory, setSelectedCategory] = useState(categories[0] || '')
   const [viewMode, setViewMode] = useState('kanban')
-  const [selectedGroup, setSelectedGroup] = useState('')
+  const [selectedGroup, setSelectedGroup] = useState('__none')
   const [player1, setPlayer1] = useState(null)
   const [player2, setPlayer2] = useState(null)
   const [teamName, setTeamName] = useState('')
@@ -201,7 +201,7 @@ export function PlayerPickerPanel({ participants, categories, teams, onTeamsChan
     const newTeam = {
       id,
       category: selectedCategory,
-      group: selectedGroup || null,
+      group: selectedGroup === '__none' ? null : selectedGroup,
       team_number: teamNum,
       player1_id: player1.isNew ? ('new-' + Date.now() + '-1') : player1.id,
       player2_id: player2.isNew ? ('new-' + Date.now() + '-2') : player2.id,
@@ -314,7 +314,7 @@ export function PlayerPickerPanel({ participants, categories, teams, onTeamsChan
                 <SelectValue placeholder="Sin grupo" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Sin grupo</SelectItem>
+                <SelectItem value="__none">Sin grupo</SelectItem>
                 {gruposLetras.slice(0, 4).map(g => (
                   <SelectItem key={g} value={g}>
                     <span className="flex items-center gap-2">
@@ -413,48 +413,52 @@ export function PlayerPickerPanel({ participants, categories, teams, onTeamsChan
       <div className="bg-card border border-border rounded-xl p-3">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
-              <button
-                onClick={() => setViewMode('kanban')}
-                className={
-                  'px-3 py-1.5 rounded-md text-sm font-medium transition-colors ' +
-                  (viewMode === 'kanban'
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground')
-                }
-              >
-                <LayoutGrid className="w-4 h-4 inline mr-1" />
-                Kanban
-              </button>
-              <button
-                onClick={() => setViewMode('lista')}
-                className={
-                  'px-3 py-1.5 rounded-md text-sm font-medium transition-colors ' +
-                  (viewMode === 'lista'
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground')
-                }
-              >
-                <List className="w-4 h-4 inline mr-1" />
-                Lista
-              </button>
-            </div>
+            {mode === 'full' && (
+              <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
+                <button
+                  onClick={() => setViewMode('kanban')}
+                  className={
+                    'px-3 py-1.5 rounded-md text-sm font-medium transition-colors ' +
+                    (viewMode === 'kanban'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground')
+                  }
+                >
+                  <LayoutGrid className="w-4 h-4 inline mr-1" />
+                  Kanban
+                </button>
+                <button
+                  onClick={() => setViewMode('lista')}
+                  className={
+                    'px-3 py-1.5 rounded-md text-sm font-medium transition-colors ' +
+                    (viewMode === 'lista'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground')
+                  }
+                >
+                  <List className="w-4 h-4 inline mr-1" />
+                  Lista
+                </button>
+              </div>
+            )}
             <span className="text-xs text-muted-foreground">
               {teamCount} equipo{teamCount !== 1 ? 's' : ''}
               {groupedCount > 0 && ` (${groupedCount} agrupados)`}
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowRandomizer(true)}
-              disabled={teams.filter(t => t.category === selectedCategory && !t.group).length < 2}
-              className="h-8 text-xs"
-            >
-              <Shuffle className="w-3.5 h-3.5 mr-1" />
-              Randomizar
-            </Button>
+            {mode === 'full' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowRandomizer(true)}
+                disabled={teams.filter(t => t.category === selectedCategory && !t.group).length < 2}
+                className="h-8 text-xs"
+              >
+                <Shuffle className="w-3.5 h-3.5 mr-1" />
+                Randomizar
+              </Button>
+            )}
             {enabledGroups.length > 0 && (
               <Button
                 variant="ghost"
