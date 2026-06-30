@@ -11,11 +11,10 @@ CREATE TABLE team_stats (
   current_streak INT DEFAULT 0,
   streak_type TEXT CHECK (streak_type IN ('W', 'L')),
   avg_score DECIMAL(5,2) DEFAULT 0,
-  updated_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(team_id, league_id)
 );
 
-CREATE INDEX idx_team_stats_team ON team_stats(team_id);
 CREATE INDEX idx_team_stats_league ON team_stats(league_id);
 
 -- Function to update team stats after match result
@@ -24,25 +23,48 @@ RETURNS TRIGGER AS $$
 DECLARE
   team1_stats RECORD;
   team2_stats RECORD;
+  r_team1_id UUID;
+  r_team2_id UUID;
+  r_league_id UUID;
 BEGIN
+  -- Guard: skip recalculation if only non-score fields changed on UPDATE
+  IF (TG_OP = 'UPDATE' 
+      AND NEW.status = OLD.status 
+      AND NEW.team1_score = OLD.team1_score 
+      AND NEW.team2_score = OLD.team2_score 
+      AND NEW.winner_team_id = OLD.winner_team_id) THEN
+    RETURN NEW;
+  END IF;
+
+  -- Resolve row data for INSERT/UPDATE (NEW) or DELETE (OLD)
+  IF TG_OP = 'DELETE' THEN
+    r_team1_id := OLD.team1_id;
+    r_team2_id := OLD.team2_id;
+    r_league_id := OLD.league_id;
+  ELSE
+    r_team1_id := NEW.team1_id;
+    r_team2_id := NEW.team2_id;
+    r_league_id := NEW.league_id;
+  END IF;
+
   -- Get or create stats for team1
-  INSERT INTO team_stats (team_id, league_id) VALUES (NEW.team1_id, NEW.league_id)
+  INSERT INTO team_stats (team_id, league_id) VALUES (r_team1_id, r_league_id)
   ON CONFLICT (team_id, league_id) DO NOTHING;
   
   -- Get or create stats for team2
-  INSERT INTO team_stats (team_id, league_id) VALUES (NEW.team2_id, NEW.league_id)
+  INSERT INTO team_stats (team_id, league_id) VALUES (r_team2_id, r_league_id)
   ON CONFLICT (team_id, league_id) DO NOTHING;
 
   -- Recalculate stats for team1
   SELECT 
     COUNT(*) as total,
-    COUNT(*) FILTER (WHERE winner_team_id = NEW.team1_id) as won,
-    COUNT(*) FILTER (WHERE winner_team_id = NEW.team2_id) as lost,
-    AVG(CASE WHEN team1_id = NEW.team1_id THEN team1_score ELSE team2_score END) as avg
+    COUNT(*) FILTER (WHERE winner_team_id = r_team1_id) as won,
+    COUNT(*) FILTER (WHERE winner_team_id = r_team2_id) as lost,
+    AVG(CASE WHEN team1_id = r_team1_id THEN team1_score ELSE team2_score END) as avg
   INTO team1_stats
   FROM matches 
-  WHERE league_id = NEW.league_id 
-    AND (team1_id = NEW.team1_id OR team2_id = NEW.team1_id)
+  WHERE league_id = r_league_id 
+    AND (team1_id = r_team1_id OR team2_id = r_team1_id)
     AND status = 'completed';
 
   UPDATE team_stats SET
@@ -54,18 +76,18 @@ BEGIN
       ELSE 0 END,
     avg_score = ROUND(COALESCE(team1_stats.avg, 0), 2),
     updated_at = NOW()
-  WHERE team_id = NEW.team1_id AND league_id = NEW.league_id;
+  WHERE team_id = r_team1_id AND league_id = r_league_id;
 
   -- Recalculate stats for team2
   SELECT 
     COUNT(*) as total,
-    COUNT(*) FILTER (WHERE winner_team_id = NEW.team2_id) as won,
-    COUNT(*) FILTER (WHERE winner_team_id = NEW.team1_id) as lost,
-    AVG(CASE WHEN team1_id = NEW.team2_id THEN team1_score ELSE team2_score END) as avg
+    COUNT(*) FILTER (WHERE winner_team_id = r_team2_id) as won,
+    COUNT(*) FILTER (WHERE winner_team_id = r_team1_id) as lost,
+    AVG(CASE WHEN team1_id = r_team2_id THEN team1_score ELSE team2_score END) as avg
   INTO team2_stats
   FROM matches 
-  WHERE league_id = NEW.league_id 
-    AND (team1_id = NEW.team2_id OR team2_id = NEW.team2_id)
+  WHERE league_id = r_league_id 
+    AND (team1_id = r_team2_id OR team2_id = r_team2_id)
     AND status = 'completed';
 
   UPDATE team_stats SET
@@ -77,13 +99,13 @@ BEGIN
       ELSE 0 END,
     avg_score = ROUND(COALESCE(team2_stats.avg, 0), 2),
     updated_at = NOW()
-  WHERE team_id = NEW.team2_id AND league_id = NEW.league_id;
+  WHERE team_id = r_team2_id AND league_id = r_league_id;
 
   -- Calculate current streaks for both teams
-  PERFORM calculate_streak(NEW.team1_id, NEW.league_id);
-  PERFORM calculate_streak(NEW.team2_id, NEW.league_id);
+  PERFORM calculate_streak(r_team1_id, r_league_id);
+  PERFORM calculate_streak(r_team2_id, r_league_id);
 
-  RETURN NEW;
+  RETURN COALESCE(NEW, OLD);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -133,6 +155,6 @@ $$ LANGUAGE plpgsql;
 
 -- Trigger on matches table
 CREATE TRIGGER trigger_update_team_stats
-  AFTER INSERT OR UPDATE ON matches
+  AFTER INSERT OR UPDATE OR DELETE ON matches
   FOR EACH ROW
   EXECUTE FUNCTION update_team_stats_on_match();

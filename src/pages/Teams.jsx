@@ -6,12 +6,11 @@ import { useParticipants } from '@/hooks/useParticipants'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
-import { ArrowLeft, Trash2, Swords, Plus, Search, Users, X } from 'lucide-react'
+import { PlayerPickerPanel } from '@/components/leagues/PlayerPickerPanel'
+import { ArrowLeft, Trash2, Swords, Plus } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 
 export default function Teams() {
   const { leagueId } = useParams()
@@ -26,10 +25,8 @@ export default function Teams() {
 
   const [editingTeam, setEditingTeam] = useState(null)
   const [editName, setEditName] = useState('')
-  const [showCreate, setShowCreate] = useState(false)
-  const [newTeam, setNewTeam] = useState({ name: '', category: '', player1: null, player2: null })
-  const [playerSearch1, setPlayerSearch1] = useState('')
-  const [playerSearch2, setPlayerSearch2] = useState('')
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [modalTeams, setModalTeams] = useState([])
 
   const grouped = teams.reduce((acc, t) => {
     if (!acc[t.category]) acc[t.category] = []
@@ -65,50 +62,30 @@ export default function Teams() {
 
   const categories = league?.categories || []
 
-  const handleCreateTeam = async () => {
-    if (!newTeam.name.trim() || !newTeam.category || !newTeam.player1 || !newTeam.player2) return
-    const maxNum = teams
-      .filter(t => t.category === newTeam.category)
-      .reduce((max, t) => Math.max(max, t.team_number || 0), 0)
-    try {
-      await createTeamsBatch.mutateAsync([{
+  const handlePersist = async (updatedTeams) => {
+    setModalTeams(updatedTeams)
+  }
+
+  const handlePersistClose = async () => {
+    if (modalTeams.length > 0) {
+      const teamsToInsert = modalTeams.map(t => ({
         league_id: leagueId,
-        category: newTeam.category,
-        team_name: newTeam.name.trim(),
-        team_number: maxNum + 1,
-        player1_id: newTeam.player1.id,
-        player2_id: newTeam.player2.id,
-      }])
-      teamsQuery.refetch()
-      setShowCreate(false)
-      setNewTeam({ name: '', category: '', player1: null, player2: null })
-    } catch (err) { alert('Error al crear equipo: ' + err.message) }
+        category: t.category,
+        team_name: t.team_name,
+        team_number: t.team_number,
+        player1_id: t.player1_id,
+        player2_id: t.player2_id,
+      }))
+      try {
+        await createTeamsBatch.mutateAsync(teamsToInsert)
+        teamsQuery.refetch()
+      } catch (err) {
+        alert('Error al crear equipos: ' + err.message)
+      }
+    }
+    setShowCreateModal(false)
+    setModalTeams([])
   }
-
-  const togglePlayer1 = (p) => {
-    if (newTeam.player1?.id === p.id) { setNewTeam(n => ({ ...n, player1: null })); return }
-    setNewTeam(n => ({ ...n, player1: p }))
-    if (newTeam.player2?.id === p.id) setNewTeam(n => ({ ...n, player2: null }))
-  }
-  const togglePlayer2 = (p) => {
-    if (newTeam.player2?.id === p.id) { setNewTeam(n => ({ ...n, player2: null })); return }
-    setNewTeam(n => ({ ...n, player2: p }))
-    if (newTeam.player1?.id === p.id) setNewTeam(n => ({ ...n, player1: null }))
-  }
-
-  const usedPlayerIds = new Set(teams
-    .filter(t => t.category === (newTeam.category || '_'))
-    .flatMap(t => [t.player1_id, t.player2_id, t.player1?.id, t.player2?.id])
-    .filter(Boolean))
-
-  const filteredPlayers1 = participants.filter(p =>
-    !usedPlayerIds.has(p.id) &&
-    (!playerSearch1 || p.name.toLowerCase().includes(playerSearch1.toLowerCase()))
-  )
-  const filteredPlayers2 = participants.filter(p =>
-    (!newTeam.player1 || p.id === newTeam.player1.id || !usedPlayerIds.has(p.id)) &&
-    (!playerSearch2 || p.name.toLowerCase().includes(playerSearch2.toLowerCase()))
-  )
 
 
   return (
@@ -129,7 +106,7 @@ export default function Teams() {
           </div>
           <p className="text-base font-heading font-bold mb-1">No hay equipos registrados</p>
           <p className="text-sm text-muted-foreground mb-4">Crea equipos manualmente asignando dos jugadores por equipo</p>
-          <Button size="sm" onClick={() => setShowCreate(true)}>
+          <Button size="sm" onClick={() => setShowCreateModal(true)}>
             <Plus className="w-3.5 h-3.5 mr-1.5" /> Crear equipo
           </Button>
         </div>
@@ -138,7 +115,7 @@ export default function Teams() {
         <div className="flex items-center justify-between mb-6">
           <p className="text-sm text-muted-foreground">{teams.length} equipos en total</p>
           {isOrganizer && (
-            <Button size="sm" onClick={() => setShowCreate(true)}>
+            <Button size="sm" onClick={() => setShowCreateModal(true)}>
               <Plus className="w-3.5 h-3.5 mr-1.5" /> Crear equipo
             </Button>
           )}
@@ -198,145 +175,27 @@ export default function Teams() {
         </>
       )}
 
-      {/* --- Create Team Dialog --- */}
-      <Dialog open={showCreate} onOpenChange={o => { if (!o) { setShowCreate(false); setNewTeam({ name: '', category: '', player1: null, player2: null }); setPlayerSearch1(''); setPlayerSearch2('') } }}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="font-heading font-bold text-lg flex items-center gap-2">
-              <Plus className="w-4 h-4" /> Crear equipo manualmente
-            </DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground">
-              Asigna un nombre, categoría y dos jugadores al equipo
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-5">
-            {/* Team name */}
-            <div>
-              <Label className="text-sm font-medium text-muted-foreground">Nombre del equipo</Label>
-              <Input
-                value={newTeam.name}
-                onChange={e => setNewTeam(n => ({ ...n, name: e.target.value }))}
-                placeholder="Ej: Los Pumas"
-                className="mt-1"
-              />
-            </div>
+      {/* --- Create Teams Modal (PlayerPickerPanel) --- */}
+      {showCreateModal && (
+        <Dialog open={showCreateModal} onOpenChange={(open) => {
+          if (!open) handlePersistClose()
+        }}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Crear Equipos</DialogTitle>
+            </DialogHeader>
+            <PlayerPickerPanel
+              teams={modalTeams}
+              onTeamsChange={handlePersist}
+              participants={participants}
+              categories={categories}
+              mode="compact"
+            />
+          </DialogContent>
+        </Dialog>
+      )}
 
-            {/* Category */}
-            <div>
-              <Label className="text-sm font-medium text-muted-foreground">Categoría</Label>
-              <Select
-                value={newTeam.category}
-                onValueChange={v => setNewTeam(n => ({ ...n, category: v }))}
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Seleccionar categoría" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map(cat => (
-                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Player 1 */}
-            <div>
-              <Label className="text-sm font-medium text-muted-foreground">Jugador 1</Label>
-              <div className="relative mt-1">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                <Input
-                  value={playerSearch1}
-                  onChange={e => setPlayerSearch1(e.target.value)}
-                  placeholder="Buscar jugador..."
-                  className="pl-8"
-                />
-              </div>
-              {newTeam.player1 && (
-                <div className="flex items-center justify-between bg-muted/50 px-3 py-1.5 mt-2 rounded-md">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-3.5 h-3.5 text-primary" />
-                    <span className="text-sm font-medium">{newTeam.player1.name}</span>
-                  </div>
-                  <button onClick={() => { setNewTeam(n => ({ ...n, player1: null })); setPlayerSearch1('') }}>
-                    <X className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground" />
-                  </button>
-                </div>
-              )}
-              {!newTeam.player1 && (
-                <div className="max-h-32 overflow-y-auto mt-2 space-y-0.5 border border-border rounded-md">
-                  {filteredPlayers1.slice(0, 10).map(p => (
-                    <button
-                      key={p.id}
-                      onClick={() => togglePlayer1(p)}
-                      className="w-full text-left px-3 py-1.5 text-sm hover:bg-muted/50 transition-colors"
-                    >
-                      {p.name}
-                    </button>
-                  ))}
-                  {filteredPlayers1.length === 0 && (
-                    <p className="px-3 py-2 text-xs text-muted-foreground">
-                      {playerSearch1 ? 'Sin resultados' : 'No hay jugadores disponibles'}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Player 2 */}
-            <div>
-              <Label className="text-sm font-medium text-muted-foreground">Jugador 2</Label>
-              <div className="relative mt-1">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                <Input
-                  value={playerSearch2}
-                  onChange={e => setPlayerSearch2(e.target.value)}
-                  placeholder="Buscar jugador..."
-                  className="pl-8"
-                />
-              </div>
-              {newTeam.player2 && (
-                <div className="flex items-center justify-between bg-muted/50 px-3 py-1.5 mt-2 rounded-md">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-3.5 h-3.5 text-primary" />
-                    <span className="text-sm font-medium">{newTeam.player2.name}</span>
-                  </div>
-                  <button onClick={() => { setNewTeam(n => ({ ...n, player2: null })); setPlayerSearch2('') }}>
-                    <X className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground" />
-                  </button>
-                </div>
-              )}
-              {!newTeam.player2 && (
-                <div className="max-h-32 overflow-y-auto mt-2 space-y-0.5 border border-border rounded-md">
-                  {filteredPlayers2.slice(0, 10).map(p => (
-                    <button
-                      key={p.id}
-                      onClick={() => togglePlayer2(p)}
-                      className="w-full text-left px-3 py-1.5 text-sm hover:bg-muted/50 transition-colors"
-                    >
-                      {p.name}
-                    </button>
-                  ))}
-                  {filteredPlayers2.length === 0 && (
-                    <p className="px-3 py-2 text-xs text-muted-foreground">
-                      {playerSearch2 ? 'Sin resultados' : 'No hay jugadores disponibles'}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2 border-t border-border">
-              <Button variant="outline" size="sm" onClick={() => { setShowCreate(false); setNewTeam({ name: '', category: '', player1: null, player2: null }) }}>
-                Cancelar
-              </Button>
-              <Button size="sm" onClick={handleCreateTeam} disabled={!newTeam.name.trim() || !newTeam.category || !newTeam.player1 || !newTeam.player2}>
-                <Plus className="w-3.5 h-3.5 mr-1.5" /> Crear equipo
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
+      {/* --- Edit Team Dialog --- */}
       <Dialog open={!!editingTeam} onOpenChange={o => !o && setEditingTeam(null)}>
         <DialogContent>
           <DialogHeader>
