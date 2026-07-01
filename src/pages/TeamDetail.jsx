@@ -2,11 +2,70 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabaseClient';
 import { useTeamStats } from '../hooks/useTeamStats';
-import TeamHeader from '../components/teams/TeamHeader';
-import TeamStatsCards from '../components/teams/TeamStatsCards';
 import TeamMatchHistory from '../components/teams/TeamMatchHistory';
 import TeamComparison from '../components/teams/TeamComparison';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowLeft, Trophy, Target, XCircle, TrendingUp, Users } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { CATEGORY_COLORS } from '@/lib/theme-palette';
+
+const fadeIn = {
+  hidden: { opacity: 0, y: 12 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } },
+}
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.06 },
+  },
+}
+
+function StatMiniCard({ icon: Icon, label, value, color }) {
+  return (
+    <motion.div variants={fadeIn}>
+      <Card className="h-full">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+          <CardTitle className="text-xs font-medium text-muted-foreground">{label}</CardTitle>
+          <Icon className={`h-3.5 w-3.5 ${color}`} />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{value}</div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  )
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="container mx-auto py-6 px-4 max-w-6xl space-y-6">
+      <div className="h-9 w-28 bg-muted animate-pulse rounded-lg" />
+      <div className="bg-card border border-border rounded-xl p-6 space-y-4">
+        <div className="h-8 bg-muted animate-pulse rounded w-64" />
+        <div className="flex gap-3">
+          <div className="h-5 bg-muted animate-pulse rounded w-20" />
+          <div className="h-5 bg-muted animate-pulse rounded w-24" />
+          <div className="h-5 bg-muted animate-pulse rounded w-20" />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="bg-card border border-border rounded-xl p-4 space-y-2">
+            <div className="h-3 bg-muted animate-pulse rounded w-16" />
+            <div className="h-8 bg-muted animate-pulse rounded w-12" />
+          </div>
+        ))}
+      </div>
+      <Skeleton className="h-96 w-full rounded-xl" />
+    </div>
+  )
+}
 
 export default function TeamDetail() {
   const { leagueId, teamId } = useParams();
@@ -63,38 +122,132 @@ export default function TeamDetail() {
   });
 
   if (teamLoading || statsLoading) {
-    return (
-      <div className="container mx-auto py-6 px-4 max-w-6xl space-y-6">
-        <Skeleton className="h-32 w-full" />
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <Skeleton className="h-24" />
-          <Skeleton className="h-24" />
-          <Skeleton className="h-24" />
-          <Skeleton className="h-24" />
-        </div>
-        <Skeleton className="h-64 w-full" />
-        <Skeleton className="h-48 w-full" />
-      </div>
-    );
+    return <LoadingSkeleton />;
   }
 
   if (!team) {
     return (
-      <div className="text-center py-12">
-        <h2 className="text-xl font-semibold mb-2">Equipo no encontrado</h2>
-        <p className="text-muted-foreground">El equipo que buscas no existe o fue eliminado.</p>
+      <div className="container mx-auto py-6 px-4 max-w-6xl">
+        <button
+          onClick={() => navigate(`/ligas/${leagueId}/equipos`)}
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+        >
+          <ArrowLeft className="w-3 h-3" /> Volver
+        </button>
+        <div className="text-center py-16 bg-card border border-border rounded-xl">
+          <div className="w-16 h-16 rounded-xl bg-muted flex items-center justify-center mx-auto mb-4">
+            <Users className="w-8 h-8 text-muted-foreground" />
+          </div>
+          <p className="text-base font-semibold mb-1">Equipo no encontrado</p>
+          <p className="text-sm text-muted-foreground">El equipo que buscas no existe o fue eliminado.</p>
+        </div>
       </div>
     );
   }
 
+  const cat = CATEGORY_COLORS[team.category];
+  const categoryColor = cat ? `${cat.bg} ${cat.text} ${cat.border}` : 'bg-muted text-muted-foreground';
+  const winRate = stats?.win_rate || 0;
+  const avgScore = stats?.avg_score || 0;
+
   return (
     <div className="container mx-auto py-6 px-4 max-w-6xl">
-      <TeamHeader team={team} leagueName={league?.name} />
-      <TeamStatsCards stats={stats} />
-      <div className="mb-6">
-        <TeamComparison teamStats={stats} leagueAvg={leagueAvg} matchHistory={matches} teamId={teamId} />
-      </div>
-      <TeamMatchHistory matches={matches} teamId={teamId} />
+      {/* Back button */}
+      <button
+        onClick={() => navigate(`/ligas/${leagueId}/equipos`)}
+        className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+      >
+        <ArrowLeft className="w-3 h-3" /> Volver
+      </button>
+
+      {/* Team Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-card border border-border rounded-xl p-6 mb-6"
+      >
+        <div className="flex items-start gap-4">
+          <div className="w-14 h-14 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-xl shrink-0">
+            {team.team_number}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl font-bold mb-1 truncate">
+              {team.team_name || `Equipo ${team.team_number}`}
+            </h1>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge variant="outline" className={categoryColor}>{team.category}</Badge>
+              {team.group && <Badge variant="outline">Grupo {team.group}</Badge>}
+              {league?.name && <span className="text-sm text-muted-foreground">{league.name}</span>}
+            </div>
+            <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <Trophy className="w-3.5 h-3.5" />
+                {stats?.matches_won ?? 0}-{stats?.matches_draw ?? 0}-{stats?.matches_lost ?? 0}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <TrendingUp className="w-3.5 w-3.5" />
+                {avgScore > 0 ? avgScore.toFixed(1) : '-'} avg
+              </span>
+              <span className="text-xs">{winRate.toFixed(1)}% winrate</span>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Stats Cards */}
+      <motion.div
+        variants={staggerContainer}
+        initial="hidden"
+        animate="show"
+        className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6"
+      >
+        <StatMiniCard
+          icon={Target}
+          label="Ganados"
+          value={stats?.matches_won ?? 0}
+          color="text-emerald-500"
+        />
+        <StatMiniCard
+          icon={TrendingUp}
+          label="Empates"
+          value={stats?.matches_draw ?? 0}
+          color="text-amber-500"
+        />
+        <StatMiniCard
+          icon={XCircle}
+          label="Perdidos"
+          value={stats?.matches_lost ?? 0}
+          color="text-red-500"
+        />
+        <StatMiniCard
+          icon={Trophy}
+          label="Promedio"
+          value={avgScore > 0 ? avgScore.toFixed(1) : '-'}
+          color="text-primary"
+        />
+      </motion.div>
+
+      {/* Tabs */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+      >
+        <Tabs defaultValue="history" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="history">Historial</TabsTrigger>
+            <TabsTrigger value="comparison">Comparación</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="history">
+            <TeamMatchHistory matches={matches} teamId={teamId} />
+          </TabsContent>
+
+          <TabsContent value="comparison">
+            <TeamComparison teamStats={stats} leagueAvg={leagueAvg} matchHistory={matches} teamId={teamId} />
+          </TabsContent>
+        </Tabs>
+      </motion.div>
     </div>
   );
 }
