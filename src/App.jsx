@@ -15,7 +15,7 @@ import LeagueDetail from '@/pages/LeagueDetail'
 import Teams from '@/pages/Teams'
 import TeamDetail from '@/pages/TeamDetail'
 import Matches from '@/pages/Matches'
-import Participants from '@/pages/Participants'
+import Players from '@/pages/Players'
 import Standings from '@/pages/Standings'
 import Profile from '@/pages/Profile'
 import Admin from '@/pages/Admin'
@@ -241,7 +241,7 @@ export default function App() {
         <Route path="/partidos" element={<PartidosSelector />} />
         <Route path="/clasificacion" element={<ClasificacionSelector />} />
         <Route path="/admin" element={<AdminSelector />} />
-        <Route path="/participantes" element={<Participants />} />
+        <Route path="/participantes" element={<Players />} />
         <Route path="/express" element={<Express />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="*" element={<Navigate to="/" replace />} />
