@@ -11,6 +11,7 @@ import { PlayerPickerPanel } from '@/components/leagues/PlayerPickerPanel'
 import { ArrowLeft, Trash2, Swords, Plus } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
+import { toast } from 'sonner'
 
 export default function Teams() {
   const { leagueId } = useParams()
@@ -80,7 +81,7 @@ export default function Teams() {
         await createTeamsBatch.mutateAsync(teamsToInsert)
         teamsQuery.refetch()
       } catch (err) {
-        alert('Error al crear equipos: ' + err.message)
+        toast.error('Error al crear equipos: ' + err.message)
       }
     }
     setShowCreateModal(false)
@@ -133,7 +134,8 @@ export default function Teams() {
                   initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.03 }}
-                  className="bg-card border border-border p-4 hover:border-border transition-colors"
+                  onClick={() => navigate(`/ligas/${leagueId}/equipos/${team.id}`)}
+                  className="bg-card border border-border p-4 hover:border-foreground/30 transition-colors cursor-pointer"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3 min-w-0">

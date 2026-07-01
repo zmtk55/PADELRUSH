@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Trophy, Settings, Users, Calendar, Check } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Trophy, Settings, Users, Calendar, Check, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -85,6 +86,47 @@ export default function LeagueSetupWizard() {
   const participants = participantsQuery.data || []
   const [categoryInput, setCategoryInput] = useState('')
 
+  useEffect(() => {
+    if (existingLeague && isEditing) {
+      setForm({
+        name: existingLeague.name || '',
+        slug: existingLeague.slug || '',
+        sport: existingLeague.sport || 'padel',
+        gender: existingLeague.gender || 'femenil',
+        status: existingLeague.status || 'proxima',
+        season: existingLeague.season || '',
+        color: existingLeague.color || '#c96442',
+        organizer_name: existingLeague.organizer_name || '',
+        organizer_whatsapp: existingLeague.organizer_whatsapp || '',
+        organizer_instagram: existingLeague.organizer_instagram || '',
+        categories: existingLeague.categories || [],
+        sets_per_match: existingLeague.sets_per_match ? String(existingLeague.sets_per_match) : '2',
+        tiebreak_enabled: existingLeague.tiebreak_enabled ?? true,
+        category_formats: existingLeague.category_formats || {},
+      })
+    }
+  }, [existingLeague, isEditing])
+
+  const validateStep = (s) => {
+    if (s === 0 && !form.name.trim()) {
+      toast.error('El nombre de la liga es obligatorio')
+      return false
+    }
+    if (s === 1 && form.categories.length === 0) {
+      toast.error('Selecciona al menos una categoría')
+      return false
+    }
+    if (s === 2 && teams.length < 2) {
+      toast.error('Crea al menos 2 equipos')
+      return false
+    }
+    if (s === 3 && schedules.length < 1) {
+      toast.error('Agrega al menos 1 partido al calendario')
+      return false
+    }
+    return true
+  }
+
   const handleChange = (field, value) => setForm(f => ({ ...f, [field]: value }))
 
   const addCategory = () => {
@@ -155,7 +197,7 @@ export default function LeagueSetupWizard() {
           }
           
           teamsData.push({
-            // league_id removed - participants are global
+            league_id: savedLeague.id,
             category: t.category,
             team_number: t.team_number,
             player1_id: p1Id,
@@ -181,7 +223,7 @@ export default function LeagueSetupWizard() {
       
       if (schedules.length > 0 && savedLeague?.id) {
         const matchesData = schedules.map(s => ({
-          // league_id removed - participants are global
+          league_id: savedLeague.id,
           category: s.category,
           round: s.round,
           match_number: s.match_number,
@@ -201,7 +243,7 @@ export default function LeagueSetupWizard() {
       
       navigate('/ligas/' + savedLeague.id)
     } catch (e) {
-      alert('Error: ' + (e?.message || e?.error?.message || 'Error desconocido'))
+      toast.error('Error: ' + (e?.message || e?.error?.message || 'Error desconocido'))
       setSaving(false)
     }
   }
@@ -399,12 +441,12 @@ export default function LeagueSetupWizard() {
         </Button>
         
         {step < steps.length - 1 ? (
-          <Button onClick={() => setStep(step + 1)}>
+          <Button onClick={() => { if (validateStep(step)) setStep(step + 1) }}>
             Siguiente <ChevronRight className="w-4 h-4" />
           </Button>
         ) : (
           <Button onClick={handleSave} disabled={saving}>
-            <Check className="w-4 h-4" />
+            {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Check className="w-4 h-4" />}
             {saving ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Crear liga'}
           </Button>
         )}

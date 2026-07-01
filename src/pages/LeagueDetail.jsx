@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Trophy, Users, Calendar, Edit, BarChart3, ChevronRight, LayoutGrid, ArrowRight } from 'lucide-react'
+import { Trophy, Users, Calendar, Edit, BarChart3, ChevronRight, LayoutGrid, ArrowRight, Plus, Medal } from 'lucide-react'
 import { useLeagues } from '@/hooks/useLeagues'
 import { useTeams } from '@/hooks/useTeams'
 import { useMatches } from '@/hooks/useMatches'
@@ -116,6 +116,18 @@ export default function LeagueDetail() {
           <StatBox icon={Trophy} value={jugados} label="Jugados" />
           <StatBox icon={Calendar} value={programados} label="Programados" />
         </div>
+
+        {/* Quick action buttons */}
+        {isOrganizer && (
+          <div className="flex flex-wrap gap-2 mt-4">
+            <Button size="sm" variant="outline" onClick={() => navigate(`/ligas/${leagueId}/partidos`)}>
+              <Plus className="w-3.5 h-3.5 mr-1.5" /> Crear partido
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => navigate(`/ligas/${leagueId}/clasificacion`)}>
+              <Medal className="w-3.5 h-3.5 mr-1.5" /> Ver clasificación
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Quick navigation links */}
@@ -176,9 +188,9 @@ export default function LeagueDetail() {
         <div className="bg-card border border-border p-4 sm:p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-heading font-bold text-lg tracking-tight">Equipos</h2>
-            {teams.length > 0 && (
+            {teams.length > 8 && (
               <Button variant="ghost" size="sm" onClick={() => navigate(`/ligas/${leagueId}/equipos`)}>
-                Ver todos <ChevronRight className="w-3 h-3 ml-1" />
+                Ver todos los equipos <ChevronRight className="w-3 h-3 ml-1" />
               </Button>
             )}
           </div>

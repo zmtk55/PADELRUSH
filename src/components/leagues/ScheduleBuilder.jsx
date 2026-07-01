@@ -55,11 +55,19 @@ export function ScheduleBuilder({ leagueId, teams, schedules: externalSchedules,
   }
 
   const updateSchedule = (id, field, value) => {
-    setSchedules((prev) => prev.map((s) => (s.id === id ? { ...s, [field]: value } : s)))
+    setSchedules((prev) => {
+      const updated = prev.map((s) => (s.id === id ? { ...s, [field]: value } : s))
+      onSchedulesChange?.(updated)
+      return updated
+    })
   }
 
   const removeSchedule = (id) => {
-    setSchedules((prev) => prev.filter((s) => s.id !== id))
+    setSchedules((prev) => {
+      const updated = prev.filter((s) => s.id !== id)
+      onSchedulesChange?.(updated)
+      return updated
+    })
   }
 
 

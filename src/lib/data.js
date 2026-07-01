@@ -49,6 +49,7 @@ export function useFetch(fn, deps = [], initialValue = null) {
           if (initialValue !== null) {
             setData(initialValue)
           }
+          setError(e)
           setLoading(false)
         }
       })

@@ -489,7 +489,7 @@ export function PlayerPickerPanel({ participants, categories, teams, onTeamsChan
               teams={teams.filter(t => t.category === selectedCategory)}
               gruposLetras={enabledGroups}
               onMoveTeam={(teamId, newGroup) => {
-                setTeams(teams.map(t => 
+                onTeamsChange(teams.map(t => 
                   t.id === teamId ? { ...t, group: newGroup } : t
                 ));
               }}
@@ -506,7 +506,7 @@ export function PlayerPickerPanel({ participants, categories, teams, onTeamsChan
                   const overOriginalIdx = teams.indexOf(overTeam);
                   newTeams.splice(activeOriginalIdx, 1);
                   newTeams.splice(overOriginalIdx, 0, activeTeam);
-                  setTeams(newTeams);
+                  onTeamsChange(newTeams);
                 }
               }}
             />
