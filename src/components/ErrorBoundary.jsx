@@ -1,4 +1,5 @@
 import { Component } from 'react'
+import { AlertCircle } from 'lucide-react'
 
 export class ErrorBoundary extends Component {
   constructor(props) {
@@ -18,51 +19,18 @@ export class ErrorBoundary extends Component {
   render() {
     if (this.state.error) {
       return (
-        <div style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '2rem',
-          background: '#f5f4ed',
-          fontFamily: 'system-ui, sans-serif',
-        }}>
-          <div style={{ maxWidth: '600px', width: '100%' }}>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem', color: '#c96442' }}>
-              Error en la aplicación
-            </h1>
-            <div style={{
-              background: '#fff',
-              border: '1px solid #e2dcd3',
-              borderRadius: '0.5rem',
-              padding: '1.5rem',
-              marginTop: '1rem',
-            }}>
-              <p style={{ color: '#dc2626', fontWeight: 500, marginBottom: '1rem' }}>
-                {this.state.error?.message || 'Error desconocido'}
-              </p>
-              <pre style={{
-                fontSize: '0.75rem',
-                color: '#666',
-                whiteSpace: 'pre-wrap',
-                maxHeight: '300px',
-                overflow: 'auto',
-              }}>
-                {this.state.error?.stack}
-              </pre>
+        <div className="min-h-screen flex items-center justify-center bg-background text-foreground p-4">
+          <div className="max-w-md w-full bg-card border border-border p-6 rounded-lg shadow-card">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-destructive/10 text-destructive flex items-center justify-center rounded-full">
+                <AlertCircle className="w-5 h-5" />
+              </div>
+              <h1 className="text-lg font-semibold">Algo salió mal</h1>
             </div>
+            <p className="text-muted-foreground text-sm mb-4">{this.state.error?.message}</p>
             <button
               onClick={() => window.location.reload()}
-              style={{
-                marginTop: '1rem',
-                padding: '0.5rem 1rem',
-                background: '#c96442',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '0.375rem',
-                cursor: 'pointer',
-                fontSize: '0.875rem',
-              }}
+              className="w-full bg-primary text-primary-foreground py-2 px-4 rounded-lg hover:bg-primary/90 transition-colors"
             >
               Recargar página
             </button>

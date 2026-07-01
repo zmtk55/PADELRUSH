@@ -43,6 +43,37 @@
     --shadow-card: 0px 0px 0px 1px rgba(255, 255, 255, 0.06), 0px 2px 2px rgba(0, 0, 0, 0.2);
     --shadow-elevated: 0px 0px 0px 1px rgba(255, 255, 255, 0.08), 0px 2px 2px rgba(0, 0, 0, 0.2), 0px 8px 8px -8px rgba(0, 0, 0, 0.3);
     --shadow-focus: 0px 0px 0px 2px hsla(14, 100%, 58%, 0.6);
+    --shadow-card-hover: 0px 0px 0px 1px rgba(0,0,0,0.05), 0px 4px 8px rgba(0,0,0,0.1);
+    --shadow-glow-sm: 0px 0px 12px rgba(255, 107, 53, 0.15);
+
+    --success-rgb: 34, 197, 94;
+    --warning-rgb: 245, 158, 11;
+    --destructive-rgb: 239, 68, 68;
+
+    --chart-grid: 243 232 255;
+    --chart-tick: 107 114 128;
+    --chart-bar-primary: 17 17 17;
+    --chart-bar-secondary: 209 213 219;
+    --chart-tooltip-bg: 255 255 255;
+    --chart-tooltip-border: 229 231 235;
+    --chart-tooltip-text: 17 17 17;
+
+    --level-3ra: 239 68 68;
+    --level-3ra-bg: 254 242 242;
+    --level-3ra-border: 254 202 202;
+    --level-4ta: 249 115 22;
+    --level-4ta-bg: 255 247 237;
+    --level-4ta-border: 254 215 170;
+    --level-5ta: 59 130 246;
+    --level-5ta-bg: 239 246 255;
+    --level-5ta-border: 191 219 254;
+    --level-6ta: 34 197 94;
+    --level-6ta-bg: 240 253 244;
+    --level-6ta-border: 187 247 208;
+
+    --medal-gold: 184 134 11;
+    --medal-silver: 160 160 160;
+    --medal-bronze: 205 127 50;
   }
 
   .light {
@@ -83,6 +114,30 @@
     --shadow-card: 0px 0px 0px 1px rgba(0, 0, 0, 0.08), 0px 2px 2px rgba(0, 0, 0, 0.04);
     --shadow-elevated: 0px 0px 0px 1px rgba(0, 0, 0, 0.08), 0px 2px 2px rgba(0, 0, 0, 0.04), 0px 8px 8px -8px rgba(0, 0, 0, 0.08);
     --shadow-focus: 0px 0px 0px 2px hsla(14, 100%, 52%, 0.5);
+
+    --chart-grid: 42 42 58;
+    --chart-tick: 156 163 175;
+    --chart-bar-primary: 255 255 255;
+    --chart-bar-secondary: 75 85 99;
+    --chart-tooltip-bg: 30 30 46;
+    --chart-tooltip-border: 55 55 75;
+    --chart-tooltip-text: 255 255 255;
+
+    --level-3ra: 248 113 113;
+    --level-3ra-bg: 69 20 20;
+    --level-3ra-border: 127 29 29;
+    --level-4ta: 251 146 60;
+    --level-4ta-bg: 70 30 10;
+    --level-4ta-border: 120 50 10;
+    --level-5ta: 96 165 250;
+    --level-5ta-bg: 20 40 80;
+    --level-5ta-border: 30 60 120;
+    --level-6ta: 52 211 153;
+    --level-6ta-bg: 10 50 35;
+    --level-6ta-border: 20 80 50;
+
+    --shadow-card-hover: 0px 0px 0px 1px rgba(255,255,255,0.08), 0px 4px 8px rgba(0,0,0,0.4);
+    --shadow-glow-sm: 0px 0px 12px rgba(255, 107, 53, 0.3);
   }
 
   * { @apply border-border; }

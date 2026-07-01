@@ -102,34 +102,43 @@ export function computeGrade(winRate, total) {
     Math.min(total.current_win_streak / 10, 1) * 10 +
     Math.min(total.leagues_count / 5, 1) * 10
 
-  if (score >= 90) return { grade: 'S', color: '#f59e0b', label: 'ELITE' }
-  if (score >= 75) return { grade: 'A', color: '#2dd4a0', label: 'EXCELLENT' }
-  if (score >= 60) return { grade: 'B', color: '#3b82f6', label: 'GOOD' }
-  if (score >= 45) return { grade: 'C', color: '#8b5cf6', label: 'AVERAGE' }
-  if (score >= 30) return { grade: 'D', color: '#f97316', label: 'DEVELOPING' }
-  return { grade: 'F', color: '#f43f5e', label: 'BEGINNER' }
+  const gradeColors = {
+    S: { color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/30', label: 'Elite' },
+    A: { color: 'text-teal-400', bg: 'bg-teal-400/10', border: 'border-teal-400/30', label: 'Excellent' },
+    B: { color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/30', label: 'Good' },
+    C: { color: 'text-violet-500', bg: 'bg-violet-500/10', border: 'border-violet-500/30', label: 'Average' },
+    D: { color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/30', label: 'Developing' },
+    F: { color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'border-rose-500/30', label: 'Beginner' },
+  }
+
+  if (score >= 90) return gradeColors.S
+  if (score >= 75) return gradeColors.A
+  if (score >= 60) return gradeColors.B
+  if (score >= 45) return gradeColors.C
+  if (score >= 30) return gradeColors.D
+  return gradeColors.F
 }
 
 const ACHIEVEMENT_DEFS = [
-  { id: 'first_match', label: 'First Match', icon: 'Swords', color: '#3b82f6',
+  { id: 'first_match', label: 'First Match', icon: 'Swords', color: 'text-blue-500',
     check: (t) => t.matches_played >= 1, desc: 'Jugar el primer partido' },
-  { id: 'first_win', label: 'First Win', icon: 'Trophy', color: '#f59e0b',
+  { id: 'first_win', label: 'First Win', icon: 'Trophy', color: 'text-amber-500',
     check: (t) => t.matches_won >= 1, desc: 'Ganar el primer partido' },
-  { id: 'ten_wins', label: '10 Wins', icon: 'Award', color: '#2dd4a0',
+  { id: 'ten_wins', label: '10 Wins', icon: 'Award', color: 'text-teal-400',
     check: (t) => t.matches_won >= 10, desc: 'Alcanzar 10 victorias' },
-  { id: 'fifty_matches', label: '50 Matches', icon: 'Swords', color: '#8b5cf6',
+  { id: 'fifty_matches', label: '50 Matches', icon: 'Swords', color: 'text-violet-500',
     check: (t) => t.matches_played >= 50, desc: 'Jugar 50 partidos' },
-  { id: 'on_fire', label: 'On Fire', icon: 'Flame', color: '#f97316',
+  { id: 'on_fire', label: 'On Fire', icon: 'Flame', color: 'text-orange-500',
     check: (t) => t.current_win_streak >= 5, desc: '5 victorias consecutivas' },
-  { id: 'iron_will', label: 'Iron Will', icon: 'Shield', color: '#06b6d4',
+  { id: 'iron_will', label: 'Iron Will', icon: 'Shield', color: 'text-cyan-500',
     check: (t) => t.current_lose_streak >= 3, desc: 'Jugar tras 3 derrotas' },
-  { id: 'rising_star', label: 'Rising Star', icon: 'Star', color: '#f59e0b',
+  { id: 'rising_star', label: 'Rising Star', icon: 'Star', color: 'text-amber-500',
     check: (t) => t.best_ranking <= 2, desc: 'Alcanzar top 2' },
-  { id: 'veteran', label: 'Veteran', icon: 'Medal', color: '#10b981',
+  { id: 'veteran', label: 'Veteran', icon: 'Medal', color: 'text-emerald-500',
     check: (t) => t.leagues_count >= 3, desc: 'Participar en 3+ ligas' },
-  { id: 'champion', label: 'Champion', icon: 'Crown', color: '#f59e0b',
+  { id: 'champion', label: 'Champion', icon: 'Crown', color: 'text-amber-500',
     check: (t) => t.best_ranking === 1, desc: 'Ser #1 en una liga' },
-  { id: 'centurion', label: 'Centurion', icon: 'Target', color: '#f43f5e',
+  { id: 'centurion', label: 'Centurion', icon: 'Target', color: 'text-rose-500',
     check: (t) => t.sets_won >= 100, desc: 'Ganar 100 sets' },
 ]
 
