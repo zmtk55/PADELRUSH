@@ -90,7 +90,7 @@ export default function Teams() {
 
 
   return (
-    <div>
+    <div className="container mx-auto py-6 px-4 max-w-6xl">
       <button
         onClick={() => navigate(`/ligas/${leagueId}`)}
         className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"

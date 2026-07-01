@@ -63,7 +63,7 @@ export default function Matches() {
   ]
 
   return (
-    <div>
+    <div className="container mx-auto py-6 px-4 max-w-6xl">
       <Button variant="ghost" onClick={() => navigate(`/ligas/${leagueId}`)} className="mb-4">
         <ArrowLeft className="w-4 h-4" /> Volver a liga
       </Button>
@@ -197,13 +197,13 @@ function MatchCard({ match, isOrganizer, onEdit, onDelete, index = 0 }) {
       <div className="p-3 sm:p-4">
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="flex-1 min-w-0">
-            <div className={cn("bg-muted/50 rounded-md px-2.5 py-2", t1Won && "ring-1 ring-green-500/30")}>
+            <div className={cn("bg-muted/50 rounded-md px-2.5 py-2", t1Won && "ring-1 ring-success/30")}>
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-muted-foreground/20 flex items-center justify-center text-xs sm:text-sm font-semibold text-muted-foreground shrink-0">
                   {(match.team1_name || "E" + String(match.team1_number || 1)).charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0">
-                  <div className={cn("text-xs sm:text-sm font-semibold truncate leading-tight", t1Won && "text-green-500")}>
+                  <div className={cn("text-xs sm:text-sm font-semibold truncate leading-tight", t1Won && "text-success")}>
                     {match.team1_name || ("Equipo " + String(match.team1_number || 1))}
                   </div>
                   <div className="text-[10px] text-muted-foreground/60">Sets: {match.sets_won_team1 ?? 0}</div>
@@ -217,10 +217,10 @@ function MatchCard({ match, isOrganizer, onEdit, onDelete, index = 0 }) {
             </div>
           </div>
           <div className="flex-1 min-w-0 text-right">
-            <div className={cn("bg-muted/50 rounded-md px-2.5 py-2", t2Won && "ring-1 ring-green-500/30")}>
+            <div className={cn("bg-muted/50 rounded-md px-2.5 py-2", t2Won && "ring-1 ring-success/30")}>
               <div className="flex items-center gap-2 justify-end">
                 <div className="min-w-0">
-                  <div className={cn("text-xs sm:text-sm font-semibold truncate leading-tight", t2Won && "text-green-500")}>
+                  <div className={cn("text-xs sm:text-sm font-semibold truncate leading-tight", t2Won && "text-success")}>
                     {match.team2_name || ("Equipo " + String(match.team2_number || 2))}
                   </div>
                   <div className="text-[10px] text-muted-foreground/60">Sets: {match.sets_won_team2 ?? 0}</div>
@@ -240,13 +240,13 @@ function MatchCard({ match, isOrganizer, onEdit, onDelete, index = 0 }) {
         <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/40">
           <div className="flex items-center gap-2">
             {match.status === 'jugado' ? (
-              <span className="bg-green-500/10 text-green-600 text-[10px] font-medium px-2 py-0.5 rounded-full">Completado</span>
+              <Badge variant="success" className="text-[10px]">Completado</Badge>
             ) : match.status === 'walkover' ? (
-              <span className="bg-red-500/10 text-red-600 text-[10px] font-medium px-2 py-0.5 rounded-full">W/O</span>
+              <Badge variant="destructive" className="text-[10px]">W/O</Badge>
             ) : match.status === 'cancelado' ? (
-              <span className="bg-red-500/10 text-red-600 text-[10px] font-medium px-2 py-0.5 rounded-full">Cancelado</span>
+              <Badge variant="destructive" className="text-[10px]">Cancelado</Badge>
             ) : (
-              <span className="bg-amber-500/10 text-amber-600 text-[10px] font-medium px-2 py-0.5 rounded-full">Pendiente</span>
+              <Badge variant="warning" className="text-[10px]">Pendiente</Badge>
             )}
           </div>
           {match.status === 'jugado' && (
@@ -265,7 +265,7 @@ function MatchCard({ match, isOrganizer, onEdit, onDelete, index = 0 }) {
             <button className="w-7 h-7 rounded-lg hover:bg-secondary/50 flex items-center justify-center transition-colors" onClick={() => onEdit(match)}>
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
             </button>
-            <button className="w-7 h-7 rounded-lg hover:bg-red-500/10 flex items-center justify-center transition-colors text-red-500" onClick={onDelete}>
+            <button className="w-7 h-7 rounded-lg hover:bg-destructive/10 flex items-center justify-center transition-colors duration-150 text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" onClick={onDelete}>
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
             </button>
           </div>
