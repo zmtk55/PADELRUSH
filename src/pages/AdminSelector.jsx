@@ -1,8 +1,18 @@
 import { useNavigate } from 'react-router-dom'
-import { Shield, ChevronRight } from 'lucide-react'
+import { Shield, ChevronRight, FolderOpen, Settings } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { useLeagues } from '@/hooks/useLeagues'
 import { motion } from 'framer-motion'
+
+const container = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.06 } },
+}
+
+const item = {
+  hidden: { opacity: 0, y: 12 },
+  show: { opacity: 1, y: 0 },
+}
 
 export default function AdminSelector() {
   const navigate = useNavigate()
@@ -10,62 +20,90 @@ export default function AdminSelector() {
   const leagues = leaguesQuery.data || []
 
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-      <PageHeader title="Panel de Control" description="Selecciona una liga para administrar" />
+    <div className="container mx-auto py-6 px-4 max-w-4xl">
+      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+        <PageHeader title="Administración" description="Selecciona una liga para administrar" />
+      </motion.div>
 
       {leaguesQuery.isLoading && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map(i => (
             <div key={i} className="bg-card border border-border rounded-xl p-5 animate-pulse">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-muted" />
+                <div className="w-12 h-12 rounded-xl bg-muted" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-muted rounded w-24" />
-                  <div className="h-3 bg-muted rounded w-16" />
+                  <div className="h-4 bg-muted rounded w-28" />
+                  <div className="h-3 bg-muted rounded w-20" />
                 </div>
+              </div>
+              <div className="mt-4 pt-4 border-t border-border">
+                <div className="h-3 bg-muted rounded w-16" />
               </div>
             </div>
           ))}
         </div>
       )}
 
-      {!leaguesQuery.isLoading && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {leagues.map((l, i) => (
-            <motion.div
+      {!leaguesQuery.isLoading && leagues.length > 0 && (
+        <motion.div
+          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          variants={container}
+          initial="hidden"
+          animate="show"
+        >
+          {leagues.map(l => (
+            <motion.button
               key={l.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              whileHover={{ y: -2 }}
+              variants={item}
+              whileHover={{ y: -3, transition: { duration: 0.2 } }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => navigate(`/ligas/${l.id}/admin`)}
-              className="group bg-card border border-border rounded-xl p-5 hover:shadow-card-hover transition-all cursor-pointer"
+              className="group relative bg-card border border-border rounded-xl p-5 text-left transition-all duration-200 hover:shadow-[0_8px_30px_-12px_hsl(var(--primary)/0.25)] hover:border-primary/40 cursor-pointer overflow-hidden"
             >
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-md"
-                  style={{ backgroundColor: l.color || 'hsl(var(--primary))' }}>
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
+
+              <div className="relative flex items-start gap-3">
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg shrink-0 shadow-md"
+                  style={{ backgroundColor: l.color || 'hsl(var(--primary))' }}
+                >
                   {l.name.charAt(0)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold truncate group-hover:text-primary transition-colors">{l.name}</p>
-                  <p className="text-xs text-muted-foreground">{l.gender} · {l.season || '—'}</p>
+                  <p className="font-semibold truncate group-hover:text-primary transition-colors duration-200">
+                    {l.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {[l.gender, l.season].filter(Boolean).join(' · ') || 'Sin detalles'}
+                  </p>
                 </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-all group-hover:translate-x-0.5 shrink-0" />
+                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all duration-200 shrink-0 mt-1" />
               </div>
-            </motion.div>
-          ))}
 
-          {leagues.length === 0 && (
-            <div className="text-center py-20 col-span-full">
-              <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-8 h-8 text-muted-foreground" />
+              <div className="relative mt-4 pt-3 border-t border-border/60">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Settings className="w-3.5 h-3.5" />
+                  <span>Administrar liga</span>
+                </div>
               </div>
-              <p className="text-lg font-medium mb-2">No hay ligas disponibles</p>
-              <p className="text-sm text-muted-foreground">Crea una liga primero para poder administrarla</p>
-            </div>
-          )}
-        </div>
+            </motion.button>
+          ))}
+        </motion.div>
       )}
-    </motion.div>
+
+      {!leaguesQuery.isLoading && leagues.length === 0 && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center py-20"
+        >
+          <div className="w-16 h-16 rounded-2xl bg-muted/60 flex items-center justify-center mx-auto mb-4">
+            <FolderOpen className="w-8 h-8 text-muted-foreground" />
+          </div>
+          <p className="text-lg font-medium mb-1">No hay ligas disponibles</p>
+          <p className="text-sm text-muted-foreground">Crea una liga primero para poder administrarla</p>
+        </motion.div>
+      )}
+    </div>
   )
 }
