@@ -67,7 +67,7 @@ export default function LeagueDetail() {
   )
   if (!league) return (
     <div className="container mx-auto py-6 px-4 max-w-6xl text-center py-20">
-      <p className="text-red-600 text-lg font-medium">Liga no encontrada</p>
+      <p className="text-destructive text-lg font-medium">Liga no encontrada</p>
       <Button variant="outline" className="mt-4" onClick={() => navigate('/ligas')}>Volver a ligas</Button>
     </div>
   )

@@ -79,9 +79,9 @@ function PlayerAutocomplete({ participants, value, onChange, placeholder, exclud
         </div>
         <span className="text-sm font-medium">{value.name}</span>
         {value.isNew ? (
-          <span className="text-[9px] font-semibold text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded-full">Nuevo</span>
+          <span className="text-[9px] font-semibold text-warning bg-warning/10 px-1.5 py-0.5 rounded-full">Nuevo</span>
         ) : (
-          <span className="text-[9px] font-semibold text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 rounded-full">Existente</span>
+          <span className="text-[9px] font-semibold text-success bg-success/10 px-1.5 py-0.5 rounded-full">Existente</span>
         )}
         <button
           onClick={clearSelection}
@@ -327,8 +327,8 @@ export function PlayerPickerPanel({ participants, categories, teams, onTeamsChan
                 <span className={
                   'ml-2 text-[10px] px-1.5 py-0.5 rounded-full ' +
                   (player1.isNew
-                    ? 'bg-amber-500/10 text-amber-600'
-                    : 'bg-emerald-500/10 text-emerald-600')
+                    ? 'bg-warning/10 text-warning'
+                    : 'bg-success/10 text-success')
                 }>
                   {player1.isNew ? 'Nuevo' : 'Existente'}
                 </span>
@@ -349,8 +349,8 @@ export function PlayerPickerPanel({ participants, categories, teams, onTeamsChan
                 <span className={
                   'ml-2 text-[10px] px-1.5 py-0.5 rounded-full ' +
                   (player2.isNew
-                    ? 'bg-amber-500/10 text-amber-600'
-                    : 'bg-emerald-500/10 text-emerald-600')
+                    ? 'bg-warning/10 text-warning'
+                    : 'bg-success/10 text-success')
                 }>
                   {player2.isNew ? 'Nuevo' : 'Existente'}
                 </span>
@@ -580,7 +580,7 @@ export function PlayerPickerPanel({ participants, categories, teams, onTeamsChan
                       </button>
                       <button
                         onClick={() => removeTeam(team.id)}
-                        className="p-1.5 rounded-md text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                        className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors duration-150"
                         title="Eliminar"
                       >
                         <Trash2 className="w-3.5 h-3.5" />

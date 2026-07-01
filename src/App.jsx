@@ -46,7 +46,7 @@ function AuthPage() {
       {/* THEME TOGGLE */}
       <button
         onClick={toggleTheme}
-        className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-lg bg-card border border-border text-muted-foreground hover:text-foreground transition-all z-20"
+        className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-lg bg-card border border-border text-muted-foreground hover:text-foreground transition-all duration-150 z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         title={theme === 'light' ? 'Modo oscuro' : 'Modo claro'}
       >
         {theme === 'light' ? (
@@ -146,7 +146,7 @@ function AuthPage() {
             <p className="text-xs text-center text-muted-foreground">
               {isRegister ? 'Ya tienes cuenta?' : 'No tienes cuenta?'}{' '}
               <button type="button" onClick={() => { setIsRegister(!isRegister); setError('') }}
-                className="text-primary hover:text-primary/80 font-semibold underline-offset-2 hover:underline transition-colors"
+                className="text-primary hover:text-primary/80 font-semibold underline-offset-2 hover:underline transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 {isRegister ? 'Inicia sesion' : 'Registrate'}
               </button>

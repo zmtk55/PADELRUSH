@@ -88,7 +88,7 @@ export function TeamStatsModal({ team, league, open, onClose }) {
                         <PolarAngleAxis dataKey="stat" tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} />
                         <PolarRadiusAxis angle={30} domain={[0, 'auto']} tick={{ fontSize: 10 }} />
                         <Radar name={team.player1?.name?.split(' ')[0] || 'P1'} dataKey="P1" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.15} />
-                        <Radar name={team.player2?.name?.split(' ')[0] || 'P2'} dataKey="P2" stroke="rgb(59 130 246)" fill="rgb(59 130 246)" fillOpacity={0.15} />
+                        <Radar name={team.player2?.name?.split(' ')[0] || 'P2'} dataKey="P2" stroke="hsl(var(--accent))" fill="hsl(var(--accent))" fillOpacity={0.15} />
                         <Legend />
                       </RadarChart>
                     </ResponsiveContainer>
@@ -107,7 +107,7 @@ export function TeamStatsModal({ team, league, open, onClose }) {
                         <YAxis tick={{ fontSize: 12 }} />
                         <Tooltip />
                         <Legend />
-                        <Bar dataKey="Ganados" fill="rgb(var(--success))" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="Ganados" fill="hsl(var(--success))" radius={[4, 4, 0, 0]} />
                         <Bar dataKey="Perdidos" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
@@ -120,8 +120,8 @@ export function TeamStatsModal({ team, league, open, onClose }) {
                         <p className="text-xs text-muted-foreground mb-2">{stat.player_name}</p>
                         <div className="space-y-1 text-sm">
                           <p className="flex justify-between"><span className="text-muted-foreground">PJ</span> <span className="font-medium">{stat.matches_played}</span></p>
-                          <p className="flex justify-between"><span className="text-muted-foreground">G</span> <span className="font-medium text-emerald-600">{stat.matches_won}</span></p>
-                          <p className="flex justify-between"><span className="text-muted-foreground">P</span> <span className="font-medium text-red-600">{stat.matches_lost}</span></p>
+                          <p className="flex justify-between"><span className="text-muted-foreground">G</span> <span className="font-medium text-success">{stat.matches_won}</span></p>
+                          <p className="flex justify-between"><span className="text-muted-foreground">P</span> <span className="font-medium text-destructive">{stat.matches_lost}</span></p>
                           <p className="flex justify-between"><span className="text-muted-foreground">%</span> <span className="font-medium">{stat.win_percentage}%</span></p>
                         </div>
                       </div>
@@ -146,7 +146,7 @@ export function TeamStatsModal({ team, league, open, onClose }) {
                         <Tooltip />
                         <Legend />
                         <Line type="monotone" dataKey="% victoria" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} />
-                        <Line type="monotone" dataKey="Sets dif" stroke="rgb(59 130 246)" strokeWidth={2} dot={{ r: 4 }} />
+                        <Line type="monotone" dataKey="Sets dif" stroke="hsl(var(--accent))" strokeWidth={2} dot={{ r: 4 }} />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>

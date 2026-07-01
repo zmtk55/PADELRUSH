@@ -478,11 +478,11 @@ ${topText}
                         <span className="font-medium">Cancha {match.court}</span>
                       </div>
                       {match.played ? (
-                        <Badge variant="secondary" className="text-[10px] h-5 bg-green-500/10 text-green-600 border-green-500/20">
+                        <Badge variant="success" className="text-[10px] h-5">
                           Completado
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="text-[10px] h-5 text-amber-600 border-amber-200 dark:text-amber-400 dark:border-amber-800">
+                        <Badge variant="warning" className="text-[10px] h-5">
                           Pendiente
                         </Badge>
                       )}

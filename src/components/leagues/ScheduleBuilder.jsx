@@ -134,19 +134,19 @@ export function ScheduleBuilder({ leagueId, teams, schedules: externalSchedules,
                                 type="date"
                                 value={match.scheduled_date || ''}
                                 onChange={(e) => updateSchedule(match.id, 'scheduled_date', e.target.value)}
-                                className="border border-input rounded px-2 py-1 text-xs bg-transparent w-full sm:w-32"
+                                className="border border-input rounded px-2 py-1 text-xs bg-transparent w-full sm:w-32 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                               />
                               <input
                                 type="time"
                                 value={match.scheduled_time || ''}
                                 onChange={(e) => updateSchedule(match.id, 'scheduled_time', e.target.value)}
-                                className="border border-input rounded px-2 py-1 text-xs bg-transparent w-full sm:w-20"
+                                className="border border-input rounded px-2 py-1 text-xs bg-transparent w-full sm:w-20 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                               />
                               <input
                                 placeholder="Cancha"
                                 value={match.court || ''}
                                 onChange={(e) => updateSchedule(match.id, 'court', e.target.value)}
-                                className="border border-input rounded px-2 py-1 text-xs bg-transparent w-full sm:w-20"
+                                className="border border-input rounded px-2 py-1 text-xs bg-transparent w-full sm:w-20 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                               />
                               <Button variant="ghost" size="icon" className="w-6 h-6" onClick={() => removeSchedule(match.id)}>
                                 <X className="w-3 h-3" />

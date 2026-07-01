@@ -10,7 +10,7 @@ export default function CategoryTabs({ categories, active, onChange, counts = {}
             key={cat}
             onClick={() => onChange(cat)}
             className={cn(
-              "relative px-4 py-2 rounded-xl text-sm font-body font-semibold transition-all duration-200",
+              "relative px-4 py-2 rounded-xl text-sm font-body font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
               active === cat
                 ? "text-primary-foreground shadow-glow-sm"
                 : "bg-secondary/50 text-muted-foreground hover:text-foreground border border-border/50 hover:border-primary/20"
@@ -45,7 +45,7 @@ export default function CategoryTabs({ categories, active, onChange, counts = {}
           key={cat}
           onClick={() => onChange(cat)}
           className={cn(
-            "relative px-4 py-2 rounded-lg text-sm font-body font-medium transition-all duration-200",
+            "relative px-4 py-2 rounded-lg text-sm font-body font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             active === cat
               ? "text-foreground shadow-sm"
               : "text-muted-foreground hover:text-foreground"

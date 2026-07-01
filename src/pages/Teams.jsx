@@ -160,7 +160,7 @@ export default function Teams() {
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                           </button>
                           <button
-                            className="w-7 h-7 hover:bg-red-50 text-muted-foreground hover:text-red-600 flex items-center justify-center transition-colors"
+                            className="w-7 h-7 hover:bg-destructive/10 text-muted-foreground hover:text-destructive flex items-center justify-center transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                             onClick={() => handleDelete(team.id)}
                           >
                             <Trash2 className="w-3 h-3" />

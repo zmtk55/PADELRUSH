@@ -43,7 +43,7 @@ export default function TeamMatchHistory({ matches, teamId }) {
                   </TableCell>
                   <TableCell className="font-medium">{rival || 'Equipo desconocido'}</TableCell>
                   <TableCell>
-                    <Badge variant={isWinner ? 'default' : 'destructive'} className={cn(isWinner && 'bg-green-500/20 text-green-400 border-green-500/30')}>
+                    <Badge variant={isWinner ? 'success' : 'destructive'}>
                       {isWinner ? 'Ganado' : 'Perdido'}
                     </Badge>
                   </TableCell>

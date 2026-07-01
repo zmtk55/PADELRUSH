@@ -50,14 +50,14 @@ function MatchDisplay({ match, matchLabel, onResult }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-      className="bg-card border border-border/50 rounded-xl hover:shadow-sm hover:border-border/80 transition-all duration-200"
+      className="bg-card border border-border/50 rounded-xl hover:shadow-sm hover:border-border/80 transition-all duration-150"
     >
       <div className="flex items-center justify-between px-3 sm:px-4 pt-3 sm:pt-4 pb-2 border-b border-border/50">
         <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">{matchLabel}</span>
         {match.played ? (
-          <span className="text-[10px] font-medium text-green-600 bg-green-500/10 px-2 py-0.5 rounded-full">Completado</span>
+          <span className="text-[10px] font-medium text-success bg-success/10 px-2 py-0.5 rounded-full">Completado</span>
         ) : (
-          <span className="text-[10px] font-medium text-amber-600 bg-amber-500/10 px-2 py-0.5 rounded-full">Pendiente</span>
+          <span className="text-[10px] font-medium text-warning bg-warning/10 px-2 py-0.5 rounded-full">Pendiente</span>
         )}
       </div>
       <div className="p-3 sm:p-4">
