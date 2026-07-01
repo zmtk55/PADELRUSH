@@ -43,7 +43,7 @@ export default function AdminSelector() {
             >
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-md"
-                  style={{ backgroundColor: l.color || '#c96442' }}>
+                  style={{ backgroundColor: l.color || 'hsl(var(--primary))' }}>
                   {l.name.charAt(0)}
                 </div>
                 <div className="flex-1 min-w-0">

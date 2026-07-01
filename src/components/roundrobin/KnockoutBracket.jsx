@@ -135,7 +135,7 @@ export default function KnockoutBracket({ semis = [], finalMatch, thirdPlace, on
         <motion.div initial={{scale:0.9,opacity:0}} animate={{scale:1,opacity:1}} transition={{type:"spring",stiffness:200,damping:20}} className="relative overflow-hidden border-2 border-yellow-500/40 bg-gradient-to-b from-yellow-500/10 via-card to-card rounded-xl p-4 sm:p-7 text-center">
           <div className="absolute inset-0 bg-grid opacity-30" />
           <div className="relative">
-            <motion.div initial={{scale:0,rotate:-30}} animate={{scale:1,rotate:0}} transition={{delay:0.3,type:"spring",stiffness:180}} className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-[0_0_30px_rgba(234,179,8,0.3)]">
+            <motion.div initial={{scale:0,rotate:-30}} animate={{scale:1,rotate:0}} transition={{delay:0.3,type:"spring",stiffness:180}} className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-[0_0_30px_hsl(var(--primary)/0.3)]">
               <Crown className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
             </motion.div>
             <h3 className="font-heading font-bold text-2xl sm:text-3xl tracking-tight text-foreground mb-1">¡Campeones!</h3>

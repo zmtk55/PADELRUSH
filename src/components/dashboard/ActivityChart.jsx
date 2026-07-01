@@ -40,10 +40,10 @@ export function ActivityChart({ data: chartData, timeRange = 'week', onTimeRange
         <div className="h-52 sm:h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData} margin={{ top: 8, right: 8, left: -20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a2a3a" strokeOpacity={0.3} vertical={false} />
-              <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={{ stroke: '#2a2a3a', strokeOpacity: 0.3 }} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} allowDecimals={false} />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: '#2a2a3a', fillOpacity: 0.15 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--chart-grid))" strokeOpacity={0.3} vertical={false} />
+              <XAxis dataKey="label" tick={{ fontSize: 11, fill: 'rgb(var(--chart-tick))' }} axisLine={{ stroke: 'rgb(var(--chart-grid))', strokeOpacity: 0.3 }} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: 'rgb(var(--chart-tick))' }} axisLine={false} tickLine={false} allowDecimals={false} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgb(var(--chart-grid))', fillOpacity: 0.15 }} />
               <Bar dataKey="partidos" fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} maxBarSize={48} animationDuration={800} />
             </BarChart>
           </ResponsiveContainer>

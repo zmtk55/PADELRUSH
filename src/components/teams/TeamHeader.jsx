@@ -2,19 +2,13 @@ import { ArrowLeft, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-
-const categoryColors = {
-  '1RA': 'bg-red-500/20 text-red-400 border-red-500/30',
-  '2DA': 'bg-orange-500/20 text-orange-400 border-orange-500/30',
-  '3RA': 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-  '4TA': 'bg-green-500/20 text-green-400 border-green-500/30',
-  '5TA': 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-};
+import { CATEGORY_COLORS } from '@/lib/theme-palette';
 
 export default function TeamHeader({ team, leagueName }) {
   const navigate = useNavigate();
   
-  const categoryColor = categoryColors[team?.category] || 'bg-muted text-muted-foreground';
+  const cat = CATEGORY_COLORS[team?.category];
+  const categoryColor = cat ? `${cat.bg} ${cat.text} ${cat.border}` : 'bg-muted text-muted-foreground';
 
   return (
     <div className="flex items-start gap-4 mb-6">

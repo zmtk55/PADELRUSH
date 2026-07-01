@@ -31,10 +31,26 @@ const generos = [
 ]
 
 const levelConfig = {
-  '3RA': { color: '#dc2626', bg: '#fef2f2', border: '#fecaca' },
-  '4TA': { color: '#ea580c', bg: '#fff7ed', border: '#fed7aa' },
-  '5TA': { color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe' },
-  '6TA': { color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0' },
+  '3RA': { 
+    text: 'text-level-3ra', 
+    bg: 'bg-level-3ra-bg', 
+    border: 'border-level-3ra-border' 
+  },
+  '4TA': { 
+    text: 'text-level-4ta', 
+    bg: 'bg-level-4ta-bg', 
+    border: 'border-level-4ta-border' 
+  },
+  '5TA': { 
+    text: 'text-level-5ta', 
+    bg: 'bg-level-5ta-bg', 
+    border: 'border-level-5ta-border' 
+  },
+  '6TA': { 
+    text: 'text-level-6ta', 
+    bg: 'bg-level-6ta-bg', 
+    border: 'border-level-6ta-border' 
+  },
 }
 
 const initialForm = { name: '', level: '5TA', gender: 'femenil', phone: '', photo_url: '' }
@@ -394,8 +410,7 @@ function ParticipantCard({ participant: p, index, isOrganizer, onClick, onEdit, 
           )}
           {/* Level tag */}
           <div
-            className="absolute -bottom-1.5 -right-1.5 px-1.5 py-0.5 text-[10px] font-bold flex items-center gap-0.5 border"
-            style={{ background: lvl.bg, borderColor: lvl.border, color: lvl.color }}
+            className={cn("absolute -bottom-1.5 -right-1.5 px-1.5 py-0.5 text-[10px] font-bold flex items-center gap-0.5 border", lvl.text, lvl.bg, lvl.border)}
           >
             {p.level}
           </div>
@@ -404,7 +419,7 @@ function ParticipantCard({ participant: p, index, isOrganizer, onClick, onEdit, 
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-foreground truncate">{p.name}</p>
           <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-            <span className="text-xs px-2 py-0.5 font-medium" style={{ background: lvl.bg, color: lvl.color }}>
+            <span className={cn("text-xs px-2 py-0.5 font-medium", lvl.text, lvl.bg)}>
               {p.level}
             </span>
             <span className="text-xs text-muted-foreground">{p.gender}</span>
@@ -457,7 +472,7 @@ function ParticipantRow({ participant: p, index, isOrganizer, onClick, onEdit, o
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-sm text-foreground truncate">{p.name}</p>
         <p className="text-xs text-muted-foreground truncate flex items-center gap-1">
-          <span className="px-1.5 py-0.5 text-[10px] font-medium" style={{ background: lvl.bg, color: lvl.color }}>{p.level}</span>
+          <span className={cn("px-1.5 py-0.5 text-[10px] font-medium", lvl.text, lvl.bg)}>{p.level}</span>
           · {p.gender}
           {p.phone && ` · ${p.phone}`}
         </p>

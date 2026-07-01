@@ -72,7 +72,7 @@ export default function LeagueSetupWizard() {
     season: '2026-1',
     categories: ['5TA'],
     status: 'proxima',
-    color: '#c96442',
+    color: 'hsl(var(--primary))',
     sets_per_match: '2', // string ahora
     tiebreak_enabled: true,
     organizer_name: profile?.display_name || '',
@@ -95,7 +95,7 @@ export default function LeagueSetupWizard() {
         gender: existingLeague.gender || 'femenil',
         status: existingLeague.status || 'proxima',
         season: existingLeague.season || '',
-        color: existingLeague.color || '#c96442',
+        color: existingLeague.color || 'hsl(var(--primary))',
         organizer_name: existingLeague.organizer_name || '',
         organizer_whatsapp: existingLeague.organizer_whatsapp || '',
         organizer_instagram: existingLeague.organizer_instagram || '',

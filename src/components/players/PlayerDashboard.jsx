@@ -157,8 +157,8 @@ export default function PlayerDashboard({ player, open, onClose }) {
 
   // Sets distribution
   const setsData = [
-    { name: 'Ganados', value: total.sets_won, color: '#111111' },
-    { name: 'Perdidos', value: total.sets_lost, color: '#d1d5db' },
+    { name: 'Ganados', value: total.sets_won, color: 'rgb(var(--chart-bar-primary))' },
+    { name: 'Perdidos', value: total.sets_lost, color: 'rgb(var(--chart-bar-secondary))' },
   ].filter(d => d.value > 0)
 
   // Performance trend by league
@@ -464,27 +464,27 @@ export default function PlayerDashboard({ player, open, onClose }) {
                 ) : (
                   <ResponsiveContainer width="100%" height={140}>
                     <BarChart data={trendData} barCategoryGap="20%">
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--chart-grid))" vertical={false} />
                       <XAxis dataKey="name"
-                        tick={{ fontSize: 11, fill: '#6b7280' }}
-                        axisLine={{ stroke: '#e5e7eb' }}
+                        tick={{ fontSize: 11, fill: 'rgb(var(--chart-tick))' }}
+                        axisLine={{ stroke: 'rgb(var(--chart-tooltip-border))' }}
                         tickLine={false} interval={0} />
                       <YAxis domain={[0, 100]}
-                        tick={{ fontSize: 11, fill: '#6b7280' }}
+                        tick={{ fontSize: 11, fill: 'rgb(var(--chart-tick))' }}
                         axisLine={false} tickLine={false} width={20} />
                       <Tooltip
                         contentStyle={{
-                          background: '#fff',
-                          border: '1px solid #e5e7eb',
+                          background: 'rgb(var(--chart-tooltip-bg))',
+                          border: '1px solid rgb(var(--chart-tooltip-border))',
                           borderRadius: 0,
                           fontSize: '12px',
-                          color: '#111',
+                          color: 'rgb(var(--chart-tooltip-text))',
                         }}
                         formatter={(v) => [`${v}%`, 'Win Rate']}
                       />
                       <Bar dataKey="winRate" name="Win %" radius={[0, 0, 0, 0]} maxBarSize={16}>
                         {trendData.map((_, i) => (
-                          <Cell key={i} fill="#111111" />
+                          <Cell key={i} fill="rgb(var(--chart-bar-primary))" />
                         ))}
                       </Bar>
                     </BarChart>
@@ -507,24 +507,24 @@ export default function PlayerDashboard({ player, open, onClose }) {
                 ) : (
                   <ResponsiveContainer width="100%" height={140}>
                     <BarChart data={categoryData} barGap={1} barCategoryGap="15%">
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--chart-grid))" vertical={false} />
                       <XAxis dataKey="category"
-                        tick={{ fontSize: 11, fill: '#6b7280' }}
-                        axisLine={{ stroke: '#e5e7eb' }}
+                        tick={{ fontSize: 11, fill: 'rgb(var(--chart-tick))' }}
+                        axisLine={{ stroke: 'rgb(var(--chart-tooltip-border))' }}
                         tickLine={false} />
-                      <YAxis tick={{ fontSize: 11, fill: '#6b7280' }}
+                      <YAxis tick={{ fontSize: 11, fill: 'rgb(var(--chart-tick))' }}
                         axisLine={false} tickLine={false} width={20} />
                       <Tooltip
                         contentStyle={{
-                          background: '#fff',
-                          border: '1px solid #e5e7eb',
+                          background: 'rgb(var(--chart-tooltip-bg))',
+                          border: '1px solid rgb(var(--chart-tooltip-border))',
                           borderRadius: 0,
                           fontSize: '12px',
-                          color: '#111',
+                          color: 'rgb(var(--chart-tooltip-text))',
                         }}
                       />
-                      <Bar dataKey="wins" name="G" fill="#111111" radius={[0, 0, 0, 0]} maxBarSize={14} />
-                      <Bar dataKey="losses" name="P" fill="#d1d5db" radius={[0, 0, 0, 0]} maxBarSize={14} />
+                      <Bar dataKey="wins" name="G" fill="rgb(var(--chart-bar-primary))" radius={[0, 0, 0, 0]} maxBarSize={14} />
+                      <Bar dataKey="losses" name="P" fill="rgb(var(--chart-bar-secondary))" radius={[0, 0, 0, 0]} maxBarSize={14} />
                     </BarChart>
                   </ResponsiveContainer>
                 )}

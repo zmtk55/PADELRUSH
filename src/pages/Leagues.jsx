@@ -33,7 +33,7 @@ export default function Leagues() {
       />
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {[1, 2, 3].map(i => (
-          <div key={i} className="glass-card rounded-xl p-6 animate-pulse">
+          <div key={i} className="bg-card/80 backdrop-blur-sm border border-border rounded-xl p-6 animate-pulse">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-xl bg-muted/60" />
               <div className="flex-1 space-y-3">
@@ -50,7 +50,7 @@ export default function Leagues() {
   if (error) return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <PageHeader title="Ligas" description="Error al cargar" />
-      <div className="glass-card rounded-xl p-12 text-center">
+      <div className="bg-card/80 backdrop-blur-sm border border-border rounded-xl p-12 text-center">
         <div className="w-14 h-14 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center justify-center mx-auto mb-4">
           <Swords className="w-7 h-7 text-destructive" />
         </div>
@@ -76,7 +76,7 @@ export default function Leagues() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05, type: 'spring', stiffness: 300, damping: 25 }}
             onClick={() => navigate(`/ligas/${l.id}`)}
-            className="glass-card rounded-xl p-6 group cursor-pointer hover:shadow-glow-sm"
+            className="bg-card/80 backdrop-blur-sm border border-border rounded-xl p-6 group cursor-pointer hover:shadow-glow-sm"
           >
             <div className="flex items-start gap-4">
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/20 flex items-center justify-center shrink-0 group-hover:shadow-glow-sm transition-all duration-300">
@@ -134,7 +134,7 @@ export default function Leagues() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="col-span-full glass-card rounded-xl p-12 text-center"
+            className="col-span-full bg-card/80 backdrop-blur-sm border border-border rounded-xl p-12 text-center"
           >
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20 flex items-center justify-center mx-auto mb-5">
               <Swords className="w-8 h-8 text-primary" />

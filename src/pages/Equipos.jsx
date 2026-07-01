@@ -15,7 +15,7 @@ export default function Equipos() {
           <div key={l.id} onClick={() => navigate(`/ligas/${l.id}/equipos`)}
             className="bg-card border border-border rounded-xl p-5 hover:shadow-md transition-shadow cursor-pointer">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold" style={{ backgroundColor: l.color || '#c96442' }}>{l.name.charAt(0)}</div>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold" style={{ backgroundColor: l.color || 'hsl(var(--primary))' }}>{l.name.charAt(0)}</div>
               <div><p className="font-medium">{l.name}</p><p className="text-xs text-muted-foreground">{l.gender} · {l.season || '—'}</p></div>
             </div>
           </div>

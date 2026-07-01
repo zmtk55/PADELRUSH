@@ -87,8 +87,8 @@ export function TeamStatsModal({ team, league, open, onClose }) {
                         <PolarGrid stroke="var(--border)" />
                         <PolarAngleAxis dataKey="stat" tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} />
                         <PolarRadiusAxis angle={30} domain={[0, 'auto']} tick={{ fontSize: 10 }} />
-                        <Radar name={team.player1?.name?.split(' ')[0] || 'P1'} dataKey="P1" stroke="#c96442" fill="#c96442" fillOpacity={0.15} />
-                        <Radar name={team.player2?.name?.split(' ')[0] || 'P2'} dataKey="P2" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.15} />
+                        <Radar name={team.player1?.name?.split(' ')[0] || 'P1'} dataKey="P1" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.15} />
+                        <Radar name={team.player2?.name?.split(' ')[0] || 'P2'} dataKey="P2" stroke="rgb(59 130 246)" fill="rgb(59 130 246)" fillOpacity={0.15} />
                         <Legend />
                       </RadarChart>
                     </ResponsiveContainer>
@@ -107,8 +107,8 @@ export function TeamStatsModal({ team, league, open, onClose }) {
                         <YAxis tick={{ fontSize: 12 }} />
                         <Tooltip />
                         <Legend />
-                        <Bar dataKey="Ganados" fill="#22c55e" radius={[4, 4, 0, 0]} />
-                        <Bar dataKey="Perdidos" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="Ganados" fill="rgb(var(--success))" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="Perdidos" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -145,8 +145,8 @@ export function TeamStatsModal({ team, league, open, onClose }) {
                         <YAxis tick={{ fontSize: 12 }} />
                         <Tooltip />
                         <Legend />
-                        <Line type="monotone" dataKey="% victoria" stroke="#c96442" strokeWidth={2} dot={{ r: 4 }} />
-                        <Line type="monotone" dataKey="Sets dif" stroke="#3b82f6" strokeWidth={2} dot={{ r: 4 }} />
+                        <Line type="monotone" dataKey="% victoria" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} />
+                        <Line type="monotone" dataKey="Sets dif" stroke="rgb(59 130 246)" strokeWidth={2} dot={{ r: 4 }} />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>

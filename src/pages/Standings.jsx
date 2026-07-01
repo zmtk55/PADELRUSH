@@ -102,7 +102,7 @@ export default function Standings() {
                       {catStats.map((s, i) => {
                         const streakText = getStreakText(s.current_win_streak || 0, s.current_lose_streak || 0)
                         const isTop3 = s.position <= 3
-                        const medalColors = { 1: '#b8860b', 2: '#a0a0a0', 3: '#cd7f32' }
+                        const medalColors = { 1: 'hsl(var(--medal-gold))', 2: 'hsl(var(--medal-silver))', 3: 'hsl(var(--medal-bronze))' }
                         return (
                           <motion.tr
                             key={s.id}
