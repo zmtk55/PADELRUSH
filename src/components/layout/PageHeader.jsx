@@ -1,24 +1,17 @@
-import { cn } from "../../lib/utils"
+import { cn } from "@/lib/utils"
 
-function PageHeader({ title, description, action, className }) {
+export function PageHeader({ title, description, children, action, className }) {
   return (
-    <div className={cn(
-      "flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8",
-      className
-    )}>
-      <div className="space-y-1">
-        <h1 className="font-heading text-2xl md:text-3xl tracking-wider text-foreground">
-          {title}
-        </h1>
+    <div className={cn("flex items-center justify-between mb-6", className)}>
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
         {description && (
-          <p className="text-sm font-body text-muted-foreground">
-            {description}
-          </p>
+          <p className="text-sm text-muted-foreground mt-1">{description}</p>
         )}
       </div>
-      {action && (
-        <div className="shrink-0">
-          {action}
+      {(children || action) && (
+        <div className="flex items-center gap-2">
+          {children || action}
         </div>
       )}
     </div>
@@ -26,4 +19,3 @@ function PageHeader({ title, description, action, className }) {
 }
 
 export default PageHeader
-export { PageHeader }

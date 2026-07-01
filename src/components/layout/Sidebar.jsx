@@ -1,282 +1,241 @@
-import { useEffect, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
-import {
-  LayoutDashboard, Trophy, Users, Calendar, UserCircle,
-  Flag, Medal, Shield, Flame,
-  Menu, X, ChevronLeft, LogOut, Sun, Moon,
+import { 
+  LayoutDashboard, Trophy, Users, Swords, Calendar, 
+  BarChart3, Settings, ChevronLeft, ChevronRight, LogOut,
+  Shield, Target, Menu, X
 } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
-import { useTheme } from '@/lib/ThemeContext'
 
 const navItems = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/ligas', label: 'Ligas', icon: Trophy },
-  { to: '/express', label: 'Express', icon: Flame },
-  { to: '/equipos', label: 'Equipos', icon: Flag },
-  { to: '/partidos', label: 'Partidos', icon: Calendar },
-  { to: '/clasificacion', label: 'Clasificacion', icon: Medal },
-  { to: '/participantes', label: 'Participantes', icon: Users },
+  { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+  { icon: Trophy, label: 'Ligas', path: '/ligas' },
+  { icon: Users, label: 'Participantes', path: '/participantes' },
+  { icon: Swords, label: 'Partidos', path: '/partidos' },
+  { icon: BarChart3, label: 'Clasificación', path: '/clasificacion' },
 ]
 
-const organizerItems = [
-  { to: '/profile', label: 'Perfil', icon: UserCircle },
-  { to: '/admin', label: 'Admin', icon: Shield },
+const adminItems = [
+  { icon: Shield, label: 'Admin', path: '/admin' },
 ]
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
-  const { profile, isOrganizer, signOut } = useAuth()
-  const { theme, toggleTheme } = useTheme()
+  const location = useLocation()
+  const { profile, isAdmin, signOut } = useAuth()
+
+  const isActive = (path) => {
+    if (path === '/') return location.pathname === '/'
+    return location.pathname.startsWith(path)
+  }
 
   return (
-    <aside
-      className={cn(
-        'hidden md:flex flex-col h-screen bg-sidebar border-r border-border transition-[width] duration-300 ease-out relative',
-        collapsed ? 'w-16' : 'w-60'
-      )}
-    >
+    <aside className={cn(
+      "hidden md:flex fixed left-0 top-0 z-40 h-screen border-r border-border bg-card transition-all duration-200 flex-col",
+      collapsed ? "w-[68px]" : "w-[240px]"
+    )}>
       {/* Logo */}
-      <div className="flex items-center gap-3 px-4 h-14 shrink-0 border-b border-border">
-        <div className="w-7 h-7 flex items-center justify-center bg-primary text-primary-foreground text-xs font-bold shrink-0 rounded-sm">
-          PR
+      <div className="flex items-center gap-3 px-4 h-16 border-b border-border">
+        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
+          <Target className="w-5 h-5 text-primary-foreground" />
         </div>
-        <span
-          className={cn(
-            'font-heading font-bold text-base tracking-tight transition-all duration-300',
-            collapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'
-          )}
-        >
-          PadelRush
-        </span>
+        {!collapsed && (
+          <span className="font-bold text-lg tracking-tight">PadelRush</span>
+        )}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto overflow-x-hidden">
-        {navItems.map(({ to, label, icon: Icon }) => (
+      <nav className="flex-1 px-3 py-4 space-y-1">
+        {navItems.map((item) => (
           <NavLink
-            key={to}
-            to={to}
-            className={({ isActive }) =>
-              cn(
-                'flex items-center gap-3 px-3 py-2.5 touch-y text-sm font-body transition-all duration-150 ease-out rounded-lg',
-                'hover:bg-secondary/80 group relative',
-                isActive
-                  ? 'bg-secondary font-semibold text-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              )
-            }
-          >
-            {({ isActive }) => (
-              <>
-                {isActive && (
-                  <motion.div
-                    layoutId="sidebar-active"
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-primary rounded-r-full"
-                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                  />
-                )}
-                <Icon className={cn('w-5 h-5 shrink-0', isActive ? 'text-primary' : 'text-muted-foreground')} />
-                <span
-                  className={cn(
-                    'transition-all duration-300 whitespace-nowrap',
-                    collapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'
-                  )}
-                >
-                  {label}
-                </span>
-              </>
+            key={item.path}
+            to={item.path}
+            className={cn(
+              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
+              isActive(item.path)
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             )}
+          >
+            <item.icon className="w-5 h-5 shrink-0" />
+            {!collapsed && <span>{item.label}</span>}
           </NavLink>
         ))}
-        {isOrganizer && (
-          <div className="my-3 mx-3 h-px bg-border" />
-        )}
 
-        {isOrganizer && organizerItems.map(({ to, label, icon: Icon }) => (
-          <NavLink
-            key={to}
-            to={to}
-            className={({ isActive }) =>
-              cn(
-                'flex items-center gap-3 px-3 py-2.5 touch-y text-sm font-body transition-all duration-150 ease-out rounded-lg',
-                'hover:bg-secondary/80 group relative',
-                isActive
-                  ? 'bg-secondary font-semibold text-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              )
-            }
-          >
-            {({ isActive }) => (
-              <>
-                {isActive && (
-                  <motion.div
-                    layoutId="sidebar-active-org"
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-primary rounded-r-full"
-                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                  />
+        {/* Admin section */}
+        {isAdmin && (
+          <>
+            <div className="pt-4 pb-2">
+              {!collapsed && (
+                <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Admin
+                </p>
+              )}
+            </div>
+            {adminItems.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
+                  isActive(item.path)
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 )}
-                <Icon className={cn('w-5 h-5 shrink-0', isActive ? 'text-primary' : 'text-muted-foreground')} />
-                <span
-                  className={cn(
-                    'transition-all duration-300 whitespace-nowrap',
-                    collapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'
-                  )}
-                >
-                  {label}
-                </span>
-              </>
-            )}
-          </NavLink>
-        ))}
+              >
+                <item.icon className="w-5 h-5 shrink-0" />
+                {!collapsed && <span>{item.label}</span>}
+              </NavLink>
+            ))}
+          </>
+        )}
       </nav>
 
-      {/* Bottom section */}
-      <div className="p-3 space-y-0.5 border-t border-border">
-        {/* Theme toggle */}
-        <button
-          onClick={toggleTheme}
-          className="flex items-center gap-3 w-full px-3 py-2.5 text-sm font-body text-muted-foreground hover:text-foreground transition-colors duration-150 ease-out rounded-lg hover:bg-secondary/80 group touch-y focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          title={theme === 'light' ? 'Modo oscuro' : 'Modo claro'}
-        >
-          {theme === 'light' ? (
-            <Moon className="w-5 h-5 shrink-0" />
-          ) : (
-            <Sun className="w-5 h-5 shrink-0" />
-          )}
-          {!collapsed && (
-            <span>{theme === 'light' ? 'Modo oscuro' : 'Modo claro'}</span>
-          )}
-        </button>
-
-        {isOrganizer && (
-          <button
-            onClick={signOut}
-            className="flex items-center gap-3 w-full px-3 py-2.5 text-sm font-body text-muted-foreground hover:text-destructive transition-colors duration-150 ease-out rounded-lg hover:bg-secondary/80 group touch-y focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          >
-            <LogOut className="w-5 h-5 shrink-0" />
-            {!collapsed && <span>Salir</span>}
-          </button>
-        )}
-
+      {/* User section */}
+      <div className="border-t border-border p-3">
         {!collapsed && profile && (
-          <div className="px-3 pt-2 flex items-center gap-2">
-            <div className="w-5 h-5 flex items-center justify-center bg-muted text-muted-foreground text-[10px] font-semibold rounded-sm shrink-0">
-              {profile.display_name?.charAt(0)?.toUpperCase() || 'U'}
+          <div className="flex items-center gap-3 px-3 py-2 mb-2">
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <span className="text-sm font-medium text-primary">
+                {profile.display_name?.charAt(0) || '?'}
+              </span>
             </div>
-            <span className="text-xs text-muted-foreground truncate">
-              {profile.display_name || profile.email}
-            </span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{profile.display_name}</p>
+              <p className="text-xs text-muted-foreground truncate">{profile.email}</p>
+            </div>
           </div>
         )}
+        
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setCollapsed(!collapsed)}
+            className="w-full h-9"
+          >
+            {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          </Button>
+          {!collapsed && (
+            <Button variant="ghost" size="icon" onClick={signOut} className="h-9">
+              <LogOut className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
       </div>
-
-      {/* Collapse toggle */}
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 bottom-20 w-6 h-6 flex items-center justify-center z-10 bg-background border border-border rounded-sm hover:bg-secondary transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-      >
-        <ChevronLeft className={cn('w-3 h-3 text-muted-foreground transition-transform', collapsed && 'rotate-180')} />
-      </button>
     </aside>
   )
 }
+
 export function MobileNav() {
   const [open, setOpen] = useState(false)
-  const { isOrganizer, signOut, profile } = useAuth()
-  const { theme, toggleTheme } = useTheme()
+  const { profile, isAdmin, signOut } = useAuth()
   const location = useLocation()
 
   useEffect(() => { setOpen(false) }, [location.pathname])
 
+  const isActive = (path) => {
+    if (path === '/') return location.pathname === '/'
+    return location.pathname.startsWith(path)
+  }
+
   return (
     <>
-      <header className="md:hidden flex items-center justify-between px-4 h-12 sticky top-0 z-40 bg-background border-b border-border safe-top">
+      <header className="md:hidden flex items-center justify-between px-4 h-12 sticky top-0 z-40 bg-background border-b border-border">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 flex items-center justify-center bg-primary text-primary-foreground text-xs font-bold shrink-0 rounded-sm">
-            PR
+          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+            <Target className="w-5 h-5 text-primary-foreground" />
           </div>
-          <span className="font-heading font-bold text-sm tracking-tight">
-            PadelRush
-          </span>
+          <span className="font-bold text-sm tracking-tight">PadelRush</span>
         </div>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={toggleTheme}
-            className="touch-target w-10 h-10 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            title={theme === 'light' ? 'Modo oscuro' : 'Modo claro'}
-          >
-            {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-          </button>
-          <Button variant="ghost" size="icon" onClick={() => setOpen(true)} className="touch-target">
-            <Menu className="w-5 h-5" />
-          </Button>
-        </div>
+        <Button variant="ghost" size="icon" onClick={() => setOpen(true)}>
+          <Menu className="w-5 h-5" />
+        </Button>
       </header>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/30 md:hidden"
-            onClick={() => setOpen(false)}
+      {open && (
+        <div className="fixed inset-0 z-50 bg-black/50 md:hidden" onClick={() => setOpen(false)}>
+          <div
+            className="absolute right-0 top-0 h-full w-72 bg-card border-l border-border shadow-lg"
+            onClick={(e) => e.stopPropagation()}
           >
-            <motion.aside
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="absolute right-0 top-0 h-full w-80 sm:w-72 bg-sidebar border-l border-border shadow-elevated tap-highlight-none"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between px-4 h-12 border-b border-border">
-                <span className="font-heading font-bold text-base">Menu</span>
-                <Button variant="ghost" size="icon" onClick={() => setOpen(false)} className="touch-target">
-                  <X className="w-5 h-5" />
-                </Button>
-              </div>
+            <div className="flex items-center justify-between px-4 h-12 border-b border-border">
+              <span className="font-bold text-sm">Menu</span>
+              <Button variant="ghost" size="icon" onClick={() => setOpen(false)}>
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
 
-              <nav className="p-4 space-y-0.5">
-                {[...navItems, ...(isOrganizer ? organizerItems : [])].map(
-                  ({ to, label, icon: Icon }) => (
+            <nav className="p-3 space-y-1">
+              {navItems.map((item) => (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
+                    isActive(item.path)
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  )}
+                >
+                  <item.icon className="w-5 h-5 shrink-0" />
+                  <span>{item.label}</span>
+                </NavLink>
+              ))}
+
+              {isAdmin && (
+                <>
+                  <div className="pt-4 pb-2">
+                    <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      Admin
+                    </p>
+                  </div>
+                  {adminItems.map((item) => (
                     <NavLink
-                      key={to}
-                      to={to}
-                      className={({ isActive }) =>
-                        cn(
-                          'flex items-center gap-3 px-3 py-3 touch-y text-sm font-body rounded-sm transition-colors',
-                          isActive
-                            ? 'bg-secondary font-semibold text-foreground'
-                            : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
-                        )
-                      }
+                      key={item.path}
+                      to={item.path}
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
+                        isActive(item.path)
+                          ? "bg-primary/10 text-primary"
+                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      )}
                     >
-                      <Icon className="w-5 h-5 shrink-0" />
-                      {label}
+                      <item.icon className="w-5 h-5 shrink-0" />
+                      <span>{item.label}</span>
                     </NavLink>
-                  )
-                )}
-              </nav>
+                  ))}
+                </>
+              )}
+            </nav>
 
-              <div className="p-4 space-y-0.5 border-t border-border">
-                {profile && (
-                  <button
-                    onClick={signOut}
-                    className="flex items-center gap-3 w-full px-3 py-2.5 text-sm font-body text-muted-foreground hover:text-destructive transition-colors rounded-sm hover:bg-secondary"
-                  >
-                    <LogOut className="w-5 h-5" />
-                    Salir
-                  </button>
-                )}
-              </div>
-            </motion.aside>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <div className="border-t border-border p-3 space-y-1">
+              {profile && (
+                <div className="flex items-center gap-3 px-3 py-2 mb-2">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-sm font-medium text-primary">
+                      {profile.display_name?.charAt(0) || '?'}
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{profile.display_name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{profile.email}</p>
+                  </div>
+                </div>
+              )}
+              <button
+                onClick={signOut}
+                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-destructive hover:bg-accent transition-all duration-150"
+              >
+                <LogOut className="w-5 h-5 shrink-0" />
+                <span>Salir</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

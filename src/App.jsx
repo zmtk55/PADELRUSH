@@ -169,9 +169,9 @@ function AuthPage() {
 }
 function AppLayout({ children }) {
   return (
-    <div className="flex min-h-[100dvh] bg-background overscroll-contain">
+    <div className="min-h-[100dvh] bg-background overscroll-contain">
       <Sidebar />
-      <div className="flex-1 flex flex-col min-h-[100dvh]">
+      <div className="flex-1 flex flex-col min-h-[100dvh] md:ml-[240px] transition-[margin] duration-200">
         <MobileNav />
         <main className="flex-1 p-3 sm:p-5 lg:p-8 container-pad pb-safe">{children}</main>
       </div>
