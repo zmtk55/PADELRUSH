@@ -135,7 +135,7 @@ export default function Admin() {
 
   if (!league) {
     return (
-      <div className="space-y-4 animate-pulse">
+      <div className="container mx-auto py-6 px-4 max-w-6xl space-y-4 animate-pulse">
         <div className="h-6 bg-muted w-48" />
         <div className="h-10 bg-muted w-64" />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -149,6 +149,7 @@ export default function Admin() {
 
   if (!isOrganizer) {
     return (
+      <div className="container mx-auto py-6 px-4 max-w-6xl">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
         <Breadcrumb league={league} leagueId={leagueId} navigate={navigate} />
         <div className="border border-border bg-card p-8 flex items-center gap-5">
@@ -161,10 +162,12 @@ export default function Admin() {
           </div>
         </div>
       </motion.div>
+      </div>
     )
   }
 
   return (
+    <div className="container mx-auto py-6 px-4 max-w-6xl">
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
       <Breadcrumb league={league} leagueId={leagueId} navigate={navigate} />
 
@@ -353,7 +356,7 @@ export default function Admin() {
 
             {/* Player 1 */}
             <div>
-              <Label className="text-sm font-medium text-muted-foreground">Jugador 1 <span className="text-red-500">*</span></Label>
+              <Label className="text-sm font-medium text-muted-foreground">Jugador 1 <span className="text-destructive">*</span></Label>
               <div className="mt-1.5 space-y-2">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
@@ -373,7 +376,7 @@ export default function Admin() {
 
             {/* Player 2 */}
             <div>
-              <Label className="text-sm font-medium text-muted-foreground">Jugador 2 <span className="text-red-500">*</span></Label>
+              <Label className="text-sm font-medium text-muted-foreground">Jugador 2 <span className="text-destructive">*</span></Label>
               <div className="mt-1.5 space-y-2">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
@@ -461,7 +464,7 @@ export default function Admin() {
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 border border-red-200 bg-red-50 text-red-500 flex items-center justify-center">
+              <div className="w-10 h-10 border border-destructive/20 bg-destructive/10 text-destructive flex items-center justify-center">
                 <AlertCircle className="w-5 h-5" />
               </div>
               <div>
@@ -519,6 +522,7 @@ export default function Admin() {
         </DialogContent>
       </Dialog>
     </motion.div>
+    </div>
   )
 }
 
@@ -557,7 +561,7 @@ function TeamCard({ team, index, getPlayerName, onEdit, onDelete }) {
           <button onClick={onEdit} className="w-7 h-7 bg-muted hover:bg-muted flex items-center justify-center transition-colors" title="Editar">
             <Pencil className="w-3 h-3" />
           </button>
-          <button onClick={onDelete} className="w-7 h-7 bg-muted hover:bg-red-100 text-muted-foreground hover:text-red-600 flex items-center justify-center transition-colors" title="Eliminar">
+          <button onClick={onDelete} className="w-7 h-7 bg-muted hover:bg-destructive/10 text-muted-foreground hover:text-destructive flex items-center justify-center transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" title="Eliminar">
             <Trash2 className="w-3 h-3" />
           </button>
         </div>

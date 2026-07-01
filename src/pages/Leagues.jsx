@@ -25,6 +25,7 @@ export default function Leagues() {
   }
 
   if (loading) return (
+    <div className="container mx-auto py-6 px-4 max-w-6xl">
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <PageHeader
         title="Ligas"
@@ -45,9 +46,11 @@ export default function Leagues() {
         ))}
       </div>
     </motion.div>
+    </div>
   )
 
   if (error) return (
+    <div className="container mx-auto py-6 px-4 max-w-6xl">
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <PageHeader title="Ligas" description="Error al cargar" />
       <div className="bg-card/80 backdrop-blur-sm border border-border rounded-xl p-12 text-center">
@@ -58,9 +61,11 @@ export default function Leagues() {
         <Button variant="outline" onClick={() => leaguesQuery.refetch()}>Reintentar</Button>
       </div>
     </motion.div>
+    </div>
   )
 
   return (
+    <div className="container mx-auto py-6 px-4 max-w-6xl">
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
       <PageHeader
         title="Ligas"
@@ -153,5 +158,6 @@ export default function Leagues() {
         )}
       </div>
     </motion.div>
+    </div>
   )
 }

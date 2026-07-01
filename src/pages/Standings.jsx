@@ -36,6 +36,7 @@ export default function Standings() {
   })
 
   return (
+    <div className="container mx-auto py-6 px-4 max-w-6xl">
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
@@ -175,5 +176,6 @@ export default function Standings() {
         </div>
       )}
     </motion.div>
+    </div>
   )
 }

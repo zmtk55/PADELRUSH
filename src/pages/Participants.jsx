@@ -113,6 +113,7 @@ export default function Participants() {
   const hasFilters = search || filterLevel || filterGender
 
   return (
+    <div className="container mx-auto py-6 px-4 max-w-6xl">
     <div className="space-y-6">
       <PageHeader
         title="Participantes"
@@ -285,7 +286,7 @@ export default function Participants() {
             </div>
 
             <div>
-              <Label className="text-sm font-medium text-muted-foreground">Nombre completo <span className="text-red-500">*</span></Label>
+              <Label className="text-sm font-medium text-muted-foreground">Nombre completo <span className="text-destructive">*</span></Label>
               <div className="relative mt-1.5">
                 <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -360,8 +361,8 @@ export default function Participants() {
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-red-50 border border-red-200 flex items-center justify-center">
-                <AlertTriangle className="w-5 h-5 text-red-500" />
+              <div className="w-10 h-10 bg-destructive/10 border border-destructive/20 flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-destructive" />
               </div>
               <div>
                 <DialogTitle className="font-heading text-lg">Eliminar participante</DialogTitle>
@@ -381,6 +382,7 @@ export default function Participants() {
           </div>
         </DialogContent>
       </Dialog>
+    </div>
     </div>
   )
 }
@@ -429,11 +431,11 @@ function ParticipantCard({ participant: p, index, isOrganizer, onClick, onEdit, 
         {/* Actions */}
         {isOrganizer && (
           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-            <button onClick={onEdit} className="w-7 h-7 flex items-center justify-center hover:bg-muted transition-colors">
+            <button onClick={onEdit} className="w-7 h-7 flex items-center justify-center hover:bg-muted transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
               <Pencil className="w-3 h-3 text-muted-foreground" />
             </button>
-            <button onClick={onDelete} className="w-7 h-7 flex items-center justify-center hover:bg-red-50 transition-colors">
-              <Trash2 className="w-3 h-3 text-red-400" />
+            <button onClick={onDelete} className="w-7 h-7 flex items-center justify-center hover:bg-destructive/10 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+              <Trash2 className="w-3 h-3 text-destructive/70" />
             </button>
           </div>
         )}
@@ -484,11 +486,11 @@ function ParticipantRow({ participant: p, index, isOrganizer, onClick, onEdit, o
         </span>
         {isOrganizer && (
           <div className="flex gap-1">
-            <button onClick={onEdit} className="w-7 h-7 flex items-center justify-center hover:bg-muted transition-colors">
+            <button onClick={onEdit} className="w-7 h-7 flex items-center justify-center hover:bg-muted transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
               <Pencil className="w-3 h-3 text-muted-foreground" />
             </button>
-            <button onClick={onDelete} className="w-7 h-7 flex items-center justify-center hover:bg-red-50 transition-colors">
-              <Trash2 className="w-3 h-3 text-red-400" />
+            <button onClick={onDelete} className="w-7 h-7 flex items-center justify-center hover:bg-destructive/10 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+              <Trash2 className="w-3 h-3 text-destructive/70" />
             </button>
           </div>
         )}

@@ -6,7 +6,7 @@ import TeamHeader from '../components/teams/TeamHeader';
 import TeamStatsCards from '../components/teams/TeamStatsCards';
 import TeamMatchHistory from '../components/teams/TeamMatchHistory';
 import TeamComparison from '../components/teams/TeamComparison';
-import { Loader2 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function TeamDetail() {
   const { leagueId, teamId } = useParams();
@@ -64,8 +64,16 @@ export default function TeamDetail() {
 
   if (teamLoading || statsLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="container mx-auto py-6 px-4 max-w-6xl space-y-6">
+        <Skeleton className="h-32 w-full" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+        </div>
+        <Skeleton className="h-64 w-full" />
+        <Skeleton className="h-48 w-full" />
       </div>
     );
   }

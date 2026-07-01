@@ -29,6 +29,7 @@ export default function Profile() {
   if (!profile) return null
 
   return (
+    <div className="container mx-auto py-6 px-4 max-w-6xl">
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <PageHeader
         title="Perfil"
@@ -126,5 +127,6 @@ export default function Profile() {
         </div>
       </div>
     </motion.div>
+    </div>
   )
 }

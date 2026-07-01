@@ -37,6 +37,7 @@ export default function Dashboard() {
   const isLoading = leaguesQuery.isLoading || loading
 
   return (
+    <div className="container mx-auto py-6 px-4 max-w-6xl">
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
       <PageHeader
         title="Dashboard"
@@ -100,5 +101,6 @@ export default function Dashboard() {
         </div>
       )}
     </motion.div>
+    </div>
   )
 }

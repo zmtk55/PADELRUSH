@@ -56,15 +56,17 @@ export default function LeagueDetail() {
   })
 
   if (loadingLeague) return (
+    <div className="container mx-auto py-6 px-4 max-w-6xl">
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <div className="animate-pulse space-y-4">
         <div className="h-8 bg-muted w-48" />
         <div className="h-48 bg-muted" />
       </div>
     </motion.div>
+    </div>
   )
   if (!league) return (
-    <div className="text-center py-20">
+    <div className="container mx-auto py-6 px-4 max-w-6xl text-center py-20">
       <p className="text-red-600 text-lg font-medium">Liga no encontrada</p>
       <Button variant="outline" className="mt-4" onClick={() => navigate('/ligas')}>Volver a ligas</Button>
     </div>
@@ -74,6 +76,7 @@ export default function LeagueDetail() {
   const programados = matches.filter((m) => m.status === 'programado').length
 
   return (
+    <div className="container mx-auto py-6 px-4 max-w-6xl">
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
@@ -300,6 +303,7 @@ export default function LeagueDetail() {
         />
       )}
     </motion.div>
+    </div>
   )
 }
 
