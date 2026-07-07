@@ -267,7 +267,7 @@ export default function PlayerDashboard({ player, open, onClose }) {
             <div className="p-4 border border-border-subtle bg-card text-center">
               <p className="text-xs text-fg-muted">
                 <Activity className="w-4 h-4 inline mr-1 -mt-0.5" />
-                Error al cargar estadísticas detalladas
+                Error al cargar estadísticas detalladas: {playerStatsQuery.error?.message}
               </p>
             </div>
           </div>

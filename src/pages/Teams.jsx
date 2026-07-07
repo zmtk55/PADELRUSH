@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
-import { ArrowLeft, Trash2, Swords, ChevronRight, Plus, CheckCircle } from 'lucide-react'
+import { ArrowLeft, Trash2, Swords, ChevronRight, Plus, CheckCircle, RefreshCw } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { staggerContainer, staggerItem } from '@/lib/animations'
 import { useState } from 'react'
@@ -53,6 +53,10 @@ export default function Teams() {
 
   const handleSaveEdit = async () => {
     if (!editingTeam) return
+    if (!editName.trim()) {
+      toast.error('El nombre del equipo es obligatorio')
+      return
+    }
     try {
       await updateTeam.mutateAsync({ id: editingTeam.id, team_name: editName })
       toast.success('Equipo actualizado')
@@ -106,19 +110,24 @@ export default function Teams() {
   }
 
   if (teamsQuery.isLoading) {
-    return (
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-        <div className="space-y-3">
-          {[1,2,3].map(i => (
-            <div key={i} className="card p-4 animate-pulse">
-              <div className="h-5 bg-muted w-48 mb-2" />
-              <div className="h-3 bg-muted w-32" />
+      return (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3, 4, 5, 6].map(i => (
+                <div key={i} className="aspect-w-16 aspect-h-9 bg-muted rounded-lg animate-pulse" />
+              ))}
             </div>
-          ))}
-        </div>
-      </motion.div>
-    )
-  }
+          
+            <div className="mt-6 space-y-3">
+              <div className="h-4 bg-muted rounded animate-pulse w-32" />
+              <div className="h-4 bg-muted rounded animate-pulse w-48" />
+              <div className="h-4 bg-muted rounded animate-pulse w-40" />
+            </div>
+          </div>
+        </motion.div>
+      );
+    }
 
   return (
     <motion.div
@@ -134,13 +143,21 @@ export default function Teams() {
           <ChevronRight className="w-3 h-3 rotate-180 group-hover:-translate-x-0.5 transition-transform" /> Volver a liga
         </button>
         
-        (
-          <button 
-            onClick={() => setShowCreateTeam(true)}
-            className="flex items-center gap-2 h-9 px-4 rounded-md bg-court text-white text-sm font-medium hover:bg-court/[0.8] transition-colors"
-          >
-            <Plus className="w-4 h-4" /> Nuevo equipo
-          </button>
+        {isOrganizer && (
+          <>
+            <button
+              onClick={() => setShowCreateTeam(true)}
+              className="flex items-center gap-2 h-9 px-4 rounded-md bg-court text-white text-sm font-medium hover:bg-court/[0.8] transition-colors"
+            >
+              <Plus className="w-4 h-4" /> Nuevo equipo
+            </button>
+            <button
+              onClick={() => teamsQuery.refetch()}
+              className="flex items-center gap-2 h-9 px-4 rounded-md btn-ghost text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <RefreshCw className="w-4 h-4" /> Actualizar
+            </button>
+          </>
         )}
       </div>
 

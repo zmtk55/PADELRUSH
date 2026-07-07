@@ -11,9 +11,13 @@ import { useParticipants } from '@/hooks/useParticipants'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabaseClient'
 import { queryClient } from '@/lib/query-client'
-import { PlayerPickerPanel } from './PlayerPickerPanel'
-import PricingEditor from './PricingEditor'
 import { toast } from 'sonner'
+import BasicsStep from './steps/BasicsStep'
+import ConfigStep from './steps/ConfigStep'
+import TeamsStep from './steps/TeamsStep'
+import PricingStep from './steps/PricingStep'
+import CalendarStep from './steps/CalendarStep'
+import ReviewStep from './steps/ReviewStep'
 
 const steps = [
   { id: 'basicos', label: 'Datos básicos', icon: Trophy },
@@ -93,7 +97,7 @@ export default function LeagueSetupWizard() {
     operationalCosts: 0,
   })
 
-  const [teams, setTeams] = useState([])
+  const [teams, setTeams] = useState(isEditing ? (existingLeague?.teams || []) : [])
   const [categoryInput, setCategoryInput] = useState('')
 
   // Load draft from localStorage on mount
@@ -192,7 +196,7 @@ export default function LeagueSetupWizard() {
       setInitialTeams(teams)
       setInitialCategoryInput(categoryInput)
     }
-  }, [isExistingLeagueExists(), form, teams, categoryIndex])
+  }, [isEditing, existingLeague, form, teams, categoryInput])
 
   const isExistingLeagueExists = () => !!existingLeague
 
@@ -238,7 +242,7 @@ export default function LeagueSetupWizard() {
         }
         form.categories.forEach((cat, idx) => {
           if (!form.category_formats[cat]) {
-            newOptions[`format_${cat}`] = `Seleccione formato para ${cat}`
+            newErrors[`format_${cat}`] = `Seleccione formato para ${cat}`
           }
         })
         break
@@ -489,12 +493,57 @@ export default function LeagueSetupWizard() {
         {/* Form Content */}
         <AnimatePresence mode="wait">
           <motion.div key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-            {step === 0 && renderBasicsStep()}
-            {step === 1 && renderConfigStep()}
-            {step === 2 && renderTeamsStep()}
-            {step === 3 && renderPricingStep()}
-            {step === 4 && renderCalendarStep()}
-            {step === 5 && renderReviewStep()}
+            {step === 0 && <BasicsStep form={form} setForm={setForm} errors={errors} />}
+            {step === 1 && <ConfigStep 
+              form={form} 
+              setForm={setForm} 
+              errors={errors} 
+              categories={form.categories} 
+              setCategoryInput={setCategoryInput} 
+              addCategory={addCategory} 
+              removeCategory={removeCategory} 
+              participants={participantsQuery.data || []} 
+            />}
+            {step === 2 && <TeamsStep 
+              form={form} 
+              setForm={setForm} 
+              errors={errors} 
+              teams={teams} 
+              setTeams={setTeams} 
+              categoryInput={categoryInput} 
+              setCategoryInput={setCategoryInput} 
+              addCategory={addCategory} 
+              removeCategory={removeCategory} 
+              participants={participantsQuery.data || []} 
+            />}
+            {step === 3 && <PricingStep 
+              form={form} 
+              setForm={setForm} 
+              errors={errors} 
+            />}
+            {step === 4 && <CalendarStep 
+              form={form} 
+              setForm={setForm} 
+              errors={errors} 
+              teams={teams} 
+              categories={form.categories} 
+            />}
+            {step === 5 && <ReviewStep 
+              form={form} 
+              setForm={setForm} 
+              errors={errors} 
+              teams={teams} 
+              categories={form.categories} 
+              participants={participantsQuery.data || []} 
+              initialForm={initialForm} 
+              initialTeams={initialTeams} 
+              initialCategoryInput={initialCategoryInput} 
+              isDraftDirty={isDraftDirty} 
+              handleSave={handleSave} 
+              saving={saving} 
+              isEditing={isEditing} 
+              navigate={navigate} 
+            />}
           </motion.div>
         </AnimatePresence>
 
@@ -544,678 +593,4 @@ export default function LeagueSetupWizard() {
       </div>
     </div>
   )
-
-  // Step renderers
-  function renderBasicsStep() {
-    return (
-      <div className="space-y-6">
-        <h2 className="text-xl font-semibold">Datos básicos</h2>
-        
-        <div className="grid sm:grid-cols-2 gap-6">
-          <div className="space-y-3">
-            <Label>Nombre de la liga *</Label>
-            <Input 
-              value={form.name} 
-              onChange={(e) => handleChange('name', e.target.value)}
-              placeholder="Ej: Liga de Padel Primavera 2026"
-              className={errors.name ? 'border-destructive' : ''}
-            />
-            {errors.name && <p className="text-sm text-destructive mt-1">{errors.name}</p>}
-          </div>
-          
-          <div className="space-y-3">
-            <Label>Slug (URL)</Label>
-            <Input 
-              value={form.slug} 
-              onChange={(e) => handleChange('slug', e.target.value)}
-              placeholder="liga-padel-primavera-2026"
-              className={errors.slug ? 'border-destructive' : ''}
-            />
-            {errors.slug && <p className="text-sm text-destructive mt-1">{errors.slug}</p>}
-          </div>
-        </div>
-
-        <div className="grid sm:grid-cols-3 gap-6">
-          <div className="space-y-3">
-            <Label>Deporte</Label>
-            <Select 
-              value={form.sport} 
-              onValueChange={(v) => handleChange('sport', v)}
-            >
-              <SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
-              <SelectContent>
-                {sportOptions.map(opt => (
-                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-3">
-            <Label>Género</Label>
-            <Select 
-              value={form.gender} 
-              onValueChange={(v) => handleChange('gender', v)}
-            >
-              <SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
-              <SelectContent>
-                {genderOptions.map(opt => (
-                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-3">
-            <Label>Estado</Label>
-            <Select 
-              value={form.status} 
-              onValueChange={(v) => handleChange('status', v)}
-            >
-              <SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
-              <SelectContent>
-                {statusOptions.map(opt => (
-                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <Label>Temporada</Label>
-          <Input 
-            value={form.season} 
-            onChange={(e) => handleChange('season', e.target.value)}
-            placeholder="Ej: 2026-1"
-          />
-        </div>
-
-        <div className="space-y-3">
-          <Label>Color de la liga</Label>
-          <div className="flex items-center gap-3">
-            <input 
-              type="color" 
-              value={form.color} 
-              onChange={(e) => handleChange('color', e.target.value)}
-              className="w-10 h-10 rounded-md border border-input bg-transparent cursor-pointer"
-              aria-label="Color de la liga"
-            />
-            <Input 
-              value={form.color} 
-              onChange={(e) => handleChange('color', e.target.value)}
-              className="flex-1"
-            />
-          </div>
-        </div>
-
-        <div className="border-t border-border pt-6">
-          <h3 className="font-medium text-sm mb-4">Datos del organizador</h3>
-          <div className="grid sm:grid-cols-2 gap-6">
-            <div className="space-y-3">
-              <Label>Nombre</Label>
-              <Input 
-                value={form.organizer_name} 
-                onChange={(e) => handleChange('organizer_name', e.target.value)}
-                placeholder="Nombre del organizador"
-              />
-            </div>
-            <div className="space-y-3">
-              <Label>WhatsApp</Label>
-              <Input 
-                value={form.organizer_whatsapp} 
-                onChange={(e) => handleChange('organizer_whatsapp', e.target.value)}
-                placeholder="5215512345678"
-              />
-            </div>
-            <div className="space-y-3">
-              <Label>Instagram</Label>
-              <Input 
-                value={form.organizer_instagram} 
-                onChange={(e) => handleChange('organizer_instagram', e.target.value)}
-                placeholder="usuario (sin @)"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  function renderConfigStep() {
-    return (
-      <div className="space-y-6">
-        <h2 className="text-xl font-semibold">Configuración</h2>
-        
-        <div className="space-y-4">
-          <Label>Categorías</Label>
-          <div className="flex flex-wrap gap-3">
-            <div className="flex-1 min-w-0">
-              <Input 
-                value={categoryInput} 
-                onChange={(e) => setCategoryInput(e.target.value.toUpperCase())}
-                placeholder="Ej: 5TA"
-                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCategory())}
-                className={errors.categories ? 'border-destructive' : ''}
-              />
-              <button 
-                onClick={addCategory}
-                className="btn-outline h-9 px-3 ml-2"
-                disabled={!categoryInput.trim()}
-              >
-                Agregar
-              </button>
-            </div>
-          </div>
-          {errors.categories && <p className="text-sm text-destructive mt-1">{errors.categories}</p>}
-          
-          <div className="mt-4 flex flex-wrap gap-2">
-            {form.categories.map((cat, idx) => (
-              <span 
-                key={cat} 
-                className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm"
-              >
-                {cat}
-                <button 
-                  type="button"
-                  onClick={() => removeCategory(cat)}
-                  className="hover:text-destructive font-bold p-0.5"
-                  aria-label={`Eliminar categoría ${cat}`}
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="grid sm:grid-cols-2 gap-6">
-            <div className="space-y-3">
-              <Label>Sets por partido</Label>
-              <Select 
-                value={form.sets_per_match} 
-                onValueChange={(v) => handleChange('sets_per_match', v)}
-              >
-                <SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
-                <SelectContent>
-                  {setsOptions.map(opt => (
-                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-3">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  checked={form.tiebreak_enabled} 
-                  onChange={(e) => handleChange('tiebreak_enabled', e.target.checked)}
-                  className="w-4 h-4 rounded border-border text-primary"
-                />
-                <span className="text-sm">Tiebreak habilitado</span>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {form.categories.length > 0 && (
-          <div className="space-y-4">
-            <h3 className="font-medium text-sm mb-3">Formato por categoría</h3>
-            <div className="space-y-3">
-              {form.categories.map((cat) => (
-                <div key={cat} className="flex items-center gap-3">
-                  <span className="text-sm w-20 font-medium">{cat}</span>
-                  <Select 
-                    value={form.category_formats?.[cat] || 'todos-contra-todos'}
-                    onValueChange={(v) => setForm(f => ({ 
-                      ...f, 
-                      category_formats: { 
-                        ...f.category_formats, 
-                        [cat]: v 
-                      } 
-                    }))}
-                  >
-                    <SelectTrigger className="flex-1"><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
-                    <SelectContent>
-                      {formatOptions.map(opt => (
-                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <HelpCircle 
-                    title="Información"
-                    description={
-                      `Seleccione el formato de competencia para la categoría ${cat}.` +
-                      '\n• Todos contra todos: Cada equipo juega contra todos los demás.' +
-                      '\n• Round Robin Express: Formato acelerado para muchas equipes.' +
-                      '\n• Grupos + eliminatorias: Se dividen en grupos y luego eliminatoria.' +
-                      '\n• Eliminatoria directa: Partidos de eliminación directa desde el inicio.'
-                    }
-                    className="ml-2 h-4 w-4 text-muted-foreground hover:text-primary"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    )
-  }
-
-  function renderTeamsStep() {
-    return (
-      <div className="space-y-6">
-        <h2 className="text-xl font-semibold">Equipos</h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          Cree equipos asignando jugadores a cada categoría. Cada equipo necesita 2 jugadores.
-        </p>
-        
-        {form.categories.length === 0 ? (
-          <p className="text-sm text-muted-italic text-center py-8">
-            Primero debe agregar categorías en el paso de Configuración
-          </p>
-        ) : (
-          <>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="font-medium text-sm">Resumen de equipos</h3>
-                <span className="text-sm text-muted-foreground">
-                  {teams.length} equipos creados
-                </span>
-              </div>
-              {teams.length > 0 && (
-                <div className="mt-3 space-y-2">
-                  {teams.map((t, idx) => (
-                    <div 
-                      key={t.id || idx} 
-                      className="flex items-center gap-3 p-3 bg-muted rounded-lg"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium">{t.team_name || `Equipo ${t.team_number}`}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {t.category} • 
-                          {t.player1_id ? (participantsQuery.data || []).find(p => p.id === t.player1_id)?.name || 'Jugador 1' : 'Sin asignar'} 
-                          & 
-                          {t.player2_id ? (participantsQuery.data || []).find(p => p.id === t.player2_id)?.name || 'Jugador 2' : 'Sin asignar'}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button 
-                          onClick={() => {
-                            // Edit team logic would go here - for now just remove
-                            setTeams(prev => prev.filter((_, i) => i !== idx))
-                          }}
-                          className="btn-ghost h-8 px-3 text-xs"
-                          title="Editar equipo"
-                        >
-                          <Edit className="w-3 h-3" />
-                        </button>
-                        <button 
-                          onClick={() => setTeams(prev => prev.filter((_, i) => i !== idx))}
-                          className="btn-ghost h-8 px-3 text-xs text-destructive"
-                          title="Eliminar equipo"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            
-            <PlayerPickerPanel 
-              participants={participantsQuery.data || []} 
-              categories={form.categories} 
-              teams={teams} 
-              onTeamsChange={setTeams} 
-            />
-          </>
-        )}
-        
-        {errors.teams && <p className="text-sm text-destructive mt-2">{errors.teams}</p>}
-        {errors.teamsDuplicate && <p className="text-sm text-destructive mt-2">{errors.teamsDuplicate}</p>}
-      </div>
-    )
-  }
-
-  function renderPricingStep() {
-    return (
-      <div className="space-y-6">
-        <h2 className="text-xl font-semibold">Precios y Costos</h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          Configure los aspectos financieros de su liga. Todos los valores están en la moneda local.
-        </p>
-        
-        <div className="space-y-5">
-          <div className="space-y-3">
-            <Label>Inscripción por jugador</Label>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">$</span>
-              <Input 
-                type="number"
-                min="0"
-                step="0.01"
-                value={form.inscriptionFee}
-                onChange={(e) => {
-                  const val = parseFloat(e.target.value) || 0
-                  handleChange('inscriptionFee', Math.max(0, Math.round(val * 100) / 100))
-                }}
-                placeholder="0.00"
-                className="w-32 text-right"
-              />
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Costo que cada jugador paga para participar en la liga
-            </p>
-            {errors.inscriptionFee && <p className="text-sm text-destructive mt-1">{errors.inscriptionFee}</p>}
-          </div>
-          
-          <div className="space-y-3">
-            <Label>Costo de arbitraje por partido</Label>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">$</span>
-              <Input 
-                type="number"
-                min="0"
-                step="0.01"
-                value={form.arbitrationCostPerMatch}
-                onChange={(e) => {
-                  const val = parseFloat(e.target.value) || 0
-                  handleChange('arbitrationCostPerMatch', Math.max(0, Math.round(val * 100) / 100))
-                }}
-                placeholder="0.00"
-                className="w-32 text-right"
-              />
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Lo que paga el árbitro por cada partido dirigido
-            </p>
-            {errors.arbitrationCostPerMatch && <p className="text-sm text-destructive mt-1">{errors.arbitrationCostPerMatch}</p>}
-          </div>
-          
-          <div className="space-y-3">
-            <Label>Pozo de premios (opcional)</Label>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">$</span>
-              <Input 
-                type="number"
-                min="0"
-                step="0.01"
-                value={form.prizePool}
-                onChange={(e) => {
-                  const val = parseFloat(e.target.value) || 0
-                  handleChange('prizePool', Math.max(0, Math.round(val * 100) / 100))
-                }}
-                placeholder="0.00"
-                className="w-32 text-right"
-              />
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Monto total a repartir entre los ganadores (opcional)
-            </p>
-          </div>
-          
-          <div className="space-y-3">
-            <Label>Costos operativos (opcional)</Label>
-            <div class="flex items-center gap-2">
-              <span className="text-sm font-medium">$</span>
-              <Input 
-                type="number"
-                min="0"
-                step="0.01"
-                value={form.operationalCosts}
-                onChange={(e) => {
-                  const val = parseFloat(e.target.value) || 0
-                  handleChange('operationalCosts', Math.max(0, Math.round(val * 100) / 100))
-                }}
-                placeholder="0.00"
-                className="w-32 text-right"
-              />
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Gastos como canchas, equipamiento, etc. (opcional)
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-6 p-4 bg-muted rounded-lg">
-          <h3 className="font-medium text-sm mb-3">Resumen financiero</h3>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-sm">Ingreso estimado por inscripción:</span>
-              <span className="text-sm font-medium">${
-                (form.inscriptionFee * (teams.reduce((sum, t) => {
-                  // Estimar jugadores por equipo: 2 por equipo
-                  return sum + (t.player1_id ? 1 : 0) + (t.player2_id ? 1 : 0)
-                }, 0) * 2)).toFixed(2)
-              }</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-sm">Costo estimado de arbitraje:</span>
-              <span className="text-sm font-medium">${
-                (form.arbitrationCostPerMatch * Math.max(0, teams.length - 1)).toFixed(2)
-              }</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-sm">Ganancia estimada antes de costos:</span>
-              <span className="text-sm font-medium">${
-                (
-                  (form.inscriptionFee * (teams.reduce((sum, t) => {
-                    return sum + (t.player1_id ? 1 : 0) + (t.player2_id ? 1 : 0)
-                  }, 0) * 2)) - 
-                  (form.arbitrationCostPerMatch * Math.max(0, teams.length - 1))
-                ).toFixed(2)
-              }</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  function renderCalendarStep() {
-    return (
-      <div className="space-y-6">
-        <h2 className="text-xl font-semibold">Vista previa del calendario</h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          Revise la estructura estimada de su liga basada en los equipos creados.
-        </p>
-        
-        {teams.length < 2 ? (
-          <div className="text-center py-12">
-            <p className="text-sm text-muted-italic">
-              Agrega al menos 2 equipos en el paso anterior para ver la estructura completa
-            </p>
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-3 gap-6">
-              <div className="bg-background rounded-lg p-4 text-center">
-                <p className="text-2xl font-mono font-bold text-primary">{teams.length}</p>
-                <p className="text-xs text-muted-foreground">Equipos</p>
-              </div>
-              <div className="bg-background rounded-lg p-4 text-center">
-                <p className="text-2xl font-mono font-bold text-primary">
-                  {teams.length > 1 ? teams.length - 1 : 0}
-                </p>
-                <p className="text-xs text-muted-foreground">Jornadas (estimado)</p>
-              </div>
-              <div className="bg-background rounded-lg p-4 text-center">
-                <p className="text-2xl font-mono font-bold text-primary">
-                  {teams.length >= 2 ? Math.ceil(teams.length * (teams.length - 1) / 2) : 0}
-                </p>
-                <p className="text-xs text-muted-foreground">Partidos totales (estimado)</p>
-              </div>
-            </div>
-            
-            {form.categories.length > 0 && (
-              <div className="mt-6">
-                <h3 className="font-medium text-sm mb-3">Desglose por categoría</h3>
-                <div className="space-y-3">
-                  {form.categories.map(cat => {
-                    const catTeams = teams.filter(t => t.category === cat).length
-                    const jornadas = catTeams > 1 ? catTeams - 1 : 0
-                    const partidos = catTeams >= 2 ? Math.ceil(catTeams * (catTeams - 1) / 2) : 0
-                    return (
-                      <div key={cat} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                        <span className="font-medium">{cat}</span>
-                        <span className="text-sm">
-                          {catTeams} equipos • {jornadas} jornadas • {partidos} partidos
-                        </span>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
-          </>
-        )}
-        
-        <div className="mt-6 p-4 bg-muted rounded-lg">
-          <h3 className="font-medium text-sm mb-3">Recomendaciones</h3>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li>• Para ligas con muchos equipos, considere usar "Grupos + eliminatorias"</li>
-            <li>• El formato "Round Robin Express" es ideal para 8-16 equipos</li>
-            <li>• Asegúrese de tener un número par de equipos para evitar byes en eliminación directa</li>
-          </ul>
-        </div>
-      </div>
-    )
-  }
-
-  function renderReviewStep() {
-    const isValid = Object.keys(errors).length === 0 && 
-                   !errors.teams && 
-                   !errors.teamsDuplicate &&
-                   teams.length >= 2 &&
-                   form.categories.length > 0 &&
-                   form.name.trim() !== ''
-    
-    return (
-      <div className="space-y-6">
-        <h2 className="text-xl font-semibold">Revisión y confirmación</h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          Revise todos los datos antes de crear su liga. Una vez creada, algunos campos no podrán modificarse.
-        </p>
-        
-        <div className="space-y-6">
-          <div className="bg-muted rounded-lg p-4">
-            <h3 className="font-medium text-sm mb-3">Información básica</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-sm">Nombre:</span>
-                <span className="text-sm font-medium">{form.name}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Deporte:</span>
-                <span className="text-sm font-medium">{sportOptions.find(o => o.value === form.sport)?.label}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Género:</span>
-                <span className="text-sm font-medium">{genderOptions.find(o => o.value === form.gender)?.label}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Estado:</span>
-                <span className="text-sm font-medium">{statusOptions.find(o => o.value === form.status)?.label}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Temporada:</span>
-                <span className="text-sm font-medium">{form.season}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Slug:</span>
-                <span className="text-sm font-medium monospace">{form.slug || generateSlug(form.name)}</span>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-muted rounded-lg p-4">
-            <h3 className="font-medium text-sm mb-3">Configuración</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-sm">Categorías:</span>
-                <span className="text-sm font-medium">{form.categories.length} {form.categories.length === 1 ? 'categoría' : 'categorías'}</span>
-              </div>
-              {form.categories.map(cat => (
-                <div key={cat} className="flex justify-between px-3 py-1 text-sm">
-                  <span>{cat}</span>
-                  <span className="text-muted-foreground">{form.category_formats[cat] || 'todos-contra-todos'}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          <div className="bg-muted rounded-lg p-4">
-            <h3 className="font-medium text-sm mb-3">Equipos</h3>
-            <p className="text-sm">
-              {teams.length} equipos creados ({teams.filter(t => t.player1_id && t.player2_id).length} completos)
-            </p>
-            {teams.length > 0 && (
-              <div className="mt-3 space-y-2">
-                {teams.map((t, idx) => (
-                  <div key={t.id || idx} className="flex items-center gap-2 px-3 py-1 bg-white rounded">
-                    <span className="w-8 h-8 flex items-center justify-center bg-primary/10 text-primary rounded">
-                      #{t.team_number}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium">{t.team_name || `Equipo ${t.team_number}`}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {t.category} • 
-                        {(participantsQuery.data || []).find(p => p.id === t.player1_id)?.name || 'Sin asignar'} & 
-                        {(participantsQuery.data || []).find(p => p.id === t.player2_id)?.name || 'Sin asignar'}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          
-          <div className="bg-muted rounded-lg p-4">
-            <h3 className="font-medium text-sm mb-3">Precios y Costos</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-sm">Inscripción por jugador:</span>
-                <span className="text-sm font-medium">${
-                  parseFloat(form.inscriptionFee).toFixed(2)
-                }</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Costo de arbitraje por partido:</span>
-                <span className="text-sm font-medium">${
-                  parseFloat(form.arbitrationCostPerMatch).toFixed(2)
-                }</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Pozo de premios:</span>
-                <span className="text-sm font-medium">${
-                  parseFloat(form.prizePool).toFixed(2)
-                }</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Costos operativos:</span>
-                <span className="text-sm font-medium">${
-                  parseFloat(form.operationalCosts).toFixed(2)
-                }</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div className="mt-6">
-          <h3 className="font-medium text-sm mb-3">Validación</h3>
-          {isValid ? (
-            <p className="text-sm text-success">Todo listo para crear la liga</p>
-          ) : (
-            <p className="text-sm text-warning">
-              Por favor corrija los errores marcados en los pasos anteriores antes de continuar
-            </p>
-          )}
-        </div>
-      </div>
-    )
-  }
 }

@@ -57,12 +57,29 @@ export default function Participants() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!form.name.trim()) { toast.error('El nombre es obligatorio'); return }
+    if (!form.name.trim()) { 
+      toast.error('El nombre es obligatorio'); 
+      return 
+    }
     try {
-      if (editing) { await updateParticipant.mutateAsync({ id: editing.id, ...form }); toast.success('Jugador actualizado') }
-      else { await createParticipant.mutateAsync(form); toast.success('Jugador registrado') }
-      resetForm(); participantsQuery.refetch()
-    } catch (err) { toast.error(err.message || 'Error al guardar') }
+      // Convert empty strings to null for optional fields
+      const formData = {
+        ...form,
+        phone: form.phone === '' ? null : form.phone,
+        photo_url: form.photo_url === '' ? null : form.photo_url,
+      }
+      if (editing) { 
+        await updateParticipant.mutateAsync({ id: editing.id, ...formData }); 
+        toast.success('Jugador actualizado')
+      } else { 
+        await createParticipant.mutateAsync(formData); 
+        toast.success('Jugador registrado')
+      }
+      resetForm(); 
+      participantsQuery.refetch()
+    } catch (err) { 
+      toast.error(err.message || 'Error al guardar') 
+    }
   }
 
   const handleDelete = async (e) => {
