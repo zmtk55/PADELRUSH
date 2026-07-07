@@ -1,0 +1,6 @@
+--- LeagueDetail.jsx
++++ LeagueDetail.jsx
+@@ -188,2 +188,2 @@
+                   />
+-                )\n
++                ))
