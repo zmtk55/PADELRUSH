@@ -4,3 +4,21 @@ dist/
 .env.local
 
 .vercel
+
+# Agent/tooling config directories (not part of the app)
+.agents/
+.claude/
+.codex/
+.cursor/
+.gemini/
+.opencode/
+.hermes/
+
+# Temporary/migration scripts left in project root
+*.tmp.py
+find_pos.py
+fix_tabs.py
+tmp_fase2.py
+write_all.js
+write_kb.js
+write_roundrobin.py
