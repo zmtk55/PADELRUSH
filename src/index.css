@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Sora:wght@300;400;500;600&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -6,28 +6,124 @@
 
 @layer base {
   :root {
+    /* Brand */
+    --court: 150 70% 42%;        /* verde cancha pádel */
+    --ball: 48 100% 52%;         /* amarillo pelota */
+    --grass: 145 55% 38%;
+
+    /* Light surfaces (defaults, overridden by .dark) */
+    --background: 220 20% 98%;
+    --foreground: 220 25% 10%;
+    --fg: 220 25% 10%;
+    --fg-secondary: 220 12% 38%;
+    --fg-muted: 220 10% 56%;
+
+    --bg-card: 0 0% 100%;
+    --bg-elevated: 220 18% 96%;
+    --bg-hover: 220 16% 92%;
+
+    --border: 220 14% 88%;
+    --border-subtle: 220 14% 90%;
+    --border-default: 220 12% 84%;
+    --input: 220 14% 88%;
+    --ring: 150 70% 42%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 25% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 25% 10%;
+    --primary: 150 70% 42%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 16% 92%;
+    --secondary-foreground: 220 25% 10%;
+    --muted: 220 16% 94%;
+    --muted-foreground: 220 10% 46%;
+    --accent: 220 16% 92%;
+    --accent-foreground: 220 25% 10%;
+    --destructive: 0 75% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 145 55% 38%;
+    --warning: 35 85% 48%;
+    --info: 207 100% 47%;
+
+    /* Sidebar */
+    --sidebar: 220 20% 96%;
+    --sidebar-foreground: 220 25% 12%;
+    --sidebar-border: 220 14% 88%;
+    --sidebar-hover: 220 14% 90%;
+    --sidebar-active: 220 14% 84%;
+    --sidebar-accent: 150 70% 42%;
+
     --develop-blue: 207 100% 47%;
     --preview-pink: 320 80% 46%;
     --ship-red: 6 100% 61%;
+
+    --overlay: 0 0% 0% / 0.25;
+  }
+
+  .dark {
+    --background: 220 18% 7%;
+    --foreground: 0 0% 95%;
+    --fg: 0 0% 95%;
+    --fg-secondary: 0 0% 62%;
+    --fg-muted: 0 0% 42%;
+
+    --bg-card: 220 15% 11%;
+    --bg-elevated: 220 14% 14%;
+    --bg-hover: 220 14% 17%;
+
+    --border: 220 12% 18%;
+    --border-subtle: 220 12% 16%;
+    --border-default: 220 10% 22%;
+    --input: 220 12% 18%;
+    --ring: 150 75% 50%;
+
+    --card: 220 15% 11%;
+    --card-foreground: 0 0% 95%;
+    --popover: 220 15% 11%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 150 75% 50%;
+    --primary-foreground: 220 25% 8%;
+    --secondary: 220 14% 16%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 220 14% 16%;
+    --muted-foreground: 0 0% 58%;
+    --accent: 220 14% 16%;
+    --accent-foreground: 0 0% 95%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 145 55% 42%;
+    --warning: 35 85% 52%;
+    --info: 207 85% 55%;
+
+    --sidebar: 220 18% 5%;
+    --sidebar-foreground: 0 0% 92%;
+    --sidebar-border: 220 12% 13%;
+    --sidebar-hover: 220 12% 11%;
+    --sidebar-active: 220 12% 15%;
+    --sidebar-accent: 150 75% 50%;
+
+    --overlay: 0 0% 0% / 0.5;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    background: #ffffff;
-    color: #171717;
-    font-family: 'Geist', system-ui, -apple-system, sans-serif;
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: 'Sora', system-ui, -apple-system, sans-serif;
     font-size: 16px;
     line-height: 1.56;
     -webkit-font-smoothing: antialiased;
+    transition: background 0.2s, color 0.2s;
   }
-  
+
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Geist', system-ui, sans-serif;
+    font-family: 'Bricolage Grotesque', system-ui, sans-serif;
     font-weight: 600;
     line-height: 1.2;
     letter-spacing: -0.02em;
-    color: #171717;
+    color: hsl(var(--foreground));
   }
 
   h1 { font-size: 3rem; letter-spacing: -0.024em; }
@@ -35,18 +131,22 @@
   h3 { font-size: 1.5rem; letter-spacing: -0.016em; }
 
   ::selection {
-    background: hsla(207, 100%, 47%, 0.15);
-    color: #171717;
+    background: hsl(var(--court) / 0.25);
+    color: hsl(var(--foreground));
   }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: hsl(var(--border-subtle)); border-radius: 2px; }
 }
 
 @layer components {
   .vercel-card {
-    background: #ffffff;
+    background: hsl(var(--card));
     box-shadow: rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
     border-radius: 8px;
   }
-  
+
   .vercel-card:hover {
     box-shadow: rgba(0, 0, 0, 0.12) 0px 0px 0px 1px, rgba(0, 0, 0, 0.06) 0px 4px 6px -2px;
   }
@@ -56,14 +156,14 @@
     align-items: center;
     padding: 0 10px;
     height: 24px;
-    font-family: 'Geist Mono', ui-monospace, monospace;
+    font-family: 'Sora', ui-monospace, monospace;
     font-size: 12px;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.02em;
     border-radius: 9999px;
-    background: #ebf5ff;
-    color: #0068d6;
+    background: hsl(var(--court) / 0.12);
+    color: hsl(var(--court));
   }
 
   .btn {
@@ -73,7 +173,7 @@
     gap: 0.5rem;
     height: 40px;
     padding: 0 16px;
-    font-family: 'Geist', system-ui, sans-serif;
+    font-family: 'Sora', system-ui, sans-serif;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
@@ -82,23 +182,23 @@
     border: none;
     border-radius: 6px;
   }
-  
+
   .btn-primary {
-    background: #171717;
+    background: hsl(var(--court));
     color: white;
   }
-  
+
   .btn-primary:hover {
-    background: #000000;
+    background: hsl(var(--court) / 0.85);
   }
-  
+
   .btn-ghost {
     background: transparent;
-    color: #4d4d4d;
+    color: hsl(var(--fg-secondary));
   }
-  
+
   .btn-ghost:hover {
-    background: #f5f5f5;
-    color: #171717;
+    background: hsl(var(--bg-hover));
+    color: hsl(var(--foreground));
   }
 }

@@ -37,11 +37,11 @@ export default function Clasificacion() {
             className="bg-card border border-border p-5 transition-all cursor-pointer relative overflow-hidden group"
           >
             <div className="absolute left-0 top-0 bottom-0 w-[2px] opacity-50"
-              style={{ backgroundColor: l.color || '#ff6b35' }}
+              style={{ backgroundColor: l.color || 'hsl(var(--court))' }}
             />
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 flex items-center justify-center text-white font-bold text-sm"
-                style={{ backgroundColor: l.color || '#ff6b35' }}
+                style={{ backgroundColor: l.color || 'hsl(var(--court))' }}
               >
                 {l.name.charAt(0)}
               </div>

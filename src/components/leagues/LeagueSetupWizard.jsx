@@ -302,6 +302,9 @@ export default function LeagueSetupWizard() {
         organizer_id: user?.id,
         sets_per_match: parseInt(form.sets_per_match),
       }
+      // Remove derived/preview-only fields not persisted to the leagues table
+      delete leagueData.schedule
+      delete leagueData.generateSchedule
       let savedLeague
       if (isEditing) {
         savedLeague = await updateLeague.mutateAsync({ id: leagueId, ...leagueData })
@@ -379,10 +382,10 @@ export default function LeagueSetupWizard() {
       {/* Success Modal */}
       {showSuccessModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-8 w-96 relative">
+          <div className="bg-card rounded-xl p-8 w-96 relative border border-border-subtle">
             <button 
               onClick={() => setShowSuccessModal(false)}
-              className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
+              className="absolute right-4 top-4 text-fg-muted hover:text-foreground"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -393,7 +396,7 @@ export default function LeagueSetupWizard() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
               </svg>
               <h2 className="text-xl font-bold">Liga creada exitosamente</h2>
-              <p className="mt-2 text-gray-600">
+              <p className="mt-2 text-fg-secondary">
                 Tu liga ha sido guardada. Ahora puedes verla o crear otra.
               </p>
               <div className="mt-6 flex justify-center space-x-4">

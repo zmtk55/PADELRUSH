@@ -26,7 +26,7 @@ export default function LeagueCard({ league, onDelete, onEdit }) {
       animate={{ opacity: 1, y: 0 }}
       onClick={() => leagueId && navigate(`/ligas/${leagueId}`)}
       className="card-highlight"
-      style={{ borderLeft: '3px solid hsl(var(--court))' }}
+      style={{ borderLeft: '1px solid hsl(var(--court) / 0.4)' }}
     >
       <div className="p-4">
         <div className="flex items-start justify-between gap-3">

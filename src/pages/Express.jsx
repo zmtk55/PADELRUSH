@@ -882,7 +882,7 @@ export default function Express() {
             initial={{ scale: 0.85, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-            className="border-2 border-foreground bg-gradient-to-b from-card to-muted/30 p-6 sm:p-8 text-center  shadow-lg"
+            className="border-2 border-foreground bg-card p-6 sm:p-8 text-center shadow-lg"
           >
             <div className="w-16 h-16 sm:w-20 sm:h-20  bg-foreground flex items-center justify-center mx-auto mb-4 shadow-xl">
               <Trophy className="w-8 h-8 sm:w-10 sm:h-10 text-background" />

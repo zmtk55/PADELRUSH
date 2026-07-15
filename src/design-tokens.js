@@ -54,11 +54,11 @@ export const tokens = {
   
   // Font Families
   fontFamily: {
-    sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+    sans: ['Sora', 'system-ui', '-apple-system', 'sans-serif'],
     serif: ['Playfair Display', 'Georgia', 'serif'],
-    mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
-    heading: ['Oswald', 'Impact', 'sans-serif'],
-    body: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+    mono: ['Sora', 'ui-monospace', 'monospace'],
+    heading: ['Bricolage Grotesque', 'system-ui', 'sans-serif'],
+    body: ['Sora', 'system-ui', '-apple-system', 'sans-serif'],
     score: ['JetBrains Mono', 'monospace'],
   },
   

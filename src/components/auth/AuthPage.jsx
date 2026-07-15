@@ -34,34 +34,24 @@ export default function AuthPage({ onSignIn, onSignUp }) {
   }
 
   return (
-    <div className='relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-background via-background to-muted'>
-      <div className='absolute inset-0 overflow-hidden'>
-        <div className='absolute -top-40 -right-40 w-[500px] h-[500px] rounded-[50%] bg-gradient-to-br from-court/20 via-court/10 to-transparent blur-3xl' />
-        <div className='absolute -bottom-40 -left-40 w-[400px] h-[400px] rounded-[50%] bg-gradient-to-tr from-ball/15 via-ball/5 to-transparent blur-3xl' />
-        <div className='absolute top-1/3 left-1/4 w-[300px] h-[300px] rounded-[50%] bg-court/5 blur-2xl' />
-      </div>
-      <div className='absolute inset-0' style={{
-        backgroundImage: 'radial-gradient(hsl(var(--fg) / 0.04) 1px, transparent 1px)',
-        backgroundSize: '40px 40px'
-      }} />
+    <div className='relative min-h-screen flex items-center justify-center overflow-hidden bg-background'>
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
+        initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
         className='relative w-full max-w-md mx-4'
       >
-        <div className='absolute inset-0 bg-gradient-to-r from-court/10 to-ball/10 rounded-lg blur-2xl' />
-        <div className='relative backdrop-blur-xl bg-card/80 border border-border-subtle rounded-lg p-8 shadow-elevated'>
+        <div className='relative bg-card border border-border-subtle rounded-lg p-8 shadow-card'>
           <div className='flex flex-col items-center mb-8'>
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-              className='w-16 h-16 rounded-2xl bg-gradient-to-br from-court to-court/60 flex items-center justify-center mb-4 shadow-card shadow-court/25'
+              className='w-16 h-16 rounded-2xl bg-court flex items-center justify-center mb-4 shadow-card'
             >
               <Zap className='w-8 h-8 text-primary-foreground' />
             </motion.div>
-            <h1 className='text-3xl font-bold uppercase tracking-wider bg-gradient-to-r from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent'>PadelRush</h1>
+            <h1 className='text-3xl font-bold text-foreground'>PadelRush</h1>
             <p className='text-sm text-fg-secondary mt-1'>{mode === 'login' ? 'Bienvenido de nuevo' : 'Crea tu cuenta'}</p>
           </div>
           <AnimatePresence>

@@ -26,7 +26,7 @@ import { Zap, Loader2 } from 'lucide-react'
 
 function AppLayout({ children }) {
   return (
-    <div className="flex min-h-screen bg-white dark:bg-gray-900">
+    <div className="flex min-h-screen bg-background">
       <Sidebar />
       <main className="flex-1 min-h-screen relative">
         <div className="fixed inset-0 pointer-events-none"

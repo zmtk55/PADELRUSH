@@ -36,10 +36,10 @@ export default function Dashboard() {
     <div className="max-w-[1200px] mx-auto p-4 lg:p-8">
       <div className="flex items-center justify-between mb-2">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground">
             DASH<span className="text-develop">BOARD</span>
           </h1>
-          <p className="text-sm text-gray-600 mt-1 font-medium">
+          <p className="text-sm text-fg-secondary mt-1 font-medium">
             {isLoading ? 'Cargando...' : leagues?.length > 0
               ? `Resumen · ${leagues.length} ${leagues.length === 1 ? 'liga' : 'ligas'}`
               : 'Resumen general'}
@@ -64,15 +64,15 @@ export default function Dashboard() {
       {!isLoading && leagues?.length > 0 && profile?.display_name && (
         <div className="vercel-card p-4 mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 flex items-center justify-center bg-gray-900 text-white text-sm font-medium rounded-md">
+            <div className="w-9 h-9 flex items-center justify-center bg-court text-primary-foreground text-sm font-medium rounded-md">
               {profile.display_name.charAt(0).toUpperCase()}
             </div>
             <div>
-              <p className="text-sm text-gray-900 dark:text-white font-medium">
+              <p className="text-sm text-foreground font-medium">
                 Buenos días, <span className="font-semibold">{profile.display_name.split(' ')[0]}</span>
               </p>
               {stats?.activeLeagues > 0 && (
-                <p className="text-xs text-gray-600 mt-0.5">
+                <p className="text-xs text-fg-secondary mt-0.5">
                   <span className="text-develop font-medium">{stats.activeLeagues}</span>
                   {' '}{stats.activeLeagues === 1 ? 'liga activa' : 'ligas activas'}
                   {' · '}
@@ -103,7 +103,7 @@ export default function Dashboard() {
       ) : (
         <div className="space-y-6">
           {error && (
-            <div className="vercel-card p-4 border-l-4 border-ship">
+            <div className="vercel-card p-4 border-l-2 border-ship">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 bg-ship" />
@@ -118,7 +118,7 @@ export default function Dashboard() {
 
           <div className="vercel-card p-5">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-xs font-medium uppercase tracking-wider text-gray-600">
+              <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Estadísticas
               </h2>
               <div className="flex gap-1">
@@ -132,8 +132,8 @@ export default function Dashboard() {
                     onClick={() => setTimeRange(r.key)}
                     className={`h-6 px-2.5 text-[10px] font-medium uppercase transition-colors ${
                       timeRange === r.key 
-                        ? 'bg-gray-900 text-white rounded' 
-                        : 'bg-gray-50 text-gray-600 hover:text-gray-900 rounded'
+                        ? 'bg-court text-primary-foreground rounded' 
+                        : 'bg-elevated text-muted-foreground hover:text-foreground rounded'
                     }`}
                   >
                     {r.label}

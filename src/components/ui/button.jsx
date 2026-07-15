@@ -8,15 +8,15 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-gray-900 text-white shadow-vercel-border hover:bg-gray-800 active:scale-[0.98]',
-        destructive: 'bg-destructive text-destructive-foreground shadow-vercel-border hover:opacity-90 active:scale-[0.98]',
-        outline: 'bg-transparent text-gray-900 shadow-vercel-border hover:shadow-vercel-card',
-        secondary: 'bg-gray-50 text-gray-900 shadow-vercel-border hover:bg-gray-100',
-        ghost: 'text-gray-600 hover:text-gray-900 hover:bg-gray-50',
-        link: 'text-gray-900 underline-offset-4 hover:underline',
-        develop: 'bg-transparent text-develop shadow-vercel-border hover:bg-gray-50',
-        preview: 'bg-transparent text-preview shadow-vercel-border hover:bg-gray-50',
-        ship: 'bg-transparent text-ship shadow-vercel-border hover:bg-gray-50',
+        default: 'bg-court text-primary-foreground shadow-card hover:bg-court/90 active:scale-[0.98]',
+        destructive: 'bg-destructive text-destructive-foreground shadow-card hover:opacity-90 active:scale-[0.98]',
+        outline: 'bg-transparent text-foreground shadow-card hover:bg-elevated',
+        secondary: 'bg-elevated text-foreground shadow-card hover:bg-muted',
+        ghost: 'text-fg-secondary hover:text-foreground hover:bg-elevated',
+        link: 'text-court underline-offset-4 hover:underline',
+        develop: 'bg-transparent text-develop shadow-card hover:bg-elevated',
+        preview: 'bg-transparent text-preview shadow-card hover:bg-elevated',
+        ship: 'bg-transparent text-ship shadow-card hover:bg-elevated',
       },
       size: {
         default: 'h-10 px-4',

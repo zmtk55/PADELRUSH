@@ -40,12 +40,11 @@ export function useFetch(fn, deps = [], initialValue = null) {
         if (mounted) {
           setData(d)
           setLoading(false)
-          console.log('✓ fetch OK', Date.now() - start + 'ms')
         }
       })
       .catch(e => {
         if (mounted) {
-          console.log('✗ fetch ERROR', e?.message)
+          console.error('fetch error:', e?.message)
           setError(e)
           if (initialValue !== null) {
             setData(initialValue)
