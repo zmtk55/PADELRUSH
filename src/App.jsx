@@ -22,6 +22,7 @@ import AdminSelector from '@/pages/AdminSelector'
 import Participants from '@/pages/Participants'
 import Express from '@/pages/Express'
 import Profile from '@/pages/Profile'
+import Tracks from '@/pages/Tracks'
 import { Zap, Loader2 } from 'lucide-react'
 
 function AppLayout({ children }) {

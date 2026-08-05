@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, Trophy, Users, Calendar, UserCircle,
   Swords, Medal, Shield, Zap,
-  Menu, X, ChevronLeft, LogOut, Sun, Moon,
+  Menu, X, ChevronLeft, LogOut, Sun, Moon, Music,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
@@ -12,6 +12,7 @@ import { useTheme } from '@/lib/ThemeContext'
 
 const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/tracks', label: 'Pistas', icon: Zap }, // Using Zap as a placeholder for a music icon
   { to: '/ligas', label: 'Ligas', icon: Trophy },
   { to: '/express', label: 'Express', icon: Zap },
   { to: '/equipos', label: 'Equipos', icon: Swords },
@@ -19,7 +20,6 @@ const navItems = [
   { to: '/clasificacion', label: 'Clasificación', icon: Medal },
   { to: '/participantes', label: 'Jugadores', icon: Users },
 ]
-
 const organizerItems = [
   { to: '/profile', label: 'Perfil', icon: UserCircle },
   { to: '/admin', label: 'Admin', icon: Shield },

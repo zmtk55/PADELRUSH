@@ -9,11 +9,11 @@ import LeagueTableView from '@/components/leagues/LeagueTableView'
 import SuperToolbar from '@/components/layout/SuperToolbar'
 
 const filters = [
-  { value: 'all', label: 'Todas' },
-  { value: 'activa', label: 'Activa' },
-  { value: 'proxima', label: 'Próxima' },
-  { value: 'finalizada', label: 'Finalizada' },
-]
+    { value: 'all', label: 'Todas' },
+    { value: 'activa', label: 'En producción' },
+    { value: 'proxima', label: 'En pausa' },
+    { value: 'finalizada', label: 'Finalizada' },
+  ]
 
 export default function Leagues() {
   const navigate = useNavigate()
